@@ -58,4 +58,11 @@ public class HomeController {
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
+    
+    @RequestMapping(value = "/confirm-password_reset", method = RequestMethod.POST)
+    public UserBean passwordReset(HttpServletResponse response, @ModelAttribute("loginBean") LoginBean loginBean) {
+        UserBean userBean=usersService.passwordReset(loginBean);
+        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        return userBean;
+    }
 }

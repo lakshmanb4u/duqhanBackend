@@ -6,7 +6,9 @@
 package com.weavers.duqhun.business.impl;
 
 import com.weavers.duqhun.business.UsersService;
+import com.weavers.duqhun.dao.OtpTableDao;
 import com.weavers.duqhun.dao.UsersDao;
+import com.weavers.duqhun.domain.OtpTable;
 import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.UserBean;
@@ -20,6 +22,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     UsersDao usersDao;
+
+    @Autowired
+    OtpTableDao otpTableDao;
 
     private UserBean setUserBean(Users users) {
         UserBean userBean = new UserBean();
@@ -92,7 +97,13 @@ public class UsersServiceImpl implements UsersService {
             String otp = RandomCodeGenerator.getNumericCode(6);
             // send mail to user with otp.
             if (true) { // if mail send...
-                // save OTP in table.
+                OtpTable otpTable = new OtpTable();
+                otpTable.setId(null);
+                otpTable.setUserId(user.getId());
+                otpTable.setUserMail(user.getEmail());
+                otpTable.setOtp(otp);
+                otpTable.setSendTime(new Date());
+                otpTableDao.save(otpTable);
                 userBean.setEmail(user.getEmail());
                 userBean.setStatusCode("200");
                 userBean.setStatus("A 6 digit password reset code has been sent to your email");
@@ -103,6 +114,28 @@ public class UsersServiceImpl implements UsersService {
         } else {
             userBean.setStatusCode("403");
             userBean.setStatus("No user has signed up with the supplied email");
+        }
+        return userBean;
+    }
+
+    @Override
+    public UserBean passwordReset(LoginBean loginBean) {
+        Users user = usersDao.loadByEmail(loginBean.getEmail());
+        UserBean userBean = new UserBean();
+        if (user != null) {
+            boolean isValid = otpTableDao.isValidOtp(user.getId(), loginBean.getEmail());
+            if (isValid) {
+                user.setPassword(loginBean.getNewPassword());
+                usersDao.save(user);
+                userBean.setStatusCode("200");
+                userBean.setStatus("Password resetted successfully");
+            } else {
+                userBean.setStatusCode("403");
+                userBean.setStatus("Wrong password reset code or code expired");
+            }
+        } else {
+            userBean.setStatusCode("500");
+            userBean.setStatus("Server side exception");
         }
         return userBean;
     }

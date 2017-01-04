@@ -12,5 +12,5 @@ import com.weavers.duqhun.domain.OtpTable;
  * @author Android-3
  */
 public interface OtpTableDao extends BaseDao<OtpTable>{
-    
+    boolean isValidOtp(Long userId, String email);
 }

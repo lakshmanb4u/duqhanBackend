@@ -10,6 +10,34 @@ package com.weavers.duqhun.dto;
  * @author Android-3
  */
 public class LoginBean {
+
+    /**
+     * @return the resetCode
+     */
+    public String getResetCode() {
+        return resetCode;
+    }
+
+    /**
+     * @param resetCode the resetCode to set
+     */
+    public void setResetCode(String resetCode) {
+        this.resetCode = resetCode;
+    }
+
+    /**
+     * @return the newPassword
+     */
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    /**
+     * @param newPassword the newPassword to set
+     */
+    public void setNewPassword(String newPassword) {
+        this.newPassword = newPassword;
+    }
     
     private String name;
     private String mobile;
@@ -20,6 +48,8 @@ public class LoginBean {
     private String lastloginDate;
     private String password;
     private String authtoken;
+    private String resetCode;
+    private String newPassword;
 
     /**
      * @return the name

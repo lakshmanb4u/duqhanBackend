@@ -22,4 +22,6 @@ public interface UsersService {
     UserBean userRegistration(LoginBean loginBean);
     
     UserBean passwordResetRequest(String email);
+    
+    UserBean passwordReset(LoginBean loginBean);
 }
