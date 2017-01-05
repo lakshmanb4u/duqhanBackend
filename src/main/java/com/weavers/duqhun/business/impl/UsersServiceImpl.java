@@ -95,8 +95,8 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         if (user != null) {
             String otp = RandomCodeGenerator.getNumericCode(6);
-            // send mail to user with otp.
-            if (true) { // if mail send...
+            String status = "success";// send mail to user with otp.
+            if (status.equals("success")) { // if mail send...
                 OtpTable otpTable = new OtpTable();
                 otpTable.setId(null);
                 otpTable.setUserId(user.getId());
@@ -123,12 +123,14 @@ public class UsersServiceImpl implements UsersService {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
         UserBean userBean = new UserBean();
         if (user != null) {
-            boolean isValid = otpTableDao.isValidOtp(user.getId(), loginBean.getEmail());
-            if (isValid) {
-                user.setPassword(loginBean.getNewPassword());
+            OtpTable otpTable = otpTableDao.getValidOtp(user.getId(), loginBean.getEmail(), loginBean.getResetCode());
+            if (otpTable != null) {
+                String pass = Crypting.encrypt(loginBean.getNewPassword());
+                user.setPassword(pass);
                 usersDao.save(user);
                 userBean.setStatusCode("200");
                 userBean.setStatus("Password resetted successfully");
+                otpTableDao.delete(otpTable);
             } else {
                 userBean.setStatusCode("403");
                 userBean.setStatus("Wrong password reset code or code expired");

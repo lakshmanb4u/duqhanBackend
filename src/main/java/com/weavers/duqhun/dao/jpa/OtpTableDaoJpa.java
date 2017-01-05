@@ -24,11 +24,12 @@ public class OtpTableDaoJpa extends BaseDaoJpa<OtpTable> implements OtpTableDao 
     }
 
     @Override
-    public boolean isValidOtp(Long userId, String email) {
+    public boolean isValidOtp(Long userId, String email, String otp) {
         try {
-            Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.email=:email AND otp.userId=:userId AND otp.sendTime>:time");
+            Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.otp=:otp AND otp.userMail=:email AND otp.userId=:userId AND otp.sendTime>:time");
             query.setParameter("email", email);
             query.setParameter("userId", userId);
+            query.setParameter("otp", otp);
             Calendar cal = Calendar.getInstance();
             cal.setTime(new Date());
             cal.add(Calendar.MINUTE, -10);
@@ -37,6 +38,23 @@ public class OtpTableDaoJpa extends BaseDaoJpa<OtpTable> implements OtpTableDao 
             return true;
         } catch (NoResultException nre) {
             return false;
+        }
+    }
+
+    @Override
+    public OtpTable getValidOtp(Long userId, String email, String otp) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.otp=:otp AND otp.userMail=:email AND otp.userId=:userId AND otp.sendTime>:time");
+            query.setParameter("email", email);
+            query.setParameter("userId", userId);
+            query.setParameter("otp", otp);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(new Date());
+            cal.add(Calendar.MINUTE, -10);
+            query.setParameter("time", cal.getTime());
+            return (OtpTable) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
         }
     }
 
