@@ -319,3 +319,30 @@ ALTER TABLE `store`
 --
 ALTER TABLE `users`
   MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+CREATE TABLE `user_aouth` (
+  `id` bigint(32) NOT NULL,
+  `user_id` bigint(32) NOT NULL,
+  `aouth_token` varchar(255) NOT NULL,
+  `valid_till` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `user_aouth`
+--
+ALTER TABLE `user_aouth`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `user_aouth`
+--
+ALTER TABLE `user_aouth`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;

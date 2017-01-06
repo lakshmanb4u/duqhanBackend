@@ -12,6 +12,7 @@
     
   <bean id="usersDao" class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
   <bean id="otpTableDao" class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
+  <bean id="userAouthDao" class="com.weavers.duqhun.dao.jpa.UserAouthDaoJpa" />
     
   <bean
     id="entityManagerFactory"
@@ -43,16 +44,16 @@
     <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         
     <!-- Local Configuration -->
-    <!--
+    
     <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
     <property name="username" value="root" />
     <property name="password" value="" />
-    -->
+    
     <!-- Server Configuration -->
     
-    <property name="url" value="jdbc:mysql://aa181chi77uz09i.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhundb" />
+<!--    <property name="url" value="jdbc:mysql://aa181chi77uz09i.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhundb" />
     <property name="username" value="root" />
-    <property name="password" value="deqhundb" />
+    <property name="password" value="deqhundb" />-->
     
   </bean>
 

@@ -7,7 +7,6 @@ package com.weavers.duqhun.dao.jpa;
 
 import com.weavers.duqhun.dao.OtpTableDao;
 import com.weavers.duqhun.domain.OtpTable;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import javax.persistence.NoResultException;

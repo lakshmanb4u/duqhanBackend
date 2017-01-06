@@ -5,16 +5,10 @@
  */
 package com.weavers.duqhun.domain;
 
-import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -27,7 +21,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "users")
-public class Users extends BaseDomain{
+public class Users extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -56,15 +50,11 @@ public class Users extends BaseDomain{
     @Column(name = "lastlogin_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastloginDate;
-    @Basic(optional = false)
-    @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
-    @Size(max = 255)
-    @Column(name = "authtoken")
-    private String authtoken;
-
+    @Column(name = "fbid")
+    private Long fbid;
 
     public String getName() {
         return name;
@@ -130,12 +120,11 @@ public class Users extends BaseDomain{
         this.password = password;
     }
 
-    public String getAuthtoken() {
-        return authtoken;
+    public Long getFbid() {
+        return fbid;
     }
 
-    public void setAuthtoken(String authtoken) {
-        this.authtoken = authtoken;
+    public void setFbid(Long fbid) {
+        this.fbid = fbid;
     }
-
 }

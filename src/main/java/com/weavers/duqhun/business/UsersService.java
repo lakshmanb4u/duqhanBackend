@@ -17,9 +17,11 @@ import java.util.List;
 public interface UsersService {
     Users getAllUser();
     
-    UserBean userLogin(LoginBean loginBean);
-    
     UserBean userRegistration(LoginBean loginBean);
+    
+    UserBean fbUserLogin(LoginBean loginBean);
+    
+    UserBean userLogin(LoginBean loginBean);
     
     UserBean passwordResetRequest(String email);
     
