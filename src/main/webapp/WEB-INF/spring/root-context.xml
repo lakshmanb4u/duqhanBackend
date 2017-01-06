@@ -10,42 +10,50 @@
     http://www.springframework.org/schema/tx
     http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
     
-    <bean id="usersDao"
-          class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
-    <bean id="otpTableDao"
-          class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
+  <bean id="usersDao" class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
+  <bean id="otpTableDao" class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
     
-    <bean id="entityManagerFactory"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-          p:dataSource-ref="dataSource" p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
-          p:persistenceUnitName="duqhun-db" /><!--
+  <bean
+    id="entityManagerFactory"
+    class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+    p:dataSource-ref="dataSource"
+    p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
+    p:persistenceUnitName="duqhun-db" />
+    
+  <!-- bean post-processor for JPA annotations -->
+  <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+  
+  <!-- Transaction Config -->
+  <bean
+    id="transactionManager"
+    class="org.springframework.orm.jpa.JpaTransactionManager"
+    p:entityManagerFactory-ref="entityManagerFactory" />
 
-	 bean post-processor for JPA annotations 
--->	
-    <bean
-        class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" /><!--
-
-	 Transaction Config 
--->	
-    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
-          p:entityManagerFactory-ref="entityManagerFactory" />
-
-    <!--use declarative transaction management--> 
+    <!--use declarative transaction management-->
     <tx:annotation-driven transaction-manager="transactionManager" />
-    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource" p:basename="message"></bean>
+    <bean
+      id="messageSource"
+      class="org.springframework.context.support.ResourceBundleMessageSource"
+      p:basename="message" />
     
     
     
-    <!--DataSource--> 
-    <bean id="dataSource"
-          class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+  <!--DataSource-->
+  <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         
-        <!-- Local Configuration --> 
-        <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
-        <property name="username" value="root" />
-        <property name="password" value="" />
-       
-    </bean>
+    <!-- Local Configuration -->
+    <!--
+    <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
+    <property name="username" value="root" />
+    <property name="password" value="" />
+    -->
+    <!-- Server Configuration -->
+    
+    <property name="url" value="jdbc:mysql://aa181chi77uz09i.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhundb" />
+    <property name="username" value="root" />
+    <property name="password" value="deqhundb" />
+    
+  </bean>
 
 </beans>
