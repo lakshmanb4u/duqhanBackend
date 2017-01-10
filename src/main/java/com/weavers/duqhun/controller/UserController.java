@@ -11,9 +11,11 @@ import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.ProductBeans;
+import com.weavers.duqhun.dto.ProductRequistBean;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author Android-3
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/user/**")
 public class UserController {
@@ -42,9 +45,15 @@ public class UserController {
     }
 
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)
-    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) Long categoryId, @RequestBody(required = false) Boolean isRecent) {
+    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
         ProductBeans productBeans = new ProductBeans();
+        Long categoryId = null;
+        Boolean isRecent = null;
+        if (requistBean != null) {
+            categoryId = requistBean.getCategoryId();
+            isRecent = requistBean.getIsRecent();
+        }
         if (isRecent == null) {
             isRecent = Boolean.FALSE;
         }
