@@ -12,6 +12,7 @@ import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductRequistBean;
+import com.weavers.duqhun.dto.StatusBean;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +39,11 @@ public class UserController {
     AouthService aouthService;
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
-    public String logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
+    public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
+        StatusBean statusBean = new StatusBean();
         loginBean.setAuthtoken(request.getHeader("X-Auth-Token"));
-        String status = usersService.userLogout(loginBean);
-        return status;
+        statusBean.setStatus(usersService.userLogout(loginBean));
+        return statusBean;
     }
 
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)

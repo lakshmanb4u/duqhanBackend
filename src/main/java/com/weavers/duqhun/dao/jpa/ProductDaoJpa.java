@@ -56,7 +56,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     @Override
     public List<Product> getAllAvailableProduct() {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p");
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY p.lastUpdate");
         return query.getResultList();
     }
 
