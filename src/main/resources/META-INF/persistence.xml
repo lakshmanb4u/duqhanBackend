@@ -16,7 +16,6 @@
     <class>com.weavers.duqhun.domain.Kart</class>
     <class>com.weavers.duqhun.domain.ProductImg</class>
     <class>com.weavers.duqhun.domain.Product</class>
-    <class>com.weavers.duqhun.domain.Size1</class>
     <class>com.weavers.duqhun.domain.RecentView</class>
     <class>com.weavers.duqhun.domain.Store</class>
     <class>com.weavers.duqhun.domain.PurchaseOrder</class>
@@ -24,5 +23,6 @@
     <class>com.weavers.duqhun.domain.ProductSizeColorMap</class>
     <class>com.weavers.duqhun.domain.Category</class>
     <class>com.weavers.duqhun.domain.OtpTable</class>
+    <class>com.weavers.duqhun.domain.Sizee</class>
   </persistence-unit>
 </persistence>

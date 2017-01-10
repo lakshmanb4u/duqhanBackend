@@ -5,10 +5,13 @@
  */
 package com.weavers.duqhun.domain;
 
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -18,7 +21,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "product")
-public class Product extends BaseDomain{
+public class Product extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -31,14 +34,18 @@ public class Product extends BaseDomain{
     @Column(name = "category_id")
     private long categoryId;
     @Size(max = 255)
-    @Column(name = "discretion")
-    private String discretion;
+    @Column(name = "description")
+    private String description;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
     @Column(name = "img url")
     private String imgUrl;
-
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_update")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdate;
 
     public String getName() {
         return name;
@@ -56,12 +63,12 @@ public class Product extends BaseDomain{
         this.categoryId = categoryId;
     }
 
-    public String getDiscretion() {
-        return discretion;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDiscretion(String discretion) {
-        this.discretion = discretion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getImgUrl() {
@@ -70,6 +77,14 @@ public class Product extends BaseDomain{
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
 }

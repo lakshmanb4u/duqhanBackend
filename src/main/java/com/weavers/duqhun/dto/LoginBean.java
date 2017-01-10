@@ -11,6 +11,19 @@ package com.weavers.duqhun.dto;
  */
 public class LoginBean {
 
+    private String name;
+    private String mobile;
+    private String email;
+    private String gender;
+    private String dob;
+    private String regDate;
+    private String lastloginDate;
+    private String password;
+    private String authtoken;
+    private String resetCode;
+    private String newPassword;
+    private Long fbid;
+    
     /**
      * @return the fbid
      */
@@ -25,18 +38,6 @@ public class LoginBean {
         this.fbid = fbid;
     }
 
-    private String name;
-    private String mobile;
-    private String email;
-    private String gender;
-    private String dob;
-    private String regDate;
-    private String lastloginDate;
-    private String password;
-    private String authtoken;
-    private String resetCode;
-    private String newPassword;
-    private Long fbid;
     /**
      * @return the resetCode
      */

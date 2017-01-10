@@ -14,12 +14,20 @@ import org.apache.commons.codec.binary.Base64;
 public class Crypting {
 
     public static String encrypt(String original) {
-        byte[] bytesEncoded = Base64.encodeBase64(original.getBytes());
-        return new String(bytesEncoded);
+        if (original != null) {
+            byte[] bytesEncoded = Base64.encodeBase64(original.getBytes());
+            return new String(bytesEncoded);
+        } else {
+            return null;
+        }
     }
 
     public static String decrypt(String base64String) {
-        byte[] valueDecoded = Base64.decodeBase64(base64String);
-        return new String(valueDecoded);
+        if (base64String != null) {
+            byte[] valueDecoded = Base64.decodeBase64(base64String);
+            return new String(valueDecoded);
+        } else {
+            return null;
+        }
     }
 }

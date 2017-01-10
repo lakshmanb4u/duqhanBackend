@@ -137,6 +137,13 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
+    public String userLogout(LoginBean loginBean) {
+        String status;
+        status = aouthService.invalidatedToken(loginBean.getEmail(), loginBean.getAuthtoken());
+        return status;
+    }
+
+    @Override
     public UserBean passwordResetRequest(String email) {
         Users user = usersDao.loadByEmail(email);
         UserBean userBean = new UserBean();

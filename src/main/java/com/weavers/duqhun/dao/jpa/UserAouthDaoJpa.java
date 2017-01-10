@@ -7,7 +7,9 @@ package com.weavers.duqhun.dao.jpa;
 
 import com.weavers.duqhun.dao.UserAouthDao;
 import com.weavers.duqhun.domain.UserAouth;
+import java.util.Date;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
 /**
@@ -43,4 +45,27 @@ public class UserAouthDaoJpa extends BaseDaoJpa<UserAouth> implements UserAouthD
         }
     }
 
+    @Override
+    public UserAouth getTokenByEmailAndToken(String email, String aouthToken) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT ut FROM UserAouth ut WHERE ut.email=:email AND ut.aouthToken=:aouthToken");
+            query.setParameter("email", email);
+            query.setParameter("aouthToken", aouthToken);
+            return (UserAouth) query.getSingleResult();
+        } catch (NoResultException | NonUniqueResultException nre) {
+            return null;
+        }
+    }
+
+    @Override
+    public Long getUserIdByTokenIfValid(String aouthToken) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT ut.userId FROM UserAouth ut WHERE ut.aouthToken=:aouthToken AND ut.validTill>:thisTime");
+            query.setParameter("thisTime", new Date());
+            query.setParameter("aouthToken", aouthToken);
+            return (Long) query.getSingleResult();
+        } catch (NoResultException | NonUniqueResultException nre) {
+            return null;
+        }
+    }
 }

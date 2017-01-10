@@ -23,6 +23,8 @@ public interface UsersService {
     
     UserBean userLogin(LoginBean loginBean);
     
+    String userLogout(LoginBean loginBean);
+    
     UserBean passwordResetRequest(String email);
     
     UserBean passwordReset(LoginBean loginBean);

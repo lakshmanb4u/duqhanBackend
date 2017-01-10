@@ -7,7 +7,9 @@ package com.weavers.duqhun.business.impl;
 
 import com.weavers.duqhun.business.AouthService;
 import com.weavers.duqhun.dao.UserAouthDao;
+import com.weavers.duqhun.dao.UsersDao;
 import com.weavers.duqhun.domain.UserAouth;
+import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.AouthBean;
 import com.weavers.duqhun.util.RandomCodeGenerator;
 import java.util.Calendar;
@@ -22,6 +24,8 @@ public class AouthServiceImpl implements AouthService {
 
     @Autowired
     UserAouthDao userAouthDao;
+    @Autowired
+    UsersDao usersDao;
 
     private String createToken(Long userId) {
         String token = null;
@@ -58,6 +62,27 @@ public class AouthServiceImpl implements AouthService {
         }
         aouthBean.setAouthToken(token);
         return aouthBean;
+    }
+
+    @Override
+    public String invalidatedToken(String email, String token) {
+        String status = "failure";
+        UserAouth userAouth = userAouthDao.getTokenByEmailAndToken(email, token);
+        if (userAouth != null) {
+            userAouthDao.delete(userAouth);
+            status = "success";
+        }
+        return status;
+    }
+
+    @Override
+    public Users getUserByToken(String token) {
+        Long userId = userAouthDao.getUserIdByTokenIfValid(token);
+        if (userId != null) {
+            return usersDao.loadById(userId);
+        } else {
+            return null;
+        }
     }
 
 }

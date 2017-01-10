@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "product_size_color_map")
-public class ProductSizeColorMap extends BaseDomain{
+public class ProductSizeColorMap extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -36,7 +36,10 @@ public class ProductSizeColorMap extends BaseDomain{
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "discount")
     private Double discount;
-
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "quentity")
+    private long quentity;
 
     public long getProductId() {
         return productId;
@@ -78,4 +81,11 @@ public class ProductSizeColorMap extends BaseDomain{
         this.discount = discount;
     }
 
+    public long getQuentity() {
+        return quentity;
+    }
+
+    public void setQuentity(long quentity) {
+        this.quentity = quentity;
+    }
 }

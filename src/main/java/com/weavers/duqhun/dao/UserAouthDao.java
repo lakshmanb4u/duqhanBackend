@@ -17,4 +17,7 @@ public interface UserAouthDao extends BaseDao<UserAouth>{
     
     UserAouth getTokenByMailAndUserId(String mail, Long userId);
     
+    UserAouth getTokenByEmailAndToken(String email, String token);
+    
+    Long getUserIdByTokenIfValid(String token);
 }

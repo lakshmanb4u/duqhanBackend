@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhun.business;
 
+import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.AouthBean;
 
 /**
@@ -15,4 +16,7 @@ public interface AouthService {
     
     AouthBean generatAccessToken(String email, Long userId);
     
+    String invalidatedToken(String email, String token);
+    
+    Users getUserByToken(String token);
 }
