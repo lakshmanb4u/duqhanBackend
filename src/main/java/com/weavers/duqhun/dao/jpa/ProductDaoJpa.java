@@ -22,6 +22,25 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
+    public List<Product> loadByIds(List<Long> productIds) {
+        if (productIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String q = "SELECT p FROM Product AS p WHERE p.id IN (";
+        int i = 0;
+        String s = null;
+        for (Long productId : productIds) {
+            s = s + (i == 0 ? "" : ",") + "id" + i++;
+        }
+        Query query = getEntityManager().createQuery(q + s + ")");
+        i = 0;
+        for (Long productId : productIds) {
+            query.setParameter("id" + i++, productId);
+        }
+        return query.getResultList();
+    }
+
+    @Override
     public List<Product> getAllAvailableProductByProductIds(List<Long> productIds) {
         if (productIds.isEmpty()) {
             return new ArrayList<>();

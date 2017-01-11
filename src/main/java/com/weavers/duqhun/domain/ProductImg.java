@@ -18,13 +18,17 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "product_img")
-public class ProductImg extends BaseDomain{
+public class ProductImg extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
     @Column(name = "product_id")
     private long productId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "sizecolormap_id")
+    private long sizecolormapId;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -37,6 +41,14 @@ public class ProductImg extends BaseDomain{
 
     public void setProductId(long productId) {
         this.productId = productId;
+    }
+
+    public long getSizecolormapId() {
+        return sizecolormapId;
+    }
+
+    public void setSizecolormapId(long sizecolormapId) {
+        this.sizecolormapId = sizecolormapId;
     }
 
     public String getImgUrl() {

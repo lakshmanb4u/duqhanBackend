@@ -14,7 +14,7 @@ public class SizeColorMapDto {
     private Long colorId;
     private String colorText;
     private Long mapId;
-    private int count;
+    private Long count;
     private Double orginalPrice;
     private Double salesPrice;
     private Double discount;
@@ -64,14 +64,14 @@ public class SizeColorMapDto {
     /**
      * @return the count
      */
-    public int getCount() {
+    public Long getCount() {
         return count;
     }
 
     /**
      * @param count the count to set
      */
-    public void setCount(int count) {
+    public void setCount(Long count) {
         this.count = count;
     }
 

@@ -14,5 +14,7 @@ import java.util.List;
  */
 public interface ProductImgDao extends BaseDao<ProductImg> {
 
+    List<ProductImg> loadByIds(List<Long> ProductImgIds);
+    
     List<ProductImg> getProductImgsByProductId(Long productId);
 }

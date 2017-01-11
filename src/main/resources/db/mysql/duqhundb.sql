@@ -342,3 +342,6 @@ ALTER TABLE `user_aouth`
 
 ALTER TABLE `cart` CHANGE `user id` `user_id` BIGINT(32) NOT NULL, CHANGE `load date` `load_date` DATETIME NOT NULL, CHANGE `product id` `product_id` BIGINT(32) NOT NULL;
 ALTER TABLE `cart` CHANGE `product_id` `sizecolormap_id` BIGINT(32) NOT NULL;
+
+ALTER TABLE `product_img` ADD `sizecolormap_id` BIGINT(32) NOT NULL AFTER `product_id`;
+ALTER TABLE `product_size_color_map` ADD `product_img_id` BIGINT(32) NOT NULL AFTER `color_id`;

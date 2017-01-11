@@ -14,11 +14,13 @@ import java.util.List;
  */
 public interface ProductDao extends BaseDao<Product> {
 
+    List<Product> loadByIds(List<Long> productIds);
+
     List<Product> getAllAvailableProductByProductIds(List<Long> productIds);
-    
+
     List<Product> getAllAvailableProduct();
-    
+
     List<Product> getAllRecentViewProduct(Long userid);
-    
+
     List<Product> getProductsByCategory(Long categoryId);
 }

@@ -9,6 +9,7 @@ import com.weavers.duqhun.business.AouthService;
 import com.weavers.duqhun.business.ProductService;
 import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.domain.Users;
+import com.weavers.duqhun.dto.CartBean;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductDetailBean;
@@ -31,14 +32,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/user/**")
 public class UserController {
-
+    
     @Autowired
     UsersService usersService;
     @Autowired
     ProductService productService;
     @Autowired
     AouthService aouthService;
-
+    
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
         StatusBean statusBean = new StatusBean();
@@ -46,7 +47,7 @@ public class UserController {
         statusBean.setStatus(usersService.userLogout(loginBean));
         return statusBean;
     }
-
+    
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)
     public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
@@ -61,7 +62,7 @@ public class UserController {
             if (isRecent == null) {
                 isRecent = Boolean.FALSE;
             }
-
+            
             if (categoryId != null && !isRecent) {
                 //by category id
                 productBeans = productService.getProductsByCategory(categoryId);
@@ -79,7 +80,7 @@ public class UserController {
         }
         return productBeans;
     }
-
+    
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST)
     public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
@@ -92,5 +93,34 @@ public class UserController {
             productDetailBean.setStatus("Invalid Token.");
         }
         return productDetailBean;
+    }
+    
+    @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)
+    public StatusBean getAddToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatus(productService.addProductToCart(requistBean));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+    
+    @RequestMapping(value = "/cart", method = RequestMethod.POST)
+    public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
+        CartBean cartBean = new CartBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        if (users != null) {
+             cartBean = productService.getCartFoAUser(users.getId());
+        } else {
+            response.setStatus(401);
+            cartBean.setStatusCode("401");
+            cartBean.setStatus("Invalid Token.");
+        }
+        return cartBean;
     }
 }

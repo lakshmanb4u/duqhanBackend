@@ -5,7 +5,11 @@
  */
 package com.weavers.duqhun.controller;
 
+import com.weavers.duqhun.business.WebService;
+import com.weavers.duqhun.dto.ColorAndSizeDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -17,9 +21,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/web/**")
 public class WebController {
 
-    @RequestMapping(value = "/add-product", method = RequestMethod.GET)
-    public String addProduct() {
+    @Autowired
+    WebService webService;
 
+    @RequestMapping(value = "/add-product", method = RequestMethod.GET)
+    public String addProduct(ModelMap modelMap) {
+        ColorAndSizeDto colorAndSizeDto = webService.getColorSizeList();
+        modelMap.addAttribute("sizeAndColor", colorAndSizeDto);
         return "addProduct";
     }
 

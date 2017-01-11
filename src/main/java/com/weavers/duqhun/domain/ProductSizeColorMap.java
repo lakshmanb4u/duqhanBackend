@@ -5,9 +5,16 @@
  */
 package com.weavers.duqhun.domain;
 
+import java.io.Serializable;
+import java.math.BigInteger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -17,17 +24,21 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "product_size_color_map")
-public class ProductSizeColorMap extends BaseDomain {
+public class ProductSizeColorMap extends BaseDomain{
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
     @Column(name = "product_id")
-    private Long productId;
+    private long productId;
     @Column(name = "size_id")
     private Long sizeId;
     @Column(name = "color_id")
     private Long colorId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_img_id")
+    private long productImgId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "price")
@@ -38,13 +49,13 @@ public class ProductSizeColorMap extends BaseDomain {
     @Basic(optional = false)
     @NotNull
     @Column(name = "quentity")
-    private Long quentity;
+    private long quentity;
 
-    public Long getProductId() {
+    public long getProductId() {
         return productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId(long productId) {
         this.productId = productId;
     }
 
@@ -64,6 +75,14 @@ public class ProductSizeColorMap extends BaseDomain {
         this.colorId = colorId;
     }
 
+    public long getProductImgId() {
+        return productImgId;
+    }
+
+    public void setProductImgId(long productImgId) {
+        this.productImgId = productImgId;
+    }
+
     public double getPrice() {
         return price;
     }
@@ -80,11 +99,12 @@ public class ProductSizeColorMap extends BaseDomain {
         this.discount = discount;
     }
 
-    public Long getQuentity() {
+    public long getQuentity() {
         return quentity;
     }
 
-    public void setQuentity(Long quentity) {
+    public void setQuentity(long quentity) {
         this.quentity = quentity;
     }
+
 }

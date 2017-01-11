@@ -17,6 +17,8 @@ public class ProductDetailBean {
     private Long productId;
     private String name;
     private String description;
+    private Long categoryId;
+    private String categoryName;
     private Double orginalPrice;
     private Double salesPrice;
     private Double discount;
@@ -223,5 +225,33 @@ public class ProductDetailBean {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    /**
+     * @return the categoryId
+     */
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    /**
+     * @param categoryId the categoryId to set
+     */
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    /**
+     * @return the categoryName
+     */
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    /**
+     * @param categoryName the categoryName to set
+     */
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

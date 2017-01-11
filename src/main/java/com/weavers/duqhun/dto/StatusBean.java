@@ -11,20 +11,20 @@ package com.weavers.duqhun.dto;
  */
 public class StatusBean {
 
-    private int statusCode;
+    private String statusCode;
     private String status;
 
     /**
      * @return the statusCode
      */
-    public int getStatusCode() {
+    public String getStatusCode() {
         return statusCode;
     }
 
     /**
      * @param statusCode the statusCode to set
      */
-    public void setStatusCode(int statusCode) {
+    public void setStatusCode(String statusCode) {
         this.statusCode = statusCode;
     }
 

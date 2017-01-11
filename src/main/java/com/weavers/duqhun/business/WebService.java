@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.weavers.duqhun.dao;
+package com.weavers.duqhun.business;
 
-import com.weavers.duqhun.domain.Color;
-import java.util.List;
+import com.weavers.duqhun.dto.ColorAndSizeDto;
 
 /**
  *
  * @author Android-3
  */
-public interface ColorDao extends BaseDao<Color> {
+public interface WebService {
 
-    List<Color> loadByIds(List<Long> colorIds);
+    ColorAndSizeDto getColorSizeList();
 }

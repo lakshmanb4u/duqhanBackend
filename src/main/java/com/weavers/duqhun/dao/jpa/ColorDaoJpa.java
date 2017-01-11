@@ -7,15 +7,37 @@ package com.weavers.duqhun.dao.jpa;
 
 import com.weavers.duqhun.dao.ColorDao;
 import com.weavers.duqhun.domain.Color;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Query;
 
 /**
  *
  * @author Android-3
  */
-public class ColorDaoJpa extends BaseDaoJpa<Color> implements ColorDao{
-    
+public class ColorDaoJpa extends BaseDaoJpa<Color> implements ColorDao {
+
     public ColorDaoJpa() {
         super(Color.class, "Color");
     }
-    
+
+    @Override
+    public List<Color> loadByIds(List<Long> colorIds) {
+        if (colorIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String q = "SELECT c FROM Color AS c WHERE c.id IN (";
+        int i = 0;
+        String s = null;
+        for (Long colorId : colorIds) {
+            s = s + (i == 0 ? "" : ",") + "id" + i++;
+        }
+        Query query = getEntityManager().createQuery(q + s + ")");
+        i = 0;
+        for (Long colorId : colorIds) {
+            query.setParameter("id" + i++, colorId);
+        }
+        return query.getResultList();
+    }
+
 }

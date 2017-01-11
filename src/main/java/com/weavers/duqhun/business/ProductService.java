@@ -5,8 +5,10 @@
  */
 package com.weavers.duqhun.business;
 
+import com.weavers.duqhun.dto.CartBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductDetailBean;
+import com.weavers.duqhun.dto.ProductRequistBean;
 
 /**
  *
@@ -21,4 +23,8 @@ public interface ProductService {
     ProductBeans getAllProducts();
     
     ProductDetailBean getProductDetailsById(Long productId);
+    
+    String addProductToCart(ProductRequistBean requistBean);
+    
+    CartBean getCartFoAUser(Long userId);
 }

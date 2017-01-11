@@ -7,15 +7,37 @@ package com.weavers.duqhun.dao.jpa;
 
 import com.weavers.duqhun.dao.SizeeDao;
 import com.weavers.duqhun.domain.Sizee;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Query;
 
 /**
  *
  * @author Android-3
  */
-public class SizeeDaoJpa extends BaseDaoJpa<Sizee> implements SizeeDao{
-    
+public class SizeeDaoJpa extends BaseDaoJpa<Sizee> implements SizeeDao {
+
     public SizeeDaoJpa() {
         super(Sizee.class, "Sizee");
     }
-    
+
+    @Override
+    public List<Sizee> loadByIds(List<Long> sizeeIds) {
+        if (sizeeIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String q = "SELECT s FROM Sizee AS s WHERE s.id IN (";
+        int i = 0;
+        String s = null;
+        for (Long sizeeId : sizeeIds) {
+            s = s + (i == 0 ? "" : ",") + "id" + i++;
+        }
+        Query query = getEntityManager().createQuery(q + s + ")");
+        i = 0;
+        for (Long sizeeId : sizeeIds) {
+            query.setParameter("id" + i++, sizeeId);
+        }
+        return query.getResultList();
+    }
+
 }

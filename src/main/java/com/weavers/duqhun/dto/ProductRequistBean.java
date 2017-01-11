@@ -13,7 +13,10 @@ public class ProductRequistBean {
 
     private Long categoryId;
     private Long productId;
+    private Long userId;
     private Boolean isRecent;
+    private Long mapId;
+    private Long quantity;
 
     /**
      * @return the productId
@@ -55,6 +58,48 @@ public class ProductRequistBean {
      */
     public void setIsRecent(Boolean isRecent) {
         this.isRecent = isRecent;
+    }
+
+    /**
+     * @return the mapId
+     */
+    public Long getMapId() {
+        return mapId;
+    }
+
+    /**
+     * @param mapId the mapId to set
+     */
+    public void setMapId(Long mapId) {
+        this.mapId = mapId;
+    }
+
+    /**
+     * @return the quantity
+     */
+    public Long getQuantity() {
+        return quantity;
+    }
+
+    /**
+     * @param quantity the quantity to set
+     */
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
+
+    /**
+     * @return the userId
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
 }

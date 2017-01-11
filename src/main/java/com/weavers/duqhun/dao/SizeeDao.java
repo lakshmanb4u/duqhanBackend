@@ -6,11 +6,13 @@
 package com.weavers.duqhun.dao;
 
 import com.weavers.duqhun.domain.Sizee;
+import java.util.List;
 
 /**
  *
  * @author Android-3
  */
-public interface SizeeDao extends BaseDao<Sizee>{
-    
+public interface SizeeDao extends BaseDao<Sizee> {
+
+    List<Sizee> loadByIds(List<Long> sizeeIds);
 }
