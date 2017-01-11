@@ -10,9 +10,24 @@ package com.weavers.duqhun.dto;
  * @author Android-3
  */
 public class ProductRequistBean {
-    
+
     private Long categoryId;
+    private Long productId;
     private Boolean isRecent;
+
+    /**
+     * @return the productId
+     */
+    public Long getProductId() {
+        return productId;
+    }
+
+    /**
+     * @param productId the productId to set
+     */
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
 
     /**
      * @return the categoryId
@@ -41,5 +56,5 @@ public class ProductRequistBean {
     public void setIsRecent(Boolean isRecent) {
         this.isRecent = isRecent;
     }
-    
+
 }

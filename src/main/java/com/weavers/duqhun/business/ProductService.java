@@ -6,6 +6,7 @@
 package com.weavers.duqhun.business;
 
 import com.weavers.duqhun.dto.ProductBeans;
+import com.weavers.duqhun.dto.ProductDetailBean;
 
 /**
  *
@@ -18,4 +19,6 @@ public interface ProductService {
     ProductBeans getProductsByRecentView(Long userId);
 
     ProductBeans getAllProducts();
+    
+    ProductDetailBean getProductDetailsById(Long productId);
 }

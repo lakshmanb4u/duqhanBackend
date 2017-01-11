@@ -337,3 +337,8 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_aouth`
   MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+
+
+ALTER TABLE `cart` CHANGE `user id` `user_id` BIGINT(32) NOT NULL, CHANGE `load date` `load_date` DATETIME NOT NULL, CHANGE `product id` `product_id` BIGINT(32) NOT NULL;
+ALTER TABLE `cart` CHANGE `product_id` `sizecolormap_id` BIGINT(32) NOT NULL;

@@ -5,7 +5,6 @@
  */
 package com.weavers.duqhun.domain;
 
-import java.math.BigInteger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,11 +23,11 @@ public class ProductSizeColorMap extends BaseDomain {
     @Basic(optional = false)
     @NotNull
     @Column(name = "product_id")
-    private long productId;
+    private Long productId;
     @Column(name = "size_id")
-    private BigInteger sizeId;
+    private Long sizeId;
     @Column(name = "color_id")
-    private BigInteger colorId;
+    private Long colorId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "price")
@@ -39,29 +38,29 @@ public class ProductSizeColorMap extends BaseDomain {
     @Basic(optional = false)
     @NotNull
     @Column(name = "quentity")
-    private long quentity;
+    private Long quentity;
 
-    public long getProductId() {
+    public Long getProductId() {
         return productId;
     }
 
-    public void setProductId(long productId) {
+    public void setProductId(Long productId) {
         this.productId = productId;
     }
 
-    public BigInteger getSizeId() {
+    public Long getSizeId() {
         return sizeId;
     }
 
-    public void setSizeId(BigInteger sizeId) {
+    public void setSizeId(Long sizeId) {
         this.sizeId = sizeId;
     }
 
-    public BigInteger getColorId() {
+    public Long getColorId() {
         return colorId;
     }
 
-    public void setColorId(BigInteger colorId) {
+    public void setColorId(Long colorId) {
         this.colorId = colorId;
     }
 
@@ -81,11 +80,11 @@ public class ProductSizeColorMap extends BaseDomain {
         this.discount = discount;
     }
 
-    public long getQuentity() {
+    public Long getQuentity() {
         return quentity;
     }
 
-    public void setQuentity(long quentity) {
+    public void setQuentity(Long quentity) {
         this.quentity = quentity;
     }
 }

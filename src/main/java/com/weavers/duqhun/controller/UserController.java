@@ -11,6 +11,7 @@ import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.domain.Users;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.ProductBeans;
+import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
 import com.weavers.duqhun.dto.StatusBean;
 import javax.servlet.http.HttpServletRequest;
@@ -50,16 +51,17 @@ public class UserController {
     public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
         ProductBeans productBeans = new ProductBeans();
-        Long categoryId = null;
-        Boolean isRecent = null;
-        if (requistBean != null) {
-            categoryId = requistBean.getCategoryId();
-            isRecent = requistBean.getIsRecent();
-        }
-        if (isRecent == null) {
-            isRecent = Boolean.FALSE;
-        }
         if (users != null) {
+            Long categoryId = null;
+            Boolean isRecent = null;
+            if (requistBean != null) {
+                categoryId = requistBean.getCategoryId();
+                isRecent = requistBean.getIsRecent();
+            }
+            if (isRecent == null) {
+                isRecent = Boolean.FALSE;
+            }
+
             if (categoryId != null && !isRecent) {
                 //by category id
                 productBeans = productService.getProductsByCategory(categoryId);
@@ -76,5 +78,19 @@ public class UserController {
             productBeans.setStatus("Invalid Token.");
         }
         return productBeans;
+    }
+
+    @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST)
+    public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        if (users != null) {
+            productDetailBean = productService.getProductDetailsById(requistBean.getProductId());
+        } else {
+            response.setStatus(401);
+            productDetailBean.setStatusCode("401");
+            productDetailBean.setStatus("Invalid Token.");
+        }
+        return productDetailBean;
     }
 }

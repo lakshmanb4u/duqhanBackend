@@ -7,7 +7,6 @@ package com.weavers.duqhun.dao.jpa;
 
 import com.weavers.duqhun.dao.ProductSizeColorMapDao;
 import com.weavers.duqhun.domain.ProductSizeColorMap;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.persistence.Query;
@@ -96,5 +95,12 @@ public class ProductSizeColorMapDaoJpa extends BaseDaoJpa<ProductSizeColorMap> i
 //        Query query = getEntityManager().createQuery("SELECT pmap.productId, MIN(pmap.discount), price FROM ProductSizeColorMap AS pmap WHERE pmap.quentity>0 AND pmap.productId IN (1) GROUP BY pmap.productId, pmap.price");
 //        query.getResultList();
         return mapSizeColorMap;
+    }
+
+    @Override
+    public List<ProductSizeColorMap> getSizeColorMapByProductId(Long productId) {
+        Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap AS map WHERE map.productId=:productId");
+        query.setParameter("productId", productId);
+        return query.getResultList();
     }
 }

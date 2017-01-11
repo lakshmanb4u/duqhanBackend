@@ -18,4 +18,6 @@ public interface ProductSizeColorMapDao extends BaseDao<ProductSizeColorMap>{
     HashMap<Long, ProductSizeColorMap> getSizeColorMapbyMinPriceIfAvailable(List<Long> productIds);
     
     HashMap<Long, ProductSizeColorMap> getSizeColorMapbyMinPriceRecentView(List<Long> productIds);
+    
+    List<ProductSizeColorMap> getSizeColorMapByProductId(Long productId);
 }

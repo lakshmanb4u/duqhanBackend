@@ -24,5 +24,6 @@
     <class>com.weavers.duqhun.domain.Category</class>
     <class>com.weavers.duqhun.domain.OtpTable</class>
     <class>com.weavers.duqhun.domain.Sizee</class>
+    <class>com.weavers.duqhun.domain.Cart</class>
   </persistence-unit>
 </persistence>

@@ -25,17 +25,17 @@ public class Cart extends BaseDomain {
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "user id")
+    @Column(name = "user_id")
     private long userId;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "load date")
+    @Column(name = "load_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date loadDate;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "product id")
-    private long productId;
+    @Column(name = "sizecolormap_id")
+    private long sizecolormapId;
 
     public long getUserId() {
         return userId;
@@ -53,12 +53,12 @@ public class Cart extends BaseDomain {
         this.loadDate = loadDate;
     }
 
-    public long getProductId() {
-        return productId;
+    public long getSizecolormapId() {
+        return sizecolormapId;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setSizecolormapId(long sizecolormapId) {
+        this.sizecolormapId = sizecolormapId;
     }
 
 }

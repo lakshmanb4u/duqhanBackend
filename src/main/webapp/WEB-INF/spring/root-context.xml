@@ -10,56 +10,59 @@
     http://www.springframework.org/schema/tx
     http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
     
-  <bean id="usersDao" class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
-  <bean id="otpTableDao" class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
-  <bean id="userAouthDao" class="com.weavers.duqhun.dao.jpa.UserAouthDaoJpa" />
-  <bean id="category" class="com.weavers.duqhun.dao.jpa.CategoryDaoJpa" />
-  <bean id="cart" class="com.weavers.duqhun.dao.jpa.CartDaoJpa" />
-  <bean id="recentView" class="com.weavers.duqhun.dao.jpa.RecentViewDaoJpa" />
-  <bean id="productSizeColorMap" class="com.weavers.duqhun.dao.jpa.ProductSizeColorMapDaoJpa" />
-  <bean id="product" class="com.weavers.duqhun.dao.jpa.ProductDaoJpa" />
+    <bean id="usersDao" class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
+    <bean id="otpTableDao" class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
+    <bean id="userAouthDao" class="com.weavers.duqhun.dao.jpa.UserAouthDaoJpa" />
+    <bean id="categoryDao" class="com.weavers.duqhun.dao.jpa.CategoryDaoJpa" />
+    <bean id="cartDao" class="com.weavers.duqhun.dao.jpa.CartDaoJpa" />
+    <bean id="recentViewDao" class="com.weavers.duqhun.dao.jpa.RecentViewDaoJpa" />
+    <bean id="productSizeColorMapDao" class="com.weavers.duqhun.dao.jpa.ProductSizeColorMapDaoJpa" />
+    <bean id="productDao" class="com.weavers.duqhun.dao.jpa.ProductDaoJpa" />
+    <bean id="productImgDao" class="com.weavers.duqhun.dao.jpa.ProductImgDaoJpa" />
+    <bean id="colorDao" class="com.weavers.duqhun.dao.jpa.ColorDaoJpa" />
+    <bean id="sizeeDao" class="com.weavers.duqhun.dao.jpa.SizeeDaoJpa" />
     
-  <bean
-    id="entityManagerFactory"
-    class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-    p:dataSource-ref="dataSource"
-    p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
-    p:persistenceUnitName="duqhun-db" />
+    <bean
+        id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+        p:dataSource-ref="dataSource"
+        p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
+        p:persistenceUnitName="duqhun-db" />
     
     <!-- bean post-processor for JPA annotations -->
     <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
   
-  <!-- Transaction Config -->
-  <bean
-    id="transactionManager"
-    class="org.springframework.orm.jpa.JpaTransactionManager"
-    p:entityManagerFactory-ref="entityManagerFactory" />
+    <!-- Transaction Config -->
+    <bean
+        id="transactionManager"
+        class="org.springframework.orm.jpa.JpaTransactionManager"
+        p:entityManagerFactory-ref="entityManagerFactory" />
 
     <!--use declarative transaction management-->
     <tx:annotation-driven transaction-manager="transactionManager" />
     <bean
-      id="messageSource"
-      class="org.springframework.context.support.ResourceBundleMessageSource"
-      p:basename="message" />
+        id="messageSource"
+        class="org.springframework.context.support.ResourceBundleMessageSource"
+        p:basename="message" />
     
     
     
     <!--DataSource-->
     <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-      <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         
-    <!-- Local Configuration -->
+        <!-- Local Configuration -->
     
         <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
         <property name="username" value="root" />
         <property name="password" value="" />
     
-    <!-- Server Configuration -->
+        <!-- Server Configuration -->
         <!--
     <property name="url" value="jdbc:mysql://aanxvc9ums2nm5.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhundb" />
     <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />
         -->
-  </bean>
+    </bean>
 
 </beans>
