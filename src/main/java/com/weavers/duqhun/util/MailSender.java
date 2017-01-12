@@ -18,18 +18,18 @@ import javax.mail.internet.*;
  */
 public class MailSender {
 
-    private static final String username = "no-reply@redrafthero.com";
-    private static final String password = "Boilers123?";
+    private static final String username = "duqhanapp@gmail.com";
+    private static final String password = "duqhanapp123";
 
     public static String sendEmail(String destinationAddress, String subject, String msg, String bcc_address) /*throws Exception*/ {
         String status = "success";
 
         Properties props = new Properties();
-        props.put("mail.smtp.host", "metro701.hostmetro.com");
-//        props.put("mail.smtp.socketFactory.port", "465");
-//        props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.socketFactory.port", "465");
+        props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
-//        props.put("mail.smtp.port", "465");
+        props.put("mail.smtp.port", "465");
 
         Session session = Session.getDefaultInstance(props,
                 new javax.mail.Authenticator() {
@@ -43,7 +43,7 @@ public class MailSender {
             MimeMessage message = new MimeMessage(session);
 
             // Who is this message from
-            message.setFrom(new InternetAddress(username, "RedraftHero"));
+            message.setFrom(new InternetAddress(username, "Duqhan"));
 
             // Who is this message to (we could do fancier things like make a list or add CC's)
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinationAddress));
@@ -67,4 +67,7 @@ public class MailSender {
         }
         return status;
     }
+//    public static void main(String[] args) {
+//        MailSender.sendEmail("santanu55.bankura@gmail.com","test" , "hi....", "subhendu.sett@pkweb.in");
+//    }
 }

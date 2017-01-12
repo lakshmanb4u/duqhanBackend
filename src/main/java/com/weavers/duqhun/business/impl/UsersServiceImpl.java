@@ -15,6 +15,7 @@ import com.weavers.duqhun.dto.AouthBean;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.UserBean;
 import com.weavers.duqhun.util.Crypting;
+import com.weavers.duqhun.util.MailSender;
 import com.weavers.duqhun.util.RandomCodeGenerator;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,7 +150,7 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         if (user != null) {
             String otp = RandomCodeGenerator.getNumericCode(6);
-            String status = "success";// send mail to user with otp.
+            String status = MailSender.sendEmail(user.getEmail(), "OTP For Password Resset", "Your OTP is:  " + otp, "");// send mail to user with otp.
             if (status.equals("success")) { // if mail send...
                 OtpTable otpTable = new OtpTable();
                 otpTable.setId(null);
