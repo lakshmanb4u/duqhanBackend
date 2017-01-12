@@ -35,9 +35,9 @@ public class ProductImgDaoJpa extends BaseDaoJpa<ProductImg> implements ProductI
         }
         String q = "SELECT i FROM ProductImg AS i WHERE i.id IN (";
         int i = 0;
-        String s = null;
+        String s = "";
         for (Long productImgId : ProductImgIds) {
-            s = s + (i == 0 ? "" : ",") + "id" + i++;
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
         }
         Query query = getEntityManager().createQuery(q + s + ")");
         i = 0;

@@ -28,9 +28,9 @@ public class ColorDaoJpa extends BaseDaoJpa<Color> implements ColorDao {
         }
         String q = "SELECT c FROM Color AS c WHERE c.id IN (";
         int i = 0;
-        String s = null;
+        String s = "";
         for (Long colorId : colorIds) {
-            s = s + (i == 0 ? "" : ",") + "id" + i++;
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
         }
         Query query = getEntityManager().createQuery(q + s + ")");
         i = 0;

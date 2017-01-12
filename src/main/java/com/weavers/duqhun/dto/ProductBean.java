@@ -28,6 +28,7 @@ public class ProductBean {
     private Long colorId;
     private String color;
     private int available;
+    private Long sizeColorMapId;
 
     /**
      * @return the productId
@@ -251,6 +252,20 @@ public class ProductBean {
      */
     public void setColorId(Long colorId) {
         this.colorId = colorId;
+    }
+
+    /**
+     * @return the sizeColorMapId
+     */
+    public Long getSizeColorMapId() {
+        return sizeColorMapId;
+    }
+
+    /**
+     * @param sizeColorMapId the sizeColorMapId to set
+     */
+    public void setSizeColorMapId(Long sizeColorMapId) {
+        this.sizeColorMapId = sizeColorMapId;
     }
     
 }

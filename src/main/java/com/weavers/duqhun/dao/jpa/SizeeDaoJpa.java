@@ -28,9 +28,9 @@ public class SizeeDaoJpa extends BaseDaoJpa<Sizee> implements SizeeDao {
         }
         String q = "SELECT s FROM Sizee AS s WHERE s.id IN (";
         int i = 0;
-        String s = null;
+        String s = "";
         for (Long sizeeId : sizeeIds) {
-            s = s + (i == 0 ? "" : ",") + "id" + i++;
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
         }
         Query query = getEntityManager().createQuery(q + s + ")");
         i = 0;

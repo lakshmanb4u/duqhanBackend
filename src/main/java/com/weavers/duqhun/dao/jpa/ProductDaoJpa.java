@@ -28,9 +28,9 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         }
         String q = "SELECT p FROM Product AS p WHERE p.id IN (";
         int i = 0;
-        String s = null;
+        String s = "";
         for (Long productId : productIds) {
-            s = s + (i == 0 ? "" : ",") + "id" + i++;
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
         }
         Query query = getEntityManager().createQuery(q + s + ")");
         i = 0;

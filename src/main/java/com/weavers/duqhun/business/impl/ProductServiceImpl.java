@@ -30,6 +30,7 @@ import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
 import com.weavers.duqhun.dto.SizeColorMapDto;
 import com.weavers.duqhun.dto.SizeDto;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -111,6 +112,8 @@ public class ProductServiceImpl implements ProductService {
         if (original != null && discounted != null && less > 0.00) {
             discountPct = original / less;
         }
+        DecimalFormat df = new DecimalFormat("#.00");
+        discountPct = Double.parseDouble(df.format(discountPct));
         return discountPct;
     }
 
@@ -183,6 +186,9 @@ public class ProductServiceImpl implements ProductService {
             Set<SizeDto> sizeDtos2 = new HashSet<>();
             Set<ColorDto> colorDtos = new HashSet<>();
             HashMap<Long, List<SizeColorMapDto>> mapSizeColorMapDto = new HashMap<>();
+            Double orginalPrice = 0.0;
+            Double salesPrice = 0.0;
+            int flg = 0;
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 SizeDto sizeDto = new SizeDto();
 
@@ -196,17 +202,30 @@ public class ProductServiceImpl implements ProductService {
                     sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
                     sizeColorMapDto.setMapId(sizeColorMap.getId());
                     sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+                    if (sizeColorMap.getPrice() < orginalPrice) {
+                        orginalPrice = sizeColorMap.getPrice();
+                        salesPrice = sizeColorMap.getDiscount();
+                    }
                     sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
                     sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
                     sizeColorMapDto.setCount(sizeColorMap.getQuentity());
                     mapSizeColorMapDto.get(sizeColorMap.getSizeId()).add(sizeColorMapDto);
                 } else {
+                    if (flg == 0) {
+                        orginalPrice = sizeColorMap.getPrice();
+                        salesPrice = sizeColorMap.getDiscount();
+                    }
+                    flg++;
                     List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
                     SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
                     sizeColorMapDto.setColorId(sizeColorMap.getColorId());
                     sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
                     sizeColorMapDto.setMapId(sizeColorMap.getId());
                     sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+                    if (sizeColorMap.getPrice() < orginalPrice) {
+                        orginalPrice = sizeColorMap.getPrice();
+                        salesPrice = sizeColorMap.getDiscount();
+                    }
                     sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
                     sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
                     sizeColorMapDto.setCount(sizeColorMap.getQuentity());
@@ -228,7 +247,9 @@ public class ProductServiceImpl implements ProductService {
             }
             productDetailBean.setSizes(sizeDtos2);
             productDetailBean.setColors(colorDtos);
-
+            productDetailBean.setOrginalPrice(orginalPrice);
+            productDetailBean.setSalesPrice(salesPrice);
+            productDetailBean.setDiscount(this.getPercentage(orginalPrice, salesPrice));
             productDetailBean.setArrival("Not set yet..");
             productDetailBean.setShippingCost(null);
             productDetailBean.setRelatedProducts(new ProductBeans());
@@ -241,14 +262,19 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String addProductToCart(ProductRequistBean requistBean) {
         String status = "failure";
-        Cart cart = new Cart();
-        cart.setId(null);
-        cart.setLoadDate(new Date());
-        cart.setSizecolormapId(requistBean.getMapId());
-        cart.setUserId(requistBean.getUserId());
-        Cart cart1 = cartDao.save(cart);
-        if (cart1 != null) {
-            status = "success";
+        Cart cart2 = cartDao.loadByUserIdAndMapId(requistBean.getUserId(), requistBean.getMapId());
+        if (cart2 != null) {
+            status = "Product already added";
+        } else {
+            Cart cart = new Cart();
+            cart.setId(null);
+            cart.setLoadDate(new Date());
+            cart.setSizecolormapId(requistBean.getMapId());
+            cart.setUserId(requistBean.getUserId());
+            Cart cart1 = cartDao.save(cart);
+            if (cart1 != null) {
+                status = "success";
+            }
         }
         return status;
     }
@@ -297,16 +323,24 @@ public class ProductServiceImpl implements ProductService {
 
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 ProductBean productBean = new ProductBean();
+                productBean.setSizeColorMapId(sizeColorMap.getId());
                 productBean.setProductId(sizeColorMap.getProductId());
                 productBean.setName(MapProduct.get(sizeColorMap.getProductId()).getName());
-                productBean.setSize(MapSizee.get(sizeColorMap.getSizeId()).getValu());
-                productBean.setColor(MapColor.get(sizeColorMap.getColorId()).getName());
-                productBean.setImgurl(MapProductImg.get(sizeColorMap.getProductImgId()).getImgUrl());
+                productBean.setDescription(MapProduct.get(sizeColorMap.getProductId()).getDescription());
+                if (MapSizee.get(sizeColorMap.getSizeId()) != null) {
+                    productBean.setSize(MapSizee.get(sizeColorMap.getSizeId()).getValu());
+                }
+                if (MapColor.get(sizeColorMap.getColorId()) != null) {
+                    productBean.setColor(MapColor.get(sizeColorMap.getColorId()).getName());
+                }
+//                productBean.setImgurl(MapProductImg.get(sizeColorMap.getProductImgId()).getImgUrl());
+                productBean.setImgurl(MapProduct.get(sizeColorMap.getProductId()).getImgurl());
                 productBean.setPrice(sizeColorMap.getPrice());
                 itemTotal = itemTotal + sizeColorMap.getPrice();
                 productBean.setDiscountedPrice(sizeColorMap.getDiscount());
                 orderTotal = orderTotal + sizeColorMap.getDiscount();
                 productBean.setDiscountPCT(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
+                productBean.setAvailable(Long.valueOf(sizeColorMap.getQuentity()).intValue());
                 productBeans.add(productBean);
             }
             discountTotal = itemTotal - orderTotal;

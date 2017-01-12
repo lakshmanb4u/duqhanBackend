@@ -13,7 +13,9 @@ import java.util.List;
  *
  * @author Android-3
  */
-public interface CartDao extends BaseDao<Cart>{
-    
+public interface CartDao extends BaseDao<Cart> {
+
     List<ProductSizeColorMap> getProductSizeColorMapByUserId(Long userId);
+
+    Cart loadByUserIdAndMapId(Long userId, Long mapId);
 }

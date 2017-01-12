@@ -9,6 +9,7 @@ import com.weavers.duqhun.dao.CartDao;
 import com.weavers.duqhun.domain.Cart;
 import com.weavers.duqhun.domain.ProductSizeColorMap;
 import java.util.List;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 /**
@@ -26,6 +27,18 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
         Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap map, Cart c WHERE c.sizecolormapId=map.id AND c.userId=:userId");
         query.setParameter("userId", userId);
         return query.getResultList();
+    }
+
+    @Override
+    public Cart loadByUserIdAndMapId(Long userId, Long sizecolormapId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.sizecolormapId=:sizecolormapId AND c.userId=:userId");
+            query.setParameter("userId", userId);
+            query.setParameter("sizecolormapId", sizecolormapId);
+            return (Cart) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
     }
 
 }
