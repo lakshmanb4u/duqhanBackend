@@ -64,14 +64,43 @@ public class ProductServiceImpl implements ProductService {
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
         List<ProductBean> beans = new ArrayList<>();
-        for (Product product : products) {
-            ProductBean bean = new ProductBean();
-            bean.setProductId(product.getCategoryId());
-            bean.setName(product.getName());
-            bean.setImgurl(product.getImgurl());
-            bean.setPrice(mapSizeColorMap.get(product.getId()).getPrice());
-            beans.add(bean);
+        List<Sizee> sizees = sizeeDao.loadAll();
+        HashMap<Long, Sizee> mapSize = new HashMap<>();
+        for (Sizee sizee : sizees) {
+            mapSize.put(sizee.getId(), sizee);
         }
+        List<Color> colors = colorDao.loadAll();
+        HashMap<Long, Color> mapColor = new HashMap<>();
+        for (Color color : colors) {
+            mapColor.put(color.getId(), color);
+        }
+        int i = 0;
+        for (Product product : products) {
+            if (mapSizeColorMap.containsKey(product.getId())) {
+                ProductBean bean = new ProductBean();
+                bean.setProductId(product.getId());
+                bean.setName(product.getName());
+                bean.setImgurl(product.getImgurl());
+                bean.setDescription(product.getDescription());
+                bean.setCategoryId(product.getCategoryId());
+                bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
+                bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
+                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {
+                    bean.setSize(mapSize.get(mapSizeColorMap.get(product.getId()).getSizeId()).getValu());
+                }
+                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {
+                    bean.setColor(mapColor.get(mapSizeColorMap.get(product.getId()).getColorId()).getName());
+                }
+                bean.setPrice(mapSizeColorMap.get(product.getId()).getPrice());
+                bean.setDiscountedPrice(mapSizeColorMap.get(product.getId()).getDiscount());
+                bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
+                Long qunty = mapSizeColorMap.get(product.getId()).getQuentity();
+                bean.setAvailable(qunty.intValue());
+                i = i + qunty.intValue();
+                beans.add(bean);
+            }
+        }
+        productBeans.setTotalProducts(i);
         productBeans.setProducts(beans);
         return productBeans;
     }
@@ -103,7 +132,7 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : products) {
             productIds.add(product.getId());
         }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
+        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceRecentView(productIds);
         return this.setProductBeans(products, mapSizeColorMaps);
     }
 
