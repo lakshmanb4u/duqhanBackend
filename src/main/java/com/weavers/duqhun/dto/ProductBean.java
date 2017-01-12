@@ -15,14 +15,17 @@ public class ProductBean {
     private Long productId;
     private String name;
     private Long categoryId;
+    private String categoryName;
     private String description;
     private String imgurl;
     private Date lastUpdate;
     private Double price;
     private Double discountedPrice;
     private Double discountPCT;
+    private Long sizeId;
     private String size;
     private String sizeUnit;
+    private Long colorId;
     private String color;
     private int available;
 
@@ -206,6 +209,48 @@ public class ProductBean {
      */
     public void setAvailable(int available) {
         this.available = available;
+    }
+
+    /**
+     * @return the categoryName
+     */
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    /**
+     * @param categoryName the categoryName to set
+     */
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    /**
+     * @return the sizeId
+     */
+    public Long getSizeId() {
+        return sizeId;
+    }
+
+    /**
+     * @param sizeId the sizeId to set
+     */
+    public void setSizeId(Long sizeId) {
+        this.sizeId = sizeId;
+    }
+
+    /**
+     * @return the colorId
+     */
+    public Long getColorId() {
+        return colorId;
+    }
+
+    /**
+     * @param colorId the colorId to set
+     */
+    public void setColorId(Long colorId) {
+        this.colorId = colorId;
     }
     
 }

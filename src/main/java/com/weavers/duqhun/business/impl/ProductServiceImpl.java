@@ -293,4 +293,42 @@ public class ProductServiceImpl implements ProductService {
         return cartBean;
     }
 
+    @Override
+    public String saveProduct(ProductBean productBean) {
+        String status = "ERROR: Product can not be saved!!";
+        if (productBean != null) {
+            Product product = new Product();
+            product.setId(null);
+            product.setName(productBean.getName());
+            product.setImgurl(productBean.getImgurl());
+            product.setCategoryId(productBean.getCategoryId());
+            product.setDescription(productBean.getDescription());
+            product.setLastUpdate(new Date());
+            Product product1 = productDao.save(product);
+            if (product1 != null) {
+                //====ProductSizeColorMap(can be multi..not implemented yet)=====//
+                ProductSizeColorMap sizeColorMap = new ProductSizeColorMap();
+                sizeColorMap.setId(null);
+                sizeColorMap.setColorId(productBean.getColorId());
+                sizeColorMap.setSizeId(productBean.getSizeId());
+                sizeColorMap.setDiscount(productBean.getDiscountedPrice());
+                sizeColorMap.setPrice(productBean.getPrice());
+                sizeColorMap.setProductId(product1.getId());
+                sizeColorMap.setProductImgId(0);////********************************************
+                sizeColorMap.setQuentity(productBean.getAvailable());
+                ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
+
+                //========color table(can be multi..not implemented yet)=====//
+                ProductImg productImg = new ProductImg();
+                productImg.setId(null);
+                productImg.setImgUrl(productBean.getImgurl());
+                productImg.setProductId(product1.getId());
+                productImg.setSizecolormapId(sizeColorMap1.getId());
+                productImgDao.save(productImg);
+                status = "Product saved.";
+            }
+        }
+        return status;
+    }
+
 }

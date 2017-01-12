@@ -20,6 +20,59 @@
             $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
             $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
         });
+
+        $(".dropdown-menu li.category").click(function () {
+            $("#categoryId").val($(this).prop('id'));
+            $("#categoryId").val($(this).attr('id'));
+        });
+        $(".dropdown-menu li.sizee").click(function () {
+            $("#sizeId").val($(this).prop('id'));
+            $("#sizeId").val($(this).attr('id'));
+        });
+        $(".dropdown-menu li.color").click(function () {
+            $("#colorId").val($(this).prop('id'));
+            $("#colorId").val($(this).attr('id'));
+        });
+
+        $("#addProductId").submit(function (e) {
+            var that = $(this);
+            e.preventDefault();
+            var jsondata = {};
+            jsondata.name = $('#nameid').val();
+            jsondata.imgurl = $('#imgid').val();
+            jsondata.categoryId = $('#categoryId').val();
+            jsondata.description = $('#descriptionid').val();
+            jsondata.colorId = $('#colorId').val();
+            jsondata.sizeId = $('#sizeId').val();
+            jsondata.discountedPrice = $('#discountid').val();
+            jsondata.price = $('#priceid').val();
+            jsondata.available = $('#quntid').val();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(jsondata),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: that.attr("action"),
+                beforeSend: function () {
+//                    $('#sky-form button[type="submit"]').attr('disabled', true);
+//                    $('#sky-form button[type="submit"]').addClass('.button-submitting');
+                },
+                success: function (data) {
+//                    console.log('success');
+//                    console.log(data);
+//                    $('#sky-form button[type="submit"]').attr('disabled', false);
+//                    $('#sky-form button[type="submit"]').removeClass('button-submitting');
+//                    $('.alert').show();
+//                    $('html, body').animate({scrollTop: 0}, 800);
+                    console.log(data);
+                },
+                complete: function () {
+//                    $('body').hideLoader();
+                    return false; // required to block normal submit ajax used
+                }
+            });
+        });
+
     });
 </script>
 <style>
@@ -39,10 +92,13 @@
             <div class="col-sm-8">
                 <h2 class="text-center text-info">Add New Product</h2>
                 <form class="form-horizontal" id="addProductId" name="productBean" action="/web/save-product">
+                    <input type="hidden" id="categoryId" name="categoryId" value="">
+                    <input type="hidden" id="colorId" name="colorId" value="">
+                    <input type="hidden" id="sizeId" name="sizeId" value="">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Products Name</label>
                         <div class="col-sm-10">
-                            <input class="form-control" id="focusedInput" type="text" placeholder="products name" required="">
+                            <input class="form-control" name="name" id="nameid" type="text" placeholder="products name" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
@@ -52,8 +108,10 @@
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" style="margin-left: 18%;">
                                 <c:forEach var="category" items="${sizeAndColor.categoryDtos}" varStatus="loop"> 
-                                    <li  id="${category.categoryId}"><a href="#">${category.categoryName}</a></li>
-                                    </c:forEach>
+                                    <li class="category" id="${category.categoryId}">
+                                        <a href="#">${category.categoryName}</a>
+                                    </li>
+                                </c:forEach>
                             </ul>
                         </div>
                     </div>
@@ -64,7 +122,7 @@
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" style="margin-left: 18%;">
                                 <c:forEach var="sizee" items="${sizeAndColor.sizeDtos}" varStatus="loop"> 
-                                    <li id="${sizee.sizeId}"><a href="#">${sizee.sizeText}</a></li>
+                                    <li class="sizee" id="${sizee.sizeId}"><a href="#">${sizee.sizeText}</a></li>
                                     </c:forEach>
                             </ul>
                         </div>
@@ -76,7 +134,7 @@
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" style="margin-left: 18%;">
                                 <c:forEach var="color" items="${sizeAndColor.colorDtos}" varStatus="loop"> 
-                                    <li id="${color.colorId}"><a href="#">${color.colorText}</a></li>
+                                    <li class="color" id="${color.colorId}"><a href="#">${color.colorText}</a></li>
                                     </c:forEach>
                             </ul>
                         </div>
@@ -84,31 +142,31 @@
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Image url</label>
                         <div class="col-sm-10">
-                            <input class="form-control" id="focusedInput" type="text" placeholder="Image url" required="">
+                            <input class="form-control" id="imgid" name="imgurl" type="text" placeholder="Image url" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Price</label>
                         <div class="col-sm-10">
-                            <input class="form-control" id="focusedInput" type="number" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="0.01" value="price" min="0" required="">
+                            <input class="form-control" id="priceid" type="number" name="price" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="1" value="0" min="0" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Discount</label>
                         <div class="col-sm-10">
-                            <input class="form-control" id="focusedInput" value="0" type="number" placeholder="discount" step="0.01" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0" required="">
+                            <input class="form-control" id="discountid" value="0" name="discountedPrice" type="number" placeholder="discount" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Quantity</label>
                         <div class="col-sm-10">
-                            <input class="form-control" id="focusedInput" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1" required="">
+                            <input class="form-control" id="quntid" name="available" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Description</label>
                         <div class="col-sm-10">
-                            <textarea class="form-control" id="focusedInput" rows="2" placeholder="description" id="description" required=""></textarea>
+                            <textarea class="form-control" name="description" rows="2" placeholder="description" id="descriptionid" required=""></textarea>
                         </div>
                     </div>
                     <div class="row">

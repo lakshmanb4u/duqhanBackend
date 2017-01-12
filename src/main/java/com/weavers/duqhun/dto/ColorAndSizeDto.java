@@ -15,6 +15,7 @@ public class ColorAndSizeDto {
 
     private List<SizeDto> sizeDtos;
     private List<ColorDto> colorDtos;
+    private List<CategoryDto> categoryDtos;
 
     /**
      * @return the sizeDtos
@@ -42,5 +43,19 @@ public class ColorAndSizeDto {
      */
     public void setColorDtos(List<ColorDto> colorDtos) {
         this.colorDtos = colorDtos;
+    }
+
+    /**
+     * @return the categoryDtos
+     */
+    public List<CategoryDto> getCategoryDtos() {
+        return categoryDtos;
+    }
+
+    /**
+     * @param categoryDtos the categoryDtos to set
+     */
+    public void setCategoryDtos(List<CategoryDto> categoryDtos) {
+        this.categoryDtos = categoryDtos;
     }
 }

@@ -6,6 +6,7 @@
 package com.weavers.duqhun.business;
 
 import com.weavers.duqhun.dto.CartBean;
+import com.weavers.duqhun.dto.ProductBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
@@ -27,4 +28,6 @@ public interface ProductService {
     String addProductToCart(ProductRequistBean requistBean);
     
     CartBean getCartFoAUser(Long userId);
+    
+    String saveProduct(ProductBean productBean);
 }
