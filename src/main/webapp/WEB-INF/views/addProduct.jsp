@@ -20,7 +20,6 @@
             $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
             $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
         });
-
         $(".dropdown-menu li.category").click(function () {
             $("#categoryId").val($(this).prop('id'));
             $("#categoryId").val($(this).attr('id'));
@@ -33,6 +32,16 @@
             $("#colorId").val($(this).prop('id'));
             $("#colorId").val($(this).attr('id'));
         });
+//        $("#add").click(function (e) {
+//            console.log('aaaaaaaaaaaaaaaaaaaaaaaaa');
+//            $("#items").append('<div><input name="price" type="text" /></div>');
+//        });
+//            $("body").on("click", ".delete", function (e) {
+//    $(this).parent("div").remove();
+//        });
+//        $('#priceid').change(function () {
+//            $('#firstname').val($(this).val());
+//        });
 
         $("#addProductId").submit(function (e) {
             var that = $(this);
@@ -64,6 +73,7 @@
 //                    $('#sky-form button[type="submit"]').removeClass('button-submitting');
 //                    $('.alert').show();
 //                    $('html, body').animate({scrollTop: 0}, 800);
+                    location.reload(true);
                     console.log(data);
                 },
                 complete: function () {
@@ -72,19 +82,59 @@
                 }
             });
         });
+//        $('.btn btn-success active').click(function () {
+//            var Size = $('#sizeId').val();
+//            var Color = $('#colorId').val();
+//            var Price = $('#priceid').val();
+//            var Discount = $('#discountid').val();
+//            var Quantity = $('#quntid').val();
+//        });
 
+        var itemCount = 0;
+        $(document).ready(function () {
+            var objs = [];
+            var temp_objs = [];
+            $("#add").click(function () {
+                var html = "";
+                var obj = {
+                    "ROW_ID": itemCount,
+                    "ITEM_Size": $("#sizeId").val(),
+                    "ITEM_Color": $("#colorId").val(),
+                    "ITEM_Price": $("#priceid").val(),
+                    "ITEM_Discount": $("#discountid").val(),
+                    "ITEM_Quantity": $("#quntid").val()
+                }
+                objs.push(obj);
+                itemCount++;
+                html = "<tr id='tr" + itemCount + "'><td>" + obj['ITEM_Size'] + "</td> <td>" + obj['ITEM_Color'] + " </td> <td>" + obj['ITEM_Discount'] + " </td> <td>" + obj['ITEM_Quantity'] + " </td> <td>" + obj['ITEM_Price'] + " </td> </tr>";
+                $("#bill_table").append(html)
+                $("#" + itemCount).click(function () {
+                    var buttonId = $(this).attr("id");
+                    $("#tr" + buttonId).remove();
+                });
+                $("#sizeId").val("");
+                $("#colorId").val("");
+                $("#priceid").val("");
+                $("#discountid").val("");
+                $("#quntid").val("");
+                $("#szbid").html("Size");
+                $("#clbid").html("Color");
+                
+            });
+        });
     });
 </script>
 <style>
     .nav {
-        padding-left: 56% !important;
+        padding-left: 46% !important;
     }
 </style>
 <div class="container">
     <ul class="nav nav-pills">
         <li class="active"><a data-toggle="pill" href="#Product">Add New Product</a></li>
-        <li><a data-toggle="pill" href="#menu1">Add size</a></li>
-        <li><a data-toggle="pill" href="#menu2">Add color</a></li>
+        <li><a data-toggle="pill" href="#menu3">Category</a></li>
+        <li><a data-toggle="pill" href="#menu2">Add Size</a></li>
+        <li><a data-toggle="pill" href="#menu1">Add Color</a></li>
     </ul>
     <div class="tab-content">
         <div id="Product" class="tab-pane fade in active">
@@ -116,57 +166,111 @@
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Product Size</label>
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">products size
-                                <span class="caret"></span></button>
-                            <ul class="dropdown-menu" style="margin-left: 18%;">
-                                <c:forEach var="sizee" items="${sizeAndColor.sizeDtos}" varStatus="loop"> 
-                                    <li class="sizee" id="${sizee.sizeId}"><a href="#">${sizee.sizeText}</a></li>
-                                    </c:forEach>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Product Color</label>
-                        <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">products color
-                                <span class="caret"></span></button>
-                            <ul class="dropdown-menu" style="margin-left: 18%;">
-                                <c:forEach var="color" items="${sizeAndColor.colorDtos}" varStatus="loop"> 
-                                    <li class="color" id="${color.colorId}"><a href="#">${color.colorText}</a></li>
-                                    </c:forEach>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Image url</label>
                         <div class="col-sm-10">
                             <input class="form-control" id="imgid" name="imgurl" type="text" placeholder="Image url" required="">
                         </div>
                     </div>
-                    <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Price</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" id="priceid" type="number" name="price" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="1" value="0" min="0" required="">
-                        </div>
-                    </div>
-                    <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Discount</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" id="discountid" value="0" name="discountedPrice" type="number" placeholder="discount" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0" required="">
-                        </div>
-                    </div>
-                    <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Quantity</label>
-                        <div class="col-sm-10">
-                            <input class="form-control" id="quntid" name="available" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1" required="">
-                        </div>
-                    </div>
+
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Description</label>
                         <div class="col-sm-10">
                             <textarea class="form-control" name="description" rows="2" placeholder="description" id="descriptionid" required=""></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-group has-success has-feedback">
+                        <div class="col-sm-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Size
+                                        </th>
+                                        <th>
+                                            Color
+                                        </th>
+                                        <th>
+                                            Original Price
+                                        </th>
+                                        <th>
+                                            Sale Price
+                                        </th>
+                                        <th>
+                                            Quantity
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 10%;">
+                                            <div class="form-group has-success has-feedback" id="Psize">
+                                                <div class="dropdown" id="Psize">
+                                                    <button id="szbid" class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Size
+                                                        <span class="caret"></span></button>
+                                                    <ul class="dropdown-menu">
+                                                        <c:forEach var="sizee" items="${sizeAndColor.sizeDtos}" varStatus="loop"> 
+                                                            <li class="sizee" id="${sizee.sizeId}"><a href="#">${sizee.sizeText}</a></li>
+                                                            </c:forEach>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="width: 10%;">
+                                            <div class="form-group has-success has-feedback">
+                                                <div class="dropdown">
+                                                    <button id="clbid" class="btn btn-primary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Color
+                                                        <span class="caret"></span></button>
+                                                    <ul class="dropdown-menu">
+                                                        <c:forEach var="color" items="${sizeAndColor.colorDtos}" varStatus="loop"> 
+                                                            <li class="color" id="${color.colorId}"><a href="#">${color.colorText}</a></li>
+                                                            </c:forEach>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group has-success has-feedback" id="items">
+                                                <div class="col-sm-10" id="items">
+                                                    <input class="form-control" id="priceid" type="number" name="priceid" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="1" value="0" min="0" required="">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group has-success has-feedback">
+                                                <div class="col-sm-10">
+                                                    <input class="form-control" id="discountid" value="0" name="discountedPrice" type="number" placeholder="discount" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0" required="">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group has-success has-feedback">
+                                                <div class="col-sm-10">
+                                                    <input class="form-control" id="quntid" name="available" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1" required="">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button type="button" id="add" class="btn btn-success active">
+                                                <span class="glyphicon glyphicon-plus"></span> Add Product
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-sm-12" id="billing_items_div">
+                            <table class='table table-bordered'  id='bill_table'> 
+                                <thead>
+                                    <tr>
+                                        <th>Size</th>
+                                        <th>Color</th>
+                                        <th>Price</th>
+                                        <th>Discount</th>
+                                        <th>Quantity</th>
+                                    </tr>
+                                </thead>
+                            </table>
                         </div>
                     </div>
                     <div class="row">
@@ -181,18 +285,114 @@
             </div>
             <div class="col-sm-2"></div>
         </div>
-    </div>
-    <div id="menu1" class="tab-pane fade">
+        <div id="menu1" class="tab-pane fade in">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <h2 class="text-center text-info">Add Color</h2>
+                <form class="form-horizontal" id="" name="" action="">
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Color Name</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="" id="" type="text" placeholder="Color Name" required="">
+                        </div>
+                    </div>
 
-    </div>
-    <div id="menu2" class="tab-pane fade">
-
-    </div>
-    <div id="menu3" class="tab-pane fade">
-
+                    <div class="row">
+                        <div class="col-sm-9"></div>
+                        <div class="col-sm-3">
+                            <span class="pull-right">
+                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="menu2" class="tab-pane fade">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <h2 class="text-center text-info">Add size group</h2>
+                <form class="form-horizontal" id="" name="" action="">
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Add size group</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="" id="" type="text" placeholder="Add size group" required="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-9"></div>
+                        <div class="col-sm-3">
+                            <span class="pull-right">
+                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+                <form class="form-horizontal" id="" name="" action="">
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Size Group</label>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">products color
+                                <span class="caret"></span></button>
+                            <ul class="dropdown-menu" style="margin-left: 18%;">
+                                <li><a href="#">HTML</a></li>
+                                <li><a href="#">CSS</a></li>
+                                <li><a href="#">JavaScript</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Size</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="" id="" type="text" placeholder="Size" required="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-9"></div>
+                        <div class="col-sm-3">
+                            <span class="pull-right">
+                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div id="menu3" class="tab-pane fade">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <h2 class="text-center text-info">Category</h2>
+                <form class="form-horizontal" id="" name="" action="">
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Category Name</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="" id="" type="text" placeholder="Category Name" required="">
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Category Parent</label>
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">Category Parent
+                                <span class="caret"></span></button>
+                            <ul class="dropdown-menu" style="margin-left: 18%;">
+                                <li><a href="#">HTML</a></li>
+                                <li><a href="#">CSS</a></li>
+                                <li><a href="#">JavaScript</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-9"></div>
+                        <div class="col-sm-3">
+                            <span class="pull-right">
+                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
-</div>
-
 <!--    </body>
 </html>-->
