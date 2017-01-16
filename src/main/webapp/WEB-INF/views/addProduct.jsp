@@ -21,25 +21,185 @@
         $(".dropdown-menu li.sizee").click(function () {
             $("#sizeId").val($(this).prop('id'));
             $("#sizeId").val($(this).attr('id'));
+            $("#sizetextId").val($(this).html());
         });
         $(".dropdown-menu li.color").click(function () {
             $("#colorId").val($(this).prop('id'));
             $("#colorId").val($(this).attr('id'));
+            $("#colortextId").val($(this).html());
         });
 
+        $(".dropdown-menu li.sizegroup").click(function () {
+            $("#sizegroupId").val($(this).prop('id'));
+            $("#sizegroupId").val($(this).attr('id'));
+        });
+
+        $(".dropdown-menu li.parentcategory").click(function () {
+            $("#parentcategoryId").val($(this).prop('id'));
+            $("#parentcategoryId").val($(this).attr('id'));
+        });
+//===========================form submit===========================//
         $("#addProductId").submit(function (e) {
             var that = $(this);
             e.preventDefault();
             var jsondata = {};
             jsondata.name = $('#nameid').val();
-            jsondata.imgurl = $('#imgid').val();
+            jsondata.imgurl = $('#ImgFront').val();
             jsondata.categoryId = $('#categoryId').val();
             jsondata.description = $('#descriptionid').val();
-            jsondata.colorId = $('#colorId').val();
-            jsondata.sizeId = $('#sizeId').val();
-            jsondata.discountedPrice = $('#discountid').val();
-            jsondata.price = $('#priceid').val();
-            jsondata.available = $('#quntid').val();
+            var imageDtos = [];
+            $('.subimg').each(function () {
+                var imageDto = {};
+                imageDto.imgUrl = $(this).find('td').eq(0).text();
+                imageDtos.push(imageDto);
+            });
+            jsondata.imageDtos = imageDtos;
+
+            var sizeColorMaps = [];
+            $('.maptr').each(function (index) {
+                var sizeColorMap = {};
+                sizeColorMap.colorId = $(this).find('.colorkey').val();
+                sizeColorMap.sizeId = $(this).find('.sizekey').val();
+                sizeColorMap.orginalPrice = $(this).find('td').eq(2).text();
+                sizeColorMap.salesPrice = $(this).find('td').eq(3).text();
+                sizeColorMap.count = $(this).find('td').eq(4).text();
+                sizeColorMaps.push(sizeColorMap);
+//                    console.log(index + ": " + $(this).text());
+            });
+            jsondata.sizeColorMaps = sizeColorMaps;
+//console.log("ttttttttttttttttttt"+JSON.stringify(jsondata));
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(jsondata),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: that.attr("action"),
+                success: function (data) {
+                    location.reload(true);
+                    console.log(data);
+                },
+                complete: function () {
+                    return false; // required to block normal submit ajax used
+                }
+            });
+        });
+
+
+
+//========================add map table===========================
+
+        $("#add").click(function () {
+            var itemCount = 0;
+            var objs = [];
+            var html = "";
+            var obj = {
+                "ROW_ID": itemCount,
+                "ITEM_Size": $("#sizeId").val(),
+                "ITEM_SizeText": $("#sizetextId").val(),
+                "ITEM_Color": $("#colorId").val(),
+                "ITEM_ColorText": $("#colortextId").val(),
+                "ITEM_Price": $("#priceid").val(),
+                "ITEM_Discount": $("#discountid").val(),
+                "ITEM_Quantity": $("#quntid").val()
+            };
+            objs.push(obj);
+            itemCount++;
+            html = "<tr id='tr" + itemCount + "' class='maptr'><td>" + obj['ITEM_SizeText'] + "<input type='hidden' class='sizekey' value=" + obj['ITEM_Size'] + "></td> <td>" + obj['ITEM_ColorText'] + "<input type='hidden' class='colorkey' value=" + obj['ITEM_Color'] + "> </td> <td>" + obj['ITEM_Price'] + " </td> <td>" + obj['ITEM_Discount'] + " </td> <td>" + obj['ITEM_Quantity'] + " </td> </tr>";
+            $("#bill_table").append(html);
+            $("#" + itemCount).click(function () {
+                var buttonId = $(this).attr("id");
+                $("#tr" + buttonId).remove();
+            });
+            $("#sizeId").val("");
+            $("#colorId").val("");
+            $("#priceid").val("");
+            $("#discountid").val("");
+            $("#quntid").val("");
+            $("#szbid").html("Size");
+            $("#clbid").html("Color");
+
+        });
+//========================add more img===========================
+        $("#addImg").click(function () {
+            if ($("#imgid").val() !== "") {
+                var itemCount = 0;
+                var objs = [];
+                var html = "";
+                var obj = {
+                    "ROW_ID": itemCount,
+                    "IMG_Size": $("#imgid").val()
+                };
+                objs.push(obj);
+                itemCount++;
+                html = "<tr id='tr" + itemCount + "' class='subimg'><td>" + obj['IMG_Size'] + " </td> </tr>";
+                $("#bill_table2").append(html);
+                $("#imgid").val("");
+            }
+        });
+
+        //**************** Add Color *********************
+        $("#addColor").submit(function (e) {
+            var that = $(this);
+            e.preventDefault();
+            var jsondata = {};
+            var color = $('#addcolorId').val();
+            jsondata.addcolor = $('#addcolorId').val();
+            if (color !== '' && color !== null) {
+                $.ajax({
+                    type: "POST",
+                    data: color,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: that.attr("action"),
+                    beforeSend: function () {
+                        $("#addColor").validate();
+                    },
+                    success: function (data) {
+                        location.reload(true);
+                        console.log(data);
+                    },
+                    complete: function () {
+                        return false;
+                    }
+                });
+            }
+        });
+
+        // ****************** Add size group ************************
+        $("#Addsize ").submit(function (e) {
+            var that = $(this);
+            e.preventDefault();
+            var jsondata = {};
+            var sizeGroop = $('#AddSizeGroupId').val();
+            jsondata.addsize = $('#AddSizeGroupId').val();
+            if (sizeGroop !== '' && sizeGroop !== null) {
+                $.ajax({
+                    type: "POST",
+                    data: sizeGroop,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: that.attr("action"),
+                    beforeSend: function () {
+                        $("#Addsize").validate();
+                    },
+                    success: function (data) {
+                        location.reload(true);
+                        console.log(data);
+                    },
+                    complete: function () {
+                        return false;
+                    }
+                });
+            }
+        });
+
+        //******************** Save size *********************
+        $("#SizeGroup ").submit(function (e) {
+            var that = $(this);
+            e.preventDefault();
+            var jsondata = {};
+            jsondata.sizeGroupId = $('#sizegroupId').val();
+            jsondata.sizeText = $('#size-name').val();
             $.ajax({
                 type: "POST",
                 data: JSON.stringify(jsondata),
@@ -47,71 +207,41 @@
                 dataType: "json",
                 url: that.attr("action"),
                 beforeSend: function () {
-//                    $('#sky-form button[type="submit"]').attr('disabled', true);
-//                    $('#sky-form button[type="submit"]').addClass('.button-submitting');
+                    $("#SizeGroup").validate();
                 },
                 success: function (data) {
-//                    console.log('success');
-//                    console.log(data);
-//                    $('#sky-form button[type="submit"]').attr('disabled', false);
-//                    $('#sky-form button[type="submit"]').removeClass('button-submitting');
-//                    $('.alert').show();
-//                    $('html, body').animate({scrollTop: 0}, 800);
                     location.reload(true);
                     console.log(data);
                 },
                 complete: function () {
-//                    $('body').hideLoader();
-                    return false; // required to block normal submit ajax used
+                    return false;
                 }
             });
         });
 
-        var itemCount = 0;
-        $(document).ready(function () {
-            var objs = [];
-            $("#add").click(function () {
-                var html = "";
-                var obj = {
-                    "ROW_ID": itemCount,
-                    "ITEM_Size": $("#sizeId").val(),
-                    "ITEM_Color": $("#colorId").val(),
-                    "ITEM_Price": $("#priceid").val(),
-                    "ITEM_Discount": $("#discountid").val(),
-                    "ITEM_Quantity": $("#quntid").val()
+        //********************* Category *****************
+        $("#CategoryId ").submit(function (e) {
+            var that = $(this);
+            e.preventDefault();
+            var jsondata = {};
+            jsondata.categoryName = $('#category-name').val();
+            jsondata.patentId = $('#parentcategoryId').val();
+            $.ajax({
+                type: "POST",
+                data: JSON.stringify(jsondata),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                url: that.attr("action"),
+                beforeSend: function () {
+                    $("#CategoryId").validate();
+                },
+                success: function (data) {
+                    location.reload(true);
+                    console.log(data);
+                },
+                complete: function () {
+                    return false;
                 }
-                objs.push(obj);
-                itemCount++;
-                html = "<tr id='tr" + itemCount + "'><td>" + obj['ITEM_Size'] + "</td> <td>" + obj['ITEM_Color'] + " </td> <td>" + obj['ITEM_Discount'] + " </td> <td>" + obj['ITEM_Quantity'] + " </td> <td>" + obj['ITEM_Price'] + " </td> </tr>";
-                $("#bill_table").append(html)
-                $("#" + itemCount).click(function () {
-                    var buttonId = $(this).attr("id");
-                    $("#tr" + buttonId).remove();
-                });
-                $("#sizeId").val("");
-                $("#colorId").val("");
-                $("#priceid").val("");
-                $("#discountid").val("");
-                $("#quntid").val("");
-                $("#szbid").html("Size");
-                $("#clbid").html("Color");
-
-            });
-        });
-        var itemCount = 0;
-        $(document).ready(function () {
-            var objs = [];
-            $("#addImg").click(function () {
-                var html = "";
-                var obj = {
-                    "ROW_ID": itemCount,
-                    "IMG_Size": $("#imgid").val()
-                }
-                objs.push(obj);
-                itemCount++;
-                html = "<tr id='tr" + itemCount + "'><td>" + obj['IMG_Size'] + " </td> </tr>";
-                $("#bill_table2").append(html)
-                $("#imgid").val("");
             });
         });
     });
@@ -136,7 +266,11 @@
                 <form class="form-horizontal" id="addProductId" name="productBean" action="/web/save-product">
                     <input type="hidden" id="categoryId" name="categoryId" value="">
                     <input type="hidden" id="colorId" name="colorId" value="">
+                    <input type="hidden" id="colortextId" name="colortextId" value="">
                     <input type="hidden" id="sizeId" name="sizeId" value="">
+                    <input type="hidden" id="sizetextId" name="sizetextId" value="">
+                    <input type="hidden" id="sizegroupId" name="sizegroupId" value="">
+                    <input type="hidden" id="parentcategoryId" name="parentcategoryId" value="">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Products Name</label>
                         <div class="col-sm-10">
@@ -166,7 +300,7 @@
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Image url</label>
                         <div class="col-sm-8">
-                            <input class="form-control" id="imgid" name="imgurl" type="text" placeholder="Image url" required="">
+                            <input class="form-control" id="imgid" name="imgurl" type="text" placeholder="Image url">
                         </div>
                         <div class="col-sm-1">
                             <button type="button" id="addImg" class="btn btn-success active">
@@ -240,21 +374,21 @@
                                         <td>
                                             <div class="form-group has-success has-feedback" id="items">
                                                 <div class="col-sm-10" id="items">
-                                                    <input class="form-control" id="priceid" type="number" name="priceid" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="1" value="0" min="0" required="">
+                                                    <input class="form-control" id="priceid" type="number" name="priceid" placeholder="price" pattern="[0-9]+([\.,][0-9]+)?" step="1" value="0" min="0">
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-group has-success has-feedback">
                                                 <div class="col-sm-10">
-                                                    <input class="form-control" id="discountid" value="0" name="discountedPrice" type="number" placeholder="discount" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0" required="">
+                                                    <input class="form-control" id="discountid" value="0" name="discountedPrice" type="number" placeholder="discount" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0">
                                                 </div>
                                             </div>
                                         </td>
                                         <td>
                                             <div class="form-group has-success has-feedback">
                                                 <div class="col-sm-10">
-                                                    <input class="form-control" id="quntid" name="available" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1" required="">
+                                                    <input class="form-control" id="quntid" name="available" value="1" type="number" placeholder="quantity" pattern="[0-9]+([\.,][0-9]+)?" value="quantity" min="1">
                                                 </div>
                                             </div>
                                         </td>
@@ -273,8 +407,8 @@
                                     <tr>
                                         <th>Size</th>
                                         <th>Color</th>
-                                        <th>Price</th>
-                                        <th>Discount</th>
+                                        <th>Original Price</th>
+                                        <th>Sale Price</th>
                                         <th>Quantity</th>
                                     </tr>
                                 </thead>
@@ -297,19 +431,19 @@
             <div class="col-sm-2"></div>
             <div class="col-sm-8">
                 <h2 class="text-center text-info">Add Color</h2>
-                <form class="form-horizontal" id="" name="" action="">
+                <form class="form-horizontal" id="addColor" name="ColorBean" action="/web/save-color">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Color Name</label>
                         <div class="col-sm-10">
-                            <input class="form-control" name="" id="" type="text" placeholder="Color Name" required="">
+                            <input class="form-control" name="addcolor" id="addcolorId" type="text" placeholder="Color Name" required="">
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-sm-9"></div>
                         <div class="col-sm-3">
                             <span class="pull-right">
-                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                                <button type="submit" class="btn btn-success btn-lg active">
+                                    <span class="glyphicon glyphicon-save"></span>Save</button>
                             </span>
                         </div>
                     </div>
@@ -320,46 +454,48 @@
             <div class="col-sm-2"></div>
             <div class="col-sm-8">
                 <h2 class="text-center text-info">Add size group</h2>
-                <form class="form-horizontal" id="" name="" action="">
+                <form class="form-horizontal" id="Addsize" name="SizeBean" action="/web/save-sizegroup">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Add size group</label>
                         <div class="col-sm-10">
-                            <input class="form-control" name="" id="" type="text" placeholder="Add size group" required="">
+                            <input class="form-control" name="addsize" id="AddSizeGroupId" type="text" placeholder="Add size group" required="">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-9"></div>
                         <div class="col-sm-3">
                             <span class="pull-right">
-                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                                <button type="submit" class="btn btn-success btn-lg active">
+                                    <span class="glyphicon glyphicon-save"></span>Save</button>
                             </span>
                         </div>
                     </div>
                 </form>
-                <form class="form-horizontal" id="" name="" action="">
+                <form class="form-horizontal" id="SizeGroup" name="SizeGroupBean" action="/web/save-size">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Size Group</label>
                         <div class="dropdown">
-                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">products color
+                            <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">Size Group
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" style="margin-left: 18%;">
-                                <li><a href="#">HTML</a></li>
-                                <li><a href="#">CSS</a></li>
-                                <li><a href="#">JavaScript</a></li>
+                                <c:forEach var="sizeegroup" items="${sizeAndColor.sizeGroupDtos}" varStatus="loop"> 
+                                    <li id="${sizeegroup.sizeGroupId}" class="sizegroup"><a href="#">${sizeegroup.sizeText}</a></li>
+                                    </c:forEach>
                             </ul>
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Size</label>
                         <div class="col-sm-10">
-                            <input class="form-control" name="" id="" type="text" placeholder="Size" required="">
+                            <input class="form-control" name="size" id="size-name" type="text" placeholder="Size" required="">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-9"></div>
                         <div class="col-sm-3">
                             <span class="pull-right">
-                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                                <button type="submit" class="btn btn-success btn-lg active">
+                                    <span class="glyphicon glyphicon-save"></span>Save</button>
                             </span>
                         </div>
                     </div>
@@ -370,11 +506,11 @@
             <div class="col-sm-2"></div>
             <div class="col-sm-8">
                 <h2 class="text-center text-info">Category</h2>
-                <form class="form-horizontal" id="" name="" action="">
+                <form class="form-horizontal" id="CategoryId" name="CategoryBean" action="/web/save-category">
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Category Name</label>
                         <div class="col-sm-10">
-                            <input class="form-control" name="" id="" type="text" placeholder="Category Name" required="">
+                            <input class="form-control" name="Category" id="category-name" type="text" placeholder="Category Name" required="">
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
@@ -383,9 +519,11 @@
                             <button class="btn btn-primary dropdown-toggle" style="margin-left: 1%;" type="button" data-toggle="dropdown">Category Parent
                                 <span class="caret"></span></button>
                             <ul class="dropdown-menu" style="margin-left: 18%;">
-                                <li><a href="#">HTML</a></li>
-                                <li><a href="#">CSS</a></li>
-                                <li><a href="#">JavaScript</a></li>
+                                <c:forEach var="pcategory" items="${sizeAndColor.categoryDtos}" varStatus="loop"> 
+                                    <li class="parentcategory" id="${pcategory.categoryId}">
+                                        <a href="#">${pcategory.categoryName}</a>
+                                    </li>
+                                </c:forEach>
                             </ul>
                         </div>
                     </div>
@@ -393,7 +531,8 @@
                         <div class="col-sm-9"></div>
                         <div class="col-sm-3">
                             <span class="pull-right">
-                                <button type="submit" class="btn btn-success btn-lg active">Save</button>
+                                <button type="submit" class="btn btn-success btn-lg active">
+                                    <span class="glyphicon glyphicon-save"></span>Save</button>
                             </span>
                         </div>
                     </div>

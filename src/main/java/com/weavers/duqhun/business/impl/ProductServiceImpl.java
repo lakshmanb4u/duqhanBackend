@@ -13,6 +13,7 @@ import com.weavers.duqhun.dao.ProductDao;
 import com.weavers.duqhun.dao.ProductImgDao;
 import com.weavers.duqhun.dao.ProductSizeColorMapDao;
 import com.weavers.duqhun.dao.RecentViewDao;
+import com.weavers.duqhun.dao.SizeGroupDao;
 import com.weavers.duqhun.dao.SizeeDao;
 import com.weavers.duqhun.domain.Cart;
 import com.weavers.duqhun.domain.Category;
@@ -20,8 +21,10 @@ import com.weavers.duqhun.domain.Color;
 import com.weavers.duqhun.domain.Product;
 import com.weavers.duqhun.domain.ProductImg;
 import com.weavers.duqhun.domain.ProductSizeColorMap;
+import com.weavers.duqhun.domain.SizeGroup;
 import com.weavers.duqhun.domain.Sizee;
 import com.weavers.duqhun.dto.CartBean;
+import com.weavers.duqhun.dto.CategoryDto;
 import com.weavers.duqhun.dto.ColorDto;
 import com.weavers.duqhun.dto.ImageDto;
 import com.weavers.duqhun.dto.ProductBean;
@@ -61,6 +64,8 @@ public class ProductServiceImpl implements ProductService {
     ColorDao colorDao;
     @Autowired
     CartDao cartDao;
+    @Autowired
+    SizeGroupDao sizeGroupDao;
 
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
@@ -168,11 +173,12 @@ public class ProductServiceImpl implements ProductService {
             for (Color color : colors) {
                 mapColor.put(color.getId(), color);
             }
-            productDetailBean.setProductId(product.getCategoryId());
+            productDetailBean.setProductId(product.getId());
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
             productDetailBean.setCategoryId(category.getId());
             productDetailBean.setCategoryName(category.getName());
+            productDetailBean.setProductImg(product.getImgurl());
             //===============================add imgDto==============================
             List<ImageDto> imgDtos = new ArrayList<>();
             for (ProductImg productImg : imgs) {
@@ -191,15 +197,18 @@ public class ProductServiceImpl implements ProductService {
             int flg = 0;
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 SizeDto sizeDto = new SizeDto();
-
-                sizeDto.setSizeId(sizeColorMap.getSizeId());
-                sizeDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
+                if (mapSize.get(sizeColorMap.getSizeId()) != null) {
+                    sizeDto.setSizeId(sizeColorMap.getSizeId());
+                    sizeDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
+                }
                 sizeDtos.add(sizeDto);
 
                 if (mapSizeColorMapDto.containsKey(sizeColorMap.getSizeId())) {
                     SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-                    sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                    sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                    if (mapColor.get(sizeColorMap.getColorId()) != null) {
+                        sizeColorMapDto.setColorId(sizeColorMap.getColorId());
+                        sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                    }
                     sizeColorMapDto.setMapId(sizeColorMap.getId());
                     sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
                     if (sizeColorMap.getPrice() < orginalPrice) {
@@ -218,8 +227,10 @@ public class ProductServiceImpl implements ProductService {
                     flg++;
                     List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
                     SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-                    sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                    sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                    if (mapColor.get(sizeColorMap.getColorId()) != null) {
+                        sizeColorMapDto.setColorId(sizeColorMap.getColorId());
+                        sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                    }
                     sizeColorMapDto.setMapId(sizeColorMap.getId());
                     sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
                     if (sizeColorMap.getPrice() < orginalPrice) {
@@ -234,8 +245,10 @@ public class ProductServiceImpl implements ProductService {
                 }
 
                 ColorDto colorDto = new ColorDto();
-                colorDto.setColorId(sizeColorMap.getColorId());
-                colorDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                if (mapColor.get(sizeColorMap.getColorId()) != null) {
+                    colorDto.setColorId(sizeColorMap.getColorId());
+                    colorDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+                }
                 colorDtos.add(colorDto);
             }
             for (SizeDto sizeDto1 : sizeDtos) {
@@ -284,17 +297,17 @@ public class ProductServiceImpl implements ProductService {
         CartBean cartBean = new CartBean();
         List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);
         if (!sizeColorMaps.isEmpty()) {
-            List<Long> priductIds = new ArrayList<>();
+            List<Long> productIds = new ArrayList<>();
             List<Long> colorIds = new ArrayList<>();
             List<Long> sizeIds = new ArrayList<>();
-            List<Long> imgIds = new ArrayList<>();
+//            List<Long> imgIds = new ArrayList<>();
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
-                priductIds.add(sizeColorMap.getProductId());
+                productIds.add(sizeColorMap.getProductId());
                 colorIds.add(sizeColorMap.getColorId());
                 sizeIds.add(sizeColorMap.getSizeId());
-                imgIds.add(sizeColorMap.getProductImgId());
+//                imgIds.add(sizeColorMap.getProductImgId());
             }
-            List<Product> products = productDao.loadByIds(priductIds);
+            List<Product> products = productDao.loadByIds(productIds);
             HashMap<Long, Product> MapProduct = new HashMap<>();
             for (Product product : products) {
                 MapProduct.put(product.getId(), product);
@@ -309,11 +322,11 @@ public class ProductServiceImpl implements ProductService {
             for (Sizee sizee : sizees) {
                 MapSizee.put(sizee.getId(), sizee);
             }
-            List<ProductImg> productImgs = productImgDao.loadByIds(imgIds);
-            HashMap<Long, ProductImg> MapProductImg = new HashMap<>();
-            for (ProductImg productImg : productImgs) {
-                MapProductImg.put(productImg.getId(), productImg);
-            }
+//            List<ProductImg> productImgs = productImgDao.loadByIds(imgIds);
+//            HashMap<Long, ProductImg> MapProductImg = new HashMap<>();
+//            for (ProductImg productImg : productImgs) {
+//                MapProductImg.put(productImg.getId(), productImg);
+//            }
             //============================================================//
             List<ProductBean> productBeans = new ArrayList<>();
             double itemTotal = 0.0;         //2000
@@ -369,29 +382,97 @@ public class ProductServiceImpl implements ProductService {
             product.setLastUpdate(new Date());
             Product product1 = productDao.save(product);
             if (product1 != null) {
-                //====ProductSizeColorMap(can be multi..not implemented yet)=====//
-                ProductSizeColorMap sizeColorMap = new ProductSizeColorMap();
-                sizeColorMap.setId(null);
-                sizeColorMap.setColorId(productBean.getColorId());
-                sizeColorMap.setSizeId(productBean.getSizeId());
-                sizeColorMap.setDiscount(productBean.getDiscountedPrice());
-                sizeColorMap.setPrice(productBean.getPrice());
-                sizeColorMap.setProductId(product1.getId());
-                sizeColorMap.setProductImgId(0);////********************************************
-                sizeColorMap.setQuentity(productBean.getAvailable());
-                ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
+                //====ProductSizeColorMap(can be multi..not implemented yet)=====//working....
+                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
+                if (!sizeColorMapDtos.isEmpty()) {
+                    for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
+                        ProductSizeColorMap sizeColorMap = new ProductSizeColorMap();
+                        sizeColorMap.setId(null);
+                        sizeColorMap.setColorId(sizeColorMapDto.getColorId());
+                        sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
+                        sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
+                        sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
+                        sizeColorMap.setQuentity(sizeColorMapDto.getCount());
+                        sizeColorMap.setProductId(product1.getId());
+//                sizeColorMap.setProductImgId(0);////********************************************discerd
+                        ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
+                    }
+                }
 
-                //========color table(can be multi..not implemented yet)=====//
-                ProductImg productImg = new ProductImg();
-                productImg.setId(null);
-                productImg.setImgUrl(productBean.getImgurl());
-                productImg.setProductId(product1.getId());
-                productImg.setSizecolormapId(sizeColorMap1.getId());
-                productImgDao.save(productImg);
-                status = "Product saved.";
+                //========color table(can be multi..not implemented yet)=====//working....
+                List<ImageDto> imageDtos = productBean.getImageDtos();
+                if (!imageDtos.isEmpty()) {
+                    for (ImageDto imageDto : imageDtos) {
+                        ProductImg productImg = new ProductImg();
+                        productImg.setId(null);
+                        productImg.setImgUrl(imageDto.getImgUrl());
+                        productImg.setProductId(product1.getId());
+//                productImg.setSizecolormapId(sizeColorMap1.getId());
+                        productImgDao.save(productImg);
+                    }
+                    status = "Product saved.";
+                }
             }
         }
         return status;
+    }
+
+    @Override
+    public String saveCategory(CategoryDto categoryDto) {
+        String status = "ERROR: Category can not be saved!!";
+        if (categoryDto.getCategoryName() != null) {
+            Category category = new Category();
+            category.setId(null);
+            category.setName(categoryDto.getCategoryName());
+            category.setParentId(categoryDto.getPatentId());
+            Category category2 = categoryDao.save(category);
+            if (category2 != null) {
+                status = "Category saved.";
+            }
+        }
+        return status;
+    }
+
+    @Override
+    public String saveSize(SizeDto sizeDto) {
+        Sizee sizee = new Sizee();
+        sizee.setId(null);
+        sizee.setGroupId(sizeDto.getSizeGroupId());
+        sizee.setValu(sizeDto.getSizeText());
+        sizee.setUnit(sizeDto.getSizeText());
+        Sizee sizee1 = sizeeDao.save(sizee);
+        if (sizee1 != null) {
+            return "ERROR: Size can not be saved!!";
+        } else {
+            return "Size saved..";
+        }
+    }
+
+    @Override
+    public String saveSizeGroup(String sizeGroupName) {
+        SizeGroup sizeGroup = new SizeGroup();
+        sizeGroup.setId(null);
+        sizeGroup.setName(sizeGroupName);
+        SizeGroup sizeGroup1 = sizeGroupDao.save(sizeGroup);
+        if (sizeGroup1 != null) {
+            return "ERROR: SizeGroup can not be saved!!";
+        } else {
+            return "SizeGroup saved..";
+        }
+    }
+
+    @Override
+    public String saveColor(String color) {
+        Color color1 = new Color();
+        color1.setId(null);
+        color1.setName(color);
+        color1.setCode(color);
+        Color color2 = colorDao.save(color1);
+        if (color2 != null) {
+            return "ERROR: Color can not be saved!!";
+        } else {
+            return "Color saved..";
+        }
     }
 
 }

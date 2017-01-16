@@ -6,12 +6,42 @@
 package com.weavers.duqhun.dto;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  *
  * @author Android-3
  */
 public class ProductBean {
+
+    /**
+     * @return the sizeColorMaps
+     */
+    public List<SizeColorMapDto> getSizeColorMaps() {
+        return sizeColorMaps;
+    }
+
+    /**
+     * @param sizeColorMaps the sizeColorMaps to set
+     */
+    public void setSizeColorMaps(List<SizeColorMapDto> sizeColorMaps) {
+        this.sizeColorMaps = sizeColorMaps;
+    }
+
+    /**
+     * @return the imageDtos
+     */
+    public List<ImageDto> getImageDtos() {
+        return imageDtos;
+    }
+
+    /**
+     * @param imageDtos the imageDtos to set
+     */
+    public void setImageDtos(List<ImageDto> imageDtos) {
+        this.imageDtos = imageDtos;
+    }
+
     private Long productId;
     private String name;
     private Long categoryId;
@@ -29,6 +59,8 @@ public class ProductBean {
     private String color;
     private int available;
     private Long sizeColorMapId;
+    private List<SizeColorMapDto> sizeColorMaps;
+    private List<ImageDto> imageDtos;
 
     /**
      * @return the productId
@@ -267,5 +299,5 @@ public class ProductBean {
     public void setSizeColorMapId(Long sizeColorMapId) {
         this.sizeColorMapId = sizeColorMapId;
     }
-    
+
 }

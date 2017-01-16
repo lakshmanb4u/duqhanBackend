@@ -18,6 +18,7 @@ public class SizeColorMapDto {
     private Double orginalPrice;
     private Double salesPrice;
     private Double discount;
+    private Long sizeId;
 
     /**
      * @return the colorId
@@ -115,5 +116,19 @@ public class SizeColorMapDto {
      */
     public void setDiscount(Double discount) {
         this.discount = discount;
+    }
+
+    /**
+     * @return the sizeId
+     */
+    public Long getSizeId() {
+        return sizeId;
+    }
+
+    /**
+     * @param sizeId the sizeId to set
+     */
+    public void setSizeId(Long sizeId) {
+        this.sizeId = sizeId;
     }
 }

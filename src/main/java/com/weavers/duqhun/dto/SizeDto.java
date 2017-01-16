@@ -15,6 +15,7 @@ public class SizeDto {
 
     private Long sizeId;
     private String sizeText;
+    private Long sizeGroupId;
     private List<SizeColorMapDto> sizeColorMap;
 
     /**
@@ -57,5 +58,19 @@ public class SizeDto {
      */
     public void setSizeColorMap(List<SizeColorMapDto> sizeColorMap) {
         this.sizeColorMap = sizeColorMap;
+    }
+
+    /**
+     * @return the sizeGroupId
+     */
+    public Long getSizeGroupId() {
+        return sizeGroupId;
+    }
+
+    /**
+     * @param sizeGroupId the sizeGroupId to set
+     */
+    public void setSizeGroupId(Long sizeGroupId) {
+        this.sizeGroupId = sizeGroupId;
     }
 }

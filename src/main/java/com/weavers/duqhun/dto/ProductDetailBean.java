@@ -19,6 +19,7 @@ public class ProductDetailBean {
     private String description;
     private Long categoryId;
     private String categoryName;
+    private String productImg;
     private Double orginalPrice;
     private Double salesPrice;
     private Double discount;
@@ -253,5 +254,19 @@ public class ProductDetailBean {
      */
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    /**
+     * @return the productImg
+     */
+    public String getProductImg() {
+        return productImg;
+    }
+
+    /**
+     * @param productImg the productImg to set
+     */
+    public void setProductImg(String productImg) {
+        this.productImg = productImg;
     }
 }

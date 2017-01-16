@@ -8,9 +8,11 @@ package com.weavers.duqhun.business.impl;
 import com.weavers.duqhun.business.WebService;
 import com.weavers.duqhun.dao.CategoryDao;
 import com.weavers.duqhun.dao.ColorDao;
+import com.weavers.duqhun.dao.SizeGroupDao;
 import com.weavers.duqhun.dao.SizeeDao;
 import com.weavers.duqhun.domain.Category;
 import com.weavers.duqhun.domain.Color;
+import com.weavers.duqhun.domain.SizeGroup;
 import com.weavers.duqhun.domain.Sizee;
 import com.weavers.duqhun.dto.CategoryDto;
 import com.weavers.duqhun.dto.ColorAndSizeDto;
@@ -32,16 +34,20 @@ public class WebServiceImpl implements WebService {
     ColorDao colorDao;
     @Autowired
     CategoryDao categoryDao;
+    @Autowired
+    SizeGroupDao sizeGroupDao;
 
     @Override
     public ColorAndSizeDto getColorSizeList() {
         List<Sizee> sizees = sizeeDao.loadAll();
         List<Color> colors = colorDao.loadAll();
         List<Category> categorys = categoryDao.loadAll();
+        List<SizeGroup> sizeGroups = sizeGroupDao.loadAll();
         ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
         List<SizeDto> sizeDtos = new ArrayList<>();
         List<ColorDto> colorDtos = new ArrayList<>();
         List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<SizeDto> sizeGroupDtos = new ArrayList<>();
         for (Sizee sizee : sizees) {
             SizeDto SizeDto = new SizeDto();
             SizeDto.setSizeId(sizee.getId());
@@ -60,6 +66,13 @@ public class WebServiceImpl implements WebService {
             categoryDto.setCategoryName(category.getName());
             categoryDtos.add(categoryDto);
         }
+        for (SizeGroup sizeGroup : sizeGroups) {
+            SizeDto sizeGroupDto = new SizeDto();
+            sizeGroupDto.setSizeGroupId(sizeGroup.getId());
+            sizeGroupDto.setSizeText(sizeGroup.getName());
+            sizeGroupDtos.add(sizeGroupDto);
+        }
+        colorAndSizeDto.setSizeGroupDtos(sizeGroupDtos);
         colorAndSizeDto.setSizeDtos(sizeDtos);
         colorAndSizeDto.setColorDtos(colorDtos);
         colorAndSizeDto.setCategoryDtos(categoryDtos);

@@ -21,6 +21,7 @@
     <bean id="productImgDao" class="com.weavers.duqhun.dao.jpa.ProductImgDaoJpa" />
     <bean id="colorDao" class="com.weavers.duqhun.dao.jpa.ColorDaoJpa" />
     <bean id="sizeeDao" class="com.weavers.duqhun.dao.jpa.SizeeDaoJpa" />
+    <bean id="sizeGroup" class="com.weavers.duqhun.dao.jpa.SizeGroupDaoJpa" />
     
     <bean
         id="entityManagerFactory"

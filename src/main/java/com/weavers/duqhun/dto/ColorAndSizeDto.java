@@ -14,6 +14,7 @@ import java.util.List;
 public class ColorAndSizeDto {
 
     private List<SizeDto> sizeDtos;
+    private List<SizeDto> sizeGroupDtos;
     private List<ColorDto> colorDtos;
     private List<CategoryDto> categoryDtos;
 
@@ -57,5 +58,19 @@ public class ColorAndSizeDto {
      */
     public void setCategoryDtos(List<CategoryDto> categoryDtos) {
         this.categoryDtos = categoryDtos;
+    }
+
+    /**
+     * @return the sizeGroupDtos
+     */
+    public List<SizeDto> getSizeGroupDtos() {
+        return sizeGroupDtos;
+    }
+
+    /**
+     * @param sizeGroupDtos the sizeGroupDtos to set
+     */
+    public void setSizeGroupDtos(List<SizeDto> sizeGroupDtos) {
+        this.sizeGroupDtos = sizeGroupDtos;
     }
 }

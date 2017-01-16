@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @Table(name = "product_size_color_map")
-public class ProductSizeColorMap extends BaseDomain{
+public class ProductSizeColorMap extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -35,10 +35,6 @@ public class ProductSizeColorMap extends BaseDomain{
     private Long sizeId;
     @Column(name = "color_id")
     private Long colorId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "product_img_id")
-    private long productImgId;
     @Basic(optional = false)
     @NotNull
     @Column(name = "price")
@@ -73,14 +69,6 @@ public class ProductSizeColorMap extends BaseDomain{
 
     public void setColorId(Long colorId) {
         this.colorId = colorId;
-    }
-
-    public long getProductImgId() {
-        return productImgId;
-    }
-
-    public void setProductImgId(long productImgId) {
-        this.productImgId = productImgId;
     }
 
     public double getPrice() {

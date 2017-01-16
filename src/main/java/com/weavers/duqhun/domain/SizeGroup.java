@@ -17,34 +17,21 @@ import javax.validation.constraints.Size;
  * @author Android-3
  */
 @Entity
-@Table(name = "product_img")
-public class ProductImg extends BaseDomain {
+@Table(name = "size_group")
+public class SizeGroup extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "product_id")
-    private long productId;
-    @Basic(optional = false)
-    @NotNull
     @Size(min = 1, max = 255)
-    @Column(name = "img_url")
-    private String imgUrl;
+    @Column(name = "name")
+    private String name;
 
-    public long getProductId() {
-        return productId;
+    public String getName() {
+        return name;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setName(String name) {
+        this.name = name;
     }
-
-    public String getImgUrl() {
-        return imgUrl;
-    }
-
-    public void setImgUrl(String imgUrl) {
-        this.imgUrl = imgUrl;
-    }
-
 }

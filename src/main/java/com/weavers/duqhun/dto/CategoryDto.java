@@ -10,8 +10,10 @@ package com.weavers.duqhun.dto;
  * @author Android-3
  */
 public class CategoryDto {
+
     private Long categoryId;
     private String categoryName;
+    private Long patentId;
 
     /**
      * @return the categoryId
@@ -39,5 +41,19 @@ public class CategoryDto {
      */
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    /**
+     * @return the patentId
+     */
+    public Long getPatentId() {
+        return patentId;
+    }
+
+    /**
+     * @param patentId the patentId to set
+     */
+    public void setPatentId(Long patentId) {
+        this.patentId = patentId;
     }
 }
