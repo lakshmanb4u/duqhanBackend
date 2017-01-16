@@ -2,6 +2,14 @@
 -- version 4.5.1
 -- http://www.phpmyadmin.net
 --
+-- Host: 127.0.0.1
+-- Generation Time: Jan 16, 2017 at 01:26 PM
+-- Server version: 10.1.16-MariaDB
+-- PHP Version: 7.0.9
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 --
 -- Database: `duqhundb`
 --
@@ -14,9 +22,9 @@
 
 CREATE TABLE `cart` (
   `id` bigint(20) NOT NULL,
-  `user id` bigint(20) NOT NULL,
-  `load date` datetime NOT NULL,
-  `product id` bigint(20) NOT NULL
+  `user_id` bigint(32) NOT NULL,
+  `load_date` datetime NOT NULL,
+  `sizecolormap_id` bigint(32) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -56,14 +64,6 @@ CREATE TABLE `otp_table` (
   `otp` varchar(50) NOT NULL,
   `send_time` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `otp_table`
---
-
-INSERT INTO `otp_table` (`id`, `user_id`, `user_mail`, `otp`, `send_time`) VALUES
-(1, 4, 'next@gmail.com', '288493', '2017-01-04 20:43:55'),
-(2, 4, 'next@gmail.com', '913324', '2017-01-05 11:44:11');
 
 -- --------------------------------------------------------
 
@@ -153,6 +153,17 @@ CREATE TABLE `sizee` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `size_group`
+--
+
+CREATE TABLE `size_group` (
+  `id` bigint(32) NOT NULL,
+  `name` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -169,13 +180,6 @@ CREATE TABLE `users` (
   `fbid` bigint(32) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `users`
---
-
-INSERT INTO `users` (`id`, `name`, `mobile`, `email`, `gender`, `dob`, `reg_date`, `lastlogin_date`, `password`, `fbid`) VALUES
-(1, 'aa', '1234567890', 'abc@gmail.com', 'm', '2000-01-11', '2017-01-04 03:22:26', '2017-01-10 12:27:39', 'MTIz', NULL);
-
 -- --------------------------------------------------------
 
 --
@@ -189,13 +193,6 @@ CREATE TABLE `user_aouth` (
   `aouth_token` varchar(255) NOT NULL,
   `valid_till` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `user_aouth`
---
-
-INSERT INTO `user_aouth` (`id`, `user_id`, `email`, `aouth_token`, `valid_till`) VALUES
-(4, 1, 'abc@gmail.com', '003011484031459731', '2017-01-11 12:27:39');
 
 --
 -- Indexes for dumped tables
@@ -262,6 +259,12 @@ ALTER TABLE `sizee`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `size_group`
+--
+ALTER TABLE `size_group`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -286,32 +289,32 @@ ALTER TABLE `cart`
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `otp_table`
 --
 ALTER TABLE `otp_table`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
 ALTER TABLE `product_img`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `purchase_order`
 --
@@ -326,22 +329,19 @@ ALTER TABLE `recent_view`
 -- AUTO_INCREMENT for table `sizee`
 --
 ALTER TABLE `sizee`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+--
+-- AUTO_INCREMENT for table `size_group`
+--
+ALTER TABLE `size_group`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `user_aouth`
 --
 ALTER TABLE `user_aouth`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
-
-
-
-ALTER TABLE `cart` CHANGE `user id` `user_id` BIGINT(32) NOT NULL, CHANGE `load date` `load_date` DATETIME NOT NULL, CHANGE `product id` `product_id` BIGINT(32) NOT NULL;
-ALTER TABLE `cart` CHANGE `product_id` `sizecolormap_id` BIGINT(32) NOT NULL;
-
-ALTER TABLE `product_img` ADD `sizecolormap_id` BIGINT(32) NOT NULL AFTER `product_id`;
-ALTER TABLE `product_size_color_map` ADD `product_img_id` BIGINT(32) NOT NULL AFTER `color_id`;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
