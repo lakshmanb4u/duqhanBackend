@@ -67,21 +67,23 @@
 //                    console.log(index + ": " + $(this).text());
             });
             jsondata.sizeColorMaps = sizeColorMaps;
-//console.log("ttttttttttttttttttt"+JSON.stringify(jsondata));
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify(jsondata),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                url: that.attr("action"),
-                success: function (data) {
-                    location.reload(true);
-                    console.log(data);
-                },
-                complete: function () {
-                    return false; // required to block normal submit ajax used
-                }
-            });
+//            console.log("ttttttttttttttttttt" + JSON.stringify(jsondata));
+            if (sizeColorMaps.length > 0 && $('#categoryId').val() !== null && $('#categoryId').val() !== '') {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(jsondata),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: that.attr("action"),
+                    success: function (data) {
+                        location.reload(true);
+                        console.log(data);
+                    },
+                    complete: function () {
+                        return false; // required to block normal submit ajax used
+                    }
+                });
+            }
         });
 
 

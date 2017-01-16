@@ -191,6 +191,8 @@ public class ProductServiceImpl implements ProductService {
             Set<SizeDto> sizeDtos = new HashSet<>();
             Set<SizeDto> sizeDtos2 = new HashSet<>();
             Set<ColorDto> colorDtos = new HashSet<>();
+            HashMap<Long, Object> check = new HashMap<>();
+            HashMap<Long, Object> check1 = new HashMap<>();
             HashMap<Long, List<SizeColorMapDto>> mapSizeColorMapDto = new HashMap<>();
             Double orginalPrice = 0.0;
             Double salesPrice = 0.0;
@@ -201,7 +203,10 @@ public class ProductServiceImpl implements ProductService {
                     sizeDto.setSizeId(sizeColorMap.getSizeId());
                     sizeDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
                 }
-                sizeDtos.add(sizeDto);
+                if (!check.containsKey(sizeColorMap.getSizeId())) {
+                    sizeDtos.add(sizeDto);
+                    check.put(sizeColorMap.getSizeId(), null);
+                }
 
                 if (mapSizeColorMapDto.containsKey(sizeColorMap.getSizeId())) {
                     SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
@@ -249,7 +254,10 @@ public class ProductServiceImpl implements ProductService {
                     colorDto.setColorId(sizeColorMap.getColorId());
                     colorDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
                 }
-                colorDtos.add(colorDto);
+                if (!check1.containsKey(sizeColorMap.getColorId())) {
+                    colorDtos.add(colorDto);
+                    check1.put(sizeColorMap.getColorId(), null);
+                }
             }
             for (SizeDto sizeDto1 : sizeDtos) {
                 SizeDto sizeDto2 = new SizeDto();
