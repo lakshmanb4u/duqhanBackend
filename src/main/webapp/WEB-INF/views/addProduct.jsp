@@ -8,12 +8,6 @@
 <%--<%@ page session="true" %>--%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<!--<html>-->
-<!--    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Add New Product</title>
-    </head>
-    <body>-->
 <script type="text/javascript">
     $(document).ready(function () {
         $(".dropdown-menu li a").click(function () {
@@ -32,16 +26,6 @@
             $("#colorId").val($(this).prop('id'));
             $("#colorId").val($(this).attr('id'));
         });
-//        $("#add").click(function (e) {
-//            console.log('aaaaaaaaaaaaaaaaaaaaaaaaa');
-//            $("#items").append('<div><input name="price" type="text" /></div>');
-//        });
-//            $("body").on("click", ".delete", function (e) {
-//    $(this).parent("div").remove();
-//        });
-//        $('#priceid').change(function () {
-//            $('#firstname').val($(this).val());
-//        });
 
         $("#addProductId").submit(function (e) {
             var that = $(this);
@@ -82,18 +66,10 @@
                 }
             });
         });
-//        $('.btn btn-success active').click(function () {
-//            var Size = $('#sizeId').val();
-//            var Color = $('#colorId').val();
-//            var Price = $('#priceid').val();
-//            var Discount = $('#discountid').val();
-//            var Quantity = $('#quntid').val();
-//        });
 
         var itemCount = 0;
         $(document).ready(function () {
             var objs = [];
-            var temp_objs = [];
             $("#add").click(function () {
                 var html = "";
                 var obj = {
@@ -119,7 +95,23 @@
                 $("#quntid").val("");
                 $("#szbid").html("Size");
                 $("#clbid").html("Color");
-                
+
+            });
+        });
+        var itemCount = 0;
+        $(document).ready(function () {
+            var objs = [];
+            $("#addImg").click(function () {
+                var html = "";
+                var obj = {
+                    "ROW_ID": itemCount,
+                    "IMG_Size": $("#imgid").val()
+                }
+                objs.push(obj);
+                itemCount++;
+                html = "<tr id='tr" + itemCount + "'><td>" + obj['IMG_Size'] + " </td> </tr>";
+                $("#bill_table2").append(html)
+                $("#imgid").val("");
             });
         });
     });
@@ -166,9 +158,25 @@
                         </div>
                     </div>
                     <div class="form-group has-success has-feedback">
-                        <label class="col-sm-2 control-label" for="inputSuccess">Image url</label>
+                        <label class="col-sm-2 control-label" for="inputSuccess">Front Image</label>
                         <div class="col-sm-10">
+                            <input class="form-control" id="ImgFront" name="imgurl" type="text" placeholder="Front Image" required="">
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Image url</label>
+                        <div class="col-sm-8">
                             <input class="form-control" id="imgid" name="imgurl" type="text" placeholder="Image url" required="">
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="button" id="addImg" class="btn btn-success active">
+                                <span class="glyphicon glyphicon-plus"></span> Add Image
+                            </button>
+                        </div>
+                        <div class="col-sm-8" id="billing_items_div">
+                            <table class='table table-bordered text-center'  id='bill_table2' style="margin-left: 26%;
+                                   margin-top: 5%;"> 
+                            </table>
                         </div>
                     </div>
 
@@ -394,5 +402,4 @@
         </div>
     </div>
 </div>
-<!--    </body>
-</html>-->
+
