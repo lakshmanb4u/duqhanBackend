@@ -483,4 +483,9 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public Long getCartCountFoAUser(Long userId) {
+        return cartDao.getCartCountByUserId(userId);
+    }
+
 }

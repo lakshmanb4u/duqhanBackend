@@ -165,6 +165,7 @@ public class UserBean {
         this.authtoken = authtoken;
     }
     private String name;
+    private String profileImg;
     private String mobile;
     private String email;
     private String gender;
@@ -175,4 +176,34 @@ public class UserBean {
     private String authtoken;
     private String statusCode;
     private String status;
+    private Long cartCount;
+
+    /**
+     * @return the profileImg
+     */
+    public String getProfileImg() {
+        return profileImg;
+    }
+
+    /**
+     * @param profileImg the profileImg to set
+     */
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
+    }
+
+    /**
+     * @return the cartCount
+     */
+    public Long getCartCount() {
+        return cartCount;
+    }
+
+    /**
+     * @param cartCount the cartCount to set
+     */
+    public void setCartCount(Long cartCount) {
+        this.cartCount = cartCount;
+    }
+
 }

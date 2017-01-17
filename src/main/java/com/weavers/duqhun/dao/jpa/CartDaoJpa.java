@@ -41,4 +41,15 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
         }
     }
 
+    @Override
+    public Long getCartCountByUserId(Long userId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT COUNT(c) FROM Cart c WHERE c.userId=:userId");
+            query.setParameter("userId", userId);
+            return (Long) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return 0L;
+        }
+    }
+
 }

@@ -8,6 +8,7 @@ package com.weavers.duqhun.dao.jpa;
 import com.weavers.duqhun.dao.UserAouthDao;
 import com.weavers.duqhun.domain.UserAouth;
 import java.util.Date;
+import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
@@ -67,5 +68,12 @@ public class UserAouthDaoJpa extends BaseDaoJpa<UserAouth> implements UserAouthD
         } catch (NoResultException | NonUniqueResultException nre) {
             return null;
         }
+    }
+
+    @Override
+    public List<UserAouth> loadByUserId(Long userId) {
+        Query query = getEntityManager().createQuery("SELECT ut FROM UserAouth ut WHERE ut.userId=:userId");
+        query.setParameter("userId", userId);
+        return query.getResultList();
     }
 }

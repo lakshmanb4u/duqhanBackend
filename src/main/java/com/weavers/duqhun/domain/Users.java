@@ -55,6 +55,9 @@ public class Users extends BaseDomain {
     private String password;
     @Column(name = "fbid")
     private Long fbid;
+    @Size(max = 255)
+    @Column(name = "profile_img")
+    private String profileImg;
 
     public String getName() {
         return name;
@@ -126,5 +129,19 @@ public class Users extends BaseDomain {
 
     public void setFbid(Long fbid) {
         this.fbid = fbid;
+    }
+
+    /**
+     * @return the profileImg
+     */
+    public String getProfileImg() {
+        return profileImg;
+    }
+
+    /**
+     * @param profileImg the profileImg to set
+     */
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
     }
 }

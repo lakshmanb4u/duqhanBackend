@@ -18,4 +18,6 @@ public interface CartDao extends BaseDao<Cart> {
     List<ProductSizeColorMap> getProductSizeColorMapByUserId(Long userId);
 
     Cart loadByUserIdAndMapId(Long userId, Long mapId);
+    
+    Long getCartCountByUserId(Long userId);
 }

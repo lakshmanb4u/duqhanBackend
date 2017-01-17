@@ -6,18 +6,21 @@
 package com.weavers.duqhun.dao;
 
 import com.weavers.duqhun.domain.UserAouth;
+import java.util.List;
 
 /**
  *
  * @author Android-3
  */
-public interface UserAouthDao extends BaseDao<UserAouth>{
-    
+public interface UserAouthDao extends BaseDao<UserAouth> {
+
     UserAouth getTokenByMail(String mail);
-    
+
     UserAouth getTokenByMailAndUserId(String mail, Long userId);
-    
+
     UserAouth getTokenByEmailAndToken(String email, String token);
-    
+
     Long getUserIdByTokenIfValid(String token);
+
+    List<UserAouth> loadByUserId(Long userId);
 }

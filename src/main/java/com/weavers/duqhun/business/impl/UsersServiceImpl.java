@@ -8,6 +8,7 @@ package com.weavers.duqhun.business.impl;
 import com.weavers.duqhun.business.AouthService;
 import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.dao.OtpTableDao;
+import com.weavers.duqhun.dao.UserAouthDao;
 import com.weavers.duqhun.dao.UsersDao;
 import com.weavers.duqhun.domain.OtpTable;
 import com.weavers.duqhun.domain.Users;
@@ -15,6 +16,7 @@ import com.weavers.duqhun.dto.AouthBean;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.UserBean;
 import com.weavers.duqhun.util.Crypting;
+import com.weavers.duqhun.util.DateFormater;
 import com.weavers.duqhun.util.MailSender;
 import com.weavers.duqhun.util.RandomCodeGenerator;
 import java.util.Date;
@@ -193,6 +195,48 @@ public class UsersServiceImpl implements UsersService {
         } else {
             userBean.setStatusCode("500");
             userBean.setStatus("Server side exception");
+        }
+        return userBean;
+    }
+
+    @Override
+    public UserBean updateUserProfile(Users user, UserBean userBean1) {
+        UserBean userBean = new UserBean();
+        userBean.setStatusCode("403");
+        userBean.setStatus("Profile can not be update..");
+        if (userBean1.getEmail() != null) {
+            user.setDob(DateFormater.formateToDate(userBean1.getDob()));
+            user.setEmail(userBean1.getEmail());
+            user.setGender(userBean1.getGender());
+            user.setMobile(userBean1.getMobile());
+            user.setName(userBean1.getName());
+            Users users = usersDao.save(user);
+            if (users != null) {
+                aouthService.updateEmailByUserId(users.getId(), users.getEmail());
+                userBean.setDob(DateFormater.formate(users.getDob(), "dd/MM/yyyy"));
+                userBean.setEmail(users.getEmail());
+                userBean.setGender(users.getGender());
+                userBean.setMobile(users.getMobile());
+                userBean.setName(users.getName());
+                userBean.setProfileImg(users.getProfileImg());
+                userBean.setStatusCode("200");
+                userBean.setStatus("Profile update successfully");
+            }
+        }
+        return userBean;
+    }
+
+    @Override
+    public UserBean updateUserProfileImage(Users user, UserBean userBean1) {
+        UserBean userBean = new UserBean();
+        userBean.setStatusCode("403");
+        userBean.setStatus("Profile image can not be update..");
+        user.setProfileImg(userBean1.getProfileImg());
+        Users users = usersDao.save(user);
+        if (users != null) {
+            userBean.setProfileImg(users.getProfileImg());
+            userBean.setStatusCode("200");
+            userBean.setStatus("Profile image update successfully");
         }
         return userBean;
     }

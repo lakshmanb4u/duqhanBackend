@@ -14,6 +14,7 @@ import com.weavers.duqhun.dto.AouthBean;
 import com.weavers.duqhun.util.RandomCodeGenerator;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -82,6 +83,15 @@ public class AouthServiceImpl implements AouthService {
             return usersDao.loadById(userId);
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void updateEmailByUserId(Long userId, String newEmail) {
+        List<UserAouth> userAouths = userAouthDao.loadByUserId(userId);
+        for (UserAouth userAouth : userAouths) {
+            userAouth.setEmail(newEmail);
+            userAouthDao.save(userAouth);
         }
     }
 

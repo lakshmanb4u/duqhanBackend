@@ -25,20 +25,22 @@ public interface ProductService {
     ProductBeans getProductsByRecentView(Long userId);
 
     ProductBeans getAllProducts();
-    
+
     ProductDetailBean getProductDetailsById(Long productId);
-    
+
+    Long getCartCountFoAUser(Long userId);
+
     String addProductToCart(ProductRequistBean requistBean);
-    
+
     CartBean getCartFoAUser(Long userId);
-    
+
     String saveProduct(ProductBean productBean);
-    
+
     String saveCategory(CategoryDto categoryDto);
-    
+
     String saveSize(SizeDto sizeDto);
-    
+
     String saveSizeGroup(String sizeGroup);
-    
+
     String saveColor(String color);
 }
