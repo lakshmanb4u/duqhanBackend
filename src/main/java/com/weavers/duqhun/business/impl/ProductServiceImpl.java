@@ -301,10 +301,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public String removeProductFromCart(ProductRequistBean requistBean) {
+        String status = "failure";
+        Cart cart = cartDao.getCartByIdAndMapId(requistBean.getCartId(), requistBean.getMapId());
+        if (cart != null) {
+            cartDao.delete(cart);
+            status = "success";
+        }
+        return status;
+    }
+
+    @Override
     public CartBean getCartFoAUser(Long userId) {
         CartBean cartBean = new CartBean();
+        HashMap<Long, Cart> MapCart = new HashMap<>();
         List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);
         if (!sizeColorMaps.isEmpty()) {
+            List<Cart> carts = cartDao.getCartByUserId(userId);
+            for (Cart cart : carts) {
+                MapCart.put(cart.getSizecolormapId(), cart);
+            }
             List<Long> productIds = new ArrayList<>();
             List<Long> colorIds = new ArrayList<>();
             List<Long> sizeIds = new ArrayList<>();
@@ -362,6 +378,7 @@ public class ProductServiceImpl implements ProductService {
                 orderTotal = orderTotal + sizeColorMap.getDiscount();
                 productBean.setDiscountPCT(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
                 productBean.setAvailable(Long.valueOf(sizeColorMap.getQuentity()).intValue());
+                productBean.setCartId(MapCart.get(sizeColorMap.getId()).getId());
                 productBeans.add(productBean);
             }
             discountTotal = itemTotal - orderTotal;

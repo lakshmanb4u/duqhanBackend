@@ -31,6 +31,8 @@ public interface ProductService {
     Long getCartCountFoAUser(Long userId);
 
     String addProductToCart(ProductRequistBean requistBean);
+    
+    String removeProductFromCart(ProductRequistBean requistBean);
 
     CartBean getCartFoAUser(Long userId);
 

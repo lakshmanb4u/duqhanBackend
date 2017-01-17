@@ -52,4 +52,23 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
         }
     }
 
+    @Override
+    public List<Cart> getCartByUserId(Long userId) {
+        Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.userId=:userId");
+        query.setParameter("userId", userId);
+        return query.getResultList();
+    }
+
+    @Override
+    public Cart getCartByIdAndMapId(Long cartId, Long mapId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.id=:cartId AND c.sizecolormapId=:mapId");
+            query.setParameter("cartId", cartId);
+            query.setParameter("mapId", mapId);
+            return (Cart) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
 }

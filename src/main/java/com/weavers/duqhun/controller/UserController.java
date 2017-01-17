@@ -147,7 +147,7 @@ public class UserController {
     }
 
     @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)
-    public StatusBean getAddToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
         if (users != null) {
@@ -189,5 +189,20 @@ public class UserController {
             userBean.setStatus("Invalid Token.");
         }
         return userBean;
+    }
+    
+    @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)
+    public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatus(productService.removeProductFromCart(requistBean));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
     }
 }

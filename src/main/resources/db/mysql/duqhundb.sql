@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 16, 2017 at 01:26 PM
+-- Generation Time: Jan 17, 2017 at 12:14 PM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 7.0.9
 
@@ -177,7 +177,8 @@ CREATE TABLE `users` (
   `reg_date` datetime DEFAULT NULL,
   `lastlogin_date` datetime DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `fbid` bigint(32) DEFAULT NULL
+  `fbid` bigint(32) DEFAULT NULL,
+  `profile_img` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -284,7 +285,7 @@ ALTER TABLE `user_aouth`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `category`
 --
@@ -304,7 +305,7 @@ ALTER TABLE `otp_table`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
@@ -314,7 +315,7 @@ ALTER TABLE `product_img`
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `purchase_order`
 --

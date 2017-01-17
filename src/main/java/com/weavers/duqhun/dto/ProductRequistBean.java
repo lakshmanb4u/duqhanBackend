@@ -17,6 +17,7 @@ public class ProductRequistBean {
     private Boolean isRecent;
     private Long mapId;
     private Long quantity;
+    private Long cartId;
 
     /**
      * @return the productId
@@ -100,6 +101,20 @@ public class ProductRequistBean {
      */
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    /**
+     * @return the cartId
+     */
+    public Long getCartId() {
+        return cartId;
+    }
+
+    /**
+     * @param cartId the cartId to set
+     */
+    public void setCartId(Long cartId) {
+        this.cartId = cartId;
     }
 
 }

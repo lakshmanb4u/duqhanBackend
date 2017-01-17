@@ -59,6 +59,7 @@ public class ProductBean {
     private String color;
     private int available;
     private Long sizeColorMapId;
+    private Long cartId;
     private List<SizeColorMapDto> sizeColorMaps;
     private List<ImageDto> imageDtos;
 
@@ -298,6 +299,20 @@ public class ProductBean {
      */
     public void setSizeColorMapId(Long sizeColorMapId) {
         this.sizeColorMapId = sizeColorMapId;
+    }
+
+    /**
+     * @return the cartId
+     */
+    public Long getCartId() {
+        return cartId;
+    }
+
+    /**
+     * @param cartId the cartId to set
+     */
+    public void setCartId(Long cartId) {
+        this.cartId = cartId;
     }
 
 }
