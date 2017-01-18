@@ -32,13 +32,13 @@ public class AouthServiceImpl implements AouthService {
         String token = null;
         Calendar cal = Calendar.getInstance();
         if (userId != null) {
-            token = RandomCodeGenerator.getNumericCode(4) + userId + cal.getTimeInMillis();
+            token = RandomCodeGenerator.getNumericCode(4) + userId + cal.getTimeInMillis(); // generate new token
         }
         return token;
     }
 
     private Date nextUpdate() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(); // set token validity
         calendar.add(Calendar.DATE, 1);
         return calendar.getTime();
     }
@@ -48,11 +48,11 @@ public class AouthServiceImpl implements AouthService {
         AouthBean aouthBean = new AouthBean();
         UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
         String token = this.createToken(userId);
-        if (userAouth != null) {
+        if (userAouth != null) {    // for existing user update token
             userAouth.setAouthToken(token);
             userAouth.setValidTill(nextUpdate());
             userAouthDao.save(userAouth);
-        } else {
+        } else {                    // for new user create new token
             UserAouth userAouth2 = new UserAouth();
             userAouth2.setId(null);
             userAouth2.setEmail(email);
@@ -70,7 +70,7 @@ public class AouthServiceImpl implements AouthService {
         String status = "failure";
         UserAouth userAouth = userAouthDao.getTokenByEmailAndToken(email, token);
         if (userAouth != null) {
-            userAouthDao.delete(userAouth);
+            userAouthDao.delete(userAouth); // Token invalidated when user log out
             status = "success";
         }
         return status;
@@ -78,7 +78,7 @@ public class AouthServiceImpl implements AouthService {
 
     @Override
     public Users getUserByToken(String token) {
-        Long userId = userAouthDao.getUserIdByTokenIfValid(token);
+        Long userId = userAouthDao.getUserIdByTokenIfValid(token);  // Find user id by token.
         if (userId != null) {
             return usersDao.loadById(userId);
         } else {
@@ -91,7 +91,7 @@ public class AouthServiceImpl implements AouthService {
         List<UserAouth> userAouths = userAouthDao.loadByUserId(userId);
         for (UserAouth userAouth : userAouths) {
             userAouth.setEmail(newEmail);
-            userAouthDao.save(userAouth);
+            userAouthDao.save(userAouth);   // if user update email it will also change in auth table.
         }
     }
 

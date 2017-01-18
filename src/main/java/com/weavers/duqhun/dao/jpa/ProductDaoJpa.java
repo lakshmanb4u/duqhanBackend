@@ -41,7 +41,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
-    public List<Product> getAllAvailableProductByProductIds(List<Long> productIds) {
+    public List<Product> getAllAvailableProductByProductIds(List<Long> productIds) {    //get All Available Product from ProductIds.
         if (productIds.isEmpty()) {
             return new ArrayList<>();
         }

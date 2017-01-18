@@ -40,13 +40,13 @@ public class ProductSizeColorMapDaoJpa extends BaseDaoJpa<ProductSizeColorMap> i
             if (!objects.isEmpty()) {
                 Long c = 0l;
                 for (Object[] object : objects) {
-                    if (mapSizeColorMap.containsKey((Long) object[0])) {
+                    if (mapSizeColorMap.containsKey((Long) object[0])) {    // if map contains then update
                         if (mapSizeColorMap.get((Long) object[0]).getDiscount() > (Double) object[1]) {
                             mapSizeColorMap.get((Long) object[0]).setDiscount((Double) object[1]);
                             mapSizeColorMap.get((Long) object[0]).setPrice((Double) object[2]);
                             mapSizeColorMap.get((Long) object[0]).setQuentity(mapSizeColorMap.get((Long) object[0]).getQuentity() + (long) object[3]);
                         }
-                    } else {
+                    } else {    // else add new
                         ProductSizeColorMap productSizeColorMap = new ProductSizeColorMap();
                         productSizeColorMap.setProductId((Long) object[0]);
                         productSizeColorMap.setDiscount((Double) object[1]);
@@ -82,13 +82,13 @@ public class ProductSizeColorMapDaoJpa extends BaseDaoJpa<ProductSizeColorMap> i
             if (!objects.isEmpty()) {
                 Long c = 0l;
                 for (Object[] object : objects) {
-                    if (mapSizeColorMap.containsKey((Long) object[0])) {
+                    if (mapSizeColorMap.containsKey((Long) object[0])) {    // if map contains then update
                         if (mapSizeColorMap.get((Long) object[0]).getDiscount() > (Double) object[1]) {
                             mapSizeColorMap.get((Long) object[0]).setDiscount((Double) object[1]);
                             mapSizeColorMap.get((Long) object[0]).setPrice((Double) object[2]);
                             mapSizeColorMap.get((Long) object[0]).setQuentity(mapSizeColorMap.get((Long) object[0]).getQuentity() + (long) object[3]);
                         }
-                    } else {
+                    } else {    // else add new
                         ProductSizeColorMap productSizeColorMap = new ProductSizeColorMap();
                         productSizeColorMap.setProductId((Long) object[0]);
                         productSizeColorMap.setDiscount((Double) object[1]);

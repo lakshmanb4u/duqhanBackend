@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * @author Weavers-web
  */
 @Controller
-@RequestMapping("/web/**")
+@RequestMapping("/web/**")  // for web view only 
 public class WebController {
 
     @Autowired
@@ -33,14 +33,14 @@ public class WebController {
     @Autowired
     ProductService productService;
 
-    @RequestMapping(value = "/add-product", method = RequestMethod.GET)
+    @RequestMapping(value = "/add-product", method = RequestMethod.GET) // open main view page
     public String addProduct(ModelMap modelMap) {
         ColorAndSizeDto colorAndSizeDto = webService.getColorSizeList();
         modelMap.addAttribute("sizeAndColor", colorAndSizeDto);
         return "addProduct";
     }
 
-    @RequestMapping(value = "/save-product", method = RequestMethod.POST)
+    @RequestMapping(value = "/save-product", method = RequestMethod.POST)   // save a new product.
     @ResponseBody
     public StatusBean addingContest(@RequestBody ProductBean productBean) {
         StatusBean response = new StatusBean();
@@ -48,7 +48,7 @@ public class WebController {
         return response;
     }
 
-    @RequestMapping(value = "/save-category", method = RequestMethod.POST)
+    @RequestMapping(value = "/save-category", method = RequestMethod.POST)  // save a new category
     @ResponseBody
     public StatusBean saveCategory(@RequestBody CategoryDto categoryDto) {
         StatusBean response = new StatusBean();
@@ -56,7 +56,7 @@ public class WebController {
         return response;
     }
 
-    @RequestMapping(value = "/save-size", method = RequestMethod.POST)
+    @RequestMapping(value = "/save-size", method = RequestMethod.POST)  // save new size
     @ResponseBody
     public StatusBean saveSize(@RequestBody SizeDto sizeDto) {
         StatusBean response = new StatusBean();
@@ -64,7 +64,7 @@ public class WebController {
         return response;
     }
 
-    @RequestMapping(value = "/save-sizegroup", method = RequestMethod.POST)
+    @RequestMapping(value = "/save-sizegroup", method = RequestMethod.POST) // save new sizegroup
     @ResponseBody
     public StatusBean saveSizeGroup(@RequestBody String sizeGroop) {
         StatusBean response = new StatusBean();
@@ -72,7 +72,7 @@ public class WebController {
         return response;
     }
 
-    @RequestMapping(value = "/save-color", method = RequestMethod.POST)
+    @RequestMapping(value = "/save-color", method = RequestMethod.POST) // save new color
     @ResponseBody
     public StatusBean saveColor(@RequestBody String color) {
         StatusBean response = new StatusBean();

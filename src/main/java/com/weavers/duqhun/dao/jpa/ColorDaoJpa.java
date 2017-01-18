@@ -22,7 +22,7 @@ public class ColorDaoJpa extends BaseDaoJpa<Color> implements ColorDao {
     }
 
     @Override
-    public List<Color> loadByIds(List<Long> colorIds) {
+    public List<Color> loadByIds(List<Long> colorIds) { // load colors by color ids
         if (colorIds.isEmpty()) {
             return new ArrayList<>();
         }

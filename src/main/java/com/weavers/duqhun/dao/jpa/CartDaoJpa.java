@@ -26,7 +26,7 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
     public List<ProductSizeColorMap> getProductSizeColorMapByUserId(Long userId) {
         Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap map, Cart c WHERE c.sizecolormapId=map.id AND c.userId=:userId");
         query.setParameter("userId", userId);
-        return query.getResultList();
+        return query.getResultList();   // get productSizeColorMap for User
     }
 
     @Override
@@ -35,7 +35,7 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
             Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.sizecolormapId=:sizecolormapId AND c.userId=:userId");
             query.setParameter("userId", userId);
             query.setParameter("sizecolormapId", sizecolormapId);
-            return (Cart) query.getSingleResult();
+            return (Cart) query.getSingleResult();  // // get cart for User by mapid
         } catch (NoResultException nre) {
             return null;
         }
@@ -44,7 +44,7 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
     @Override
     public Long getCartCountByUserId(Long userId) {
         try {
-            Query query = getEntityManager().createQuery("SELECT COUNT(c) FROM Cart c WHERE c.userId=:userId");
+            Query query = getEntityManager().createQuery("SELECT COUNT(c) FROM Cart c WHERE c.userId=:userId"); // numner of products in a cart of a user
             query.setParameter("userId", userId);
             return (Long) query.getSingleResult();
         } catch (NoResultException nre) {
@@ -54,13 +54,13 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
 
     @Override
     public List<Cart> getCartByUserId(Long userId) {
-        Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.userId=:userId");
+        Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.userId=:userId");    // all product of a cart for user 
         query.setParameter("userId", userId);
         return query.getResultList();
     }
 
     @Override
-    public Cart getCartByIdAndMapId(Long cartId, Long mapId) {
+    public Cart getCartByIdAndMapId(Long cartId, Long mapId) {  //return cart for a purticular product.
         try {
             Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.id=:cartId AND c.sizecolormapId=:mapId");
             query.setParameter("cartId", cartId);

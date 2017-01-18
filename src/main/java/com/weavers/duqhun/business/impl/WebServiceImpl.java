@@ -38,7 +38,7 @@ public class WebServiceImpl implements WebService {
     SizeGroupDao sizeGroupDao;
 
     @Override
-    public ColorAndSizeDto getColorSizeList() {
+    public ColorAndSizeDto getColorSizeList() { // get color size category from database on add produc page load.
         List<Sizee> sizees = sizeeDao.loadAll();
         List<Color> colors = colorDao.loadAll();
         List<Category> categorys = categoryDao.loadAll();
@@ -48,25 +48,25 @@ public class WebServiceImpl implements WebService {
         List<ColorDto> colorDtos = new ArrayList<>();
         List<CategoryDto> categoryDtos = new ArrayList<>();
         List<SizeDto> sizeGroupDtos = new ArrayList<>();
-        for (Sizee sizee : sizees) {
+        for (Sizee sizee : sizees) {    //=============get size.
             SizeDto SizeDto = new SizeDto();
             SizeDto.setSizeId(sizee.getId());
             SizeDto.setSizeText(sizee.getValu());
             sizeDtos.add(SizeDto);
         }
-        for (Color color : colors) {
+        for (Color color : colors) {    //=============get colors.
             ColorDto ColorDto = new ColorDto();
             ColorDto.setColorId(color.getId());
             ColorDto.setColorText(color.getName());
             colorDtos.add(ColorDto);
         }
-        for (Category category : categorys) {
+        for (Category category : categorys) {   //=============get category.
             CategoryDto categoryDto = new CategoryDto();
             categoryDto.setCategoryId(category.getId());
             categoryDto.setCategoryName(category.getName());
             categoryDtos.add(categoryDto);
         }
-        for (SizeGroup sizeGroup : sizeGroups) {
+        for (SizeGroup sizeGroup : sizeGroups) {    //=============get size groups.
             SizeDto sizeGroupDto = new SizeDto();
             sizeGroupDto.setSizeGroupId(sizeGroup.getId());
             sizeGroupDto.setSizeText(sizeGroup.getName());

@@ -42,18 +42,18 @@ public class UserController {
     @Autowired
     AouthService aouthService;
 
-    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
         StatusBean statusBean = new StatusBean();
-        loginBean.setAuthtoken(request.getHeader("X-Auth-Token"));
+        loginBean.setAuthtoken(request.getHeader("X-Auth-Token"));  // Check whether Auth-Token is valid, provided by user
         statusBean.setStatus(usersService.userLogout(loginBean));
         return statusBean;
     }
 
-    @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)
+    @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getProfileDetails(HttpServletResponse response, HttpServletRequest request) {
         UserBean userBean = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean.setDob(DateFormater.formate(users.getDob(), "dd-MMM-yyyy"));
             userBean.setEmail(users.getEmail());
@@ -71,10 +71,10 @@ public class UserController {
         return userBean;
     }
 
-    @RequestMapping(value = "/update-profile-details", method = RequestMethod.POST)
+    @RequestMapping(value = "/update-profile-details", method = RequestMethod.POST) // Update user profile.
     public UserBean updateProfileDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
         UserBean userBean1 = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean1 = usersService.updateUserProfile(users, userBean);
         } else {
@@ -84,11 +84,11 @@ public class UserController {
         }
         return userBean1;
     }
-    
-    @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)
+
+    @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
     public UserBean updateProfileImage(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
         UserBean userBean1 = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean1 = usersService.updateUserProfileImage(users, userBean);
         } else {
@@ -99,9 +99,9 @@ public class UserController {
         return userBean1;
     }
 
-    @RequestMapping(value = "/get-product", method = RequestMethod.POST)
+    @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
             Long categoryId = null;
@@ -115,13 +115,13 @@ public class UserController {
             }
 
             if (categoryId != null && !isRecent) {
-                //by category id
+                //**********by category id***************//
                 productBeans = productService.getProductsByCategory(categoryId);
             } else if (categoryId == null && isRecent) {
-                //recent viewed
+                //**********recent viewed****************//
                 productBeans = productService.getProductsByRecentView(users.getId());
             } else if (categoryId == null && !isRecent) {
-                //all
+                //******************all******************//
                 productBeans = productService.getAllProducts();
             }
         } else {
@@ -132,9 +132,9 @@ public class UserController {
         return productBeans;
     }
 
-    @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST)
+    @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
     public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductDetailBean productDetailBean = new ProductDetailBean();
         if (users != null) {
             productDetailBean = productService.getProductDetailsById(requistBean.getProductId());
@@ -146,10 +146,10 @@ public class UserController {
         return productDetailBean;
     }
 
-    @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)
+    @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.
     public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             requistBean.setUserId(users.getId());
             statusBean.setStatus(productService.addProductToCart(requistBean));
@@ -161,10 +161,10 @@ public class UserController {
         return statusBean;
     }
 
-    @RequestMapping(value = "/cart", method = RequestMethod.POST)
+    @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
     public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
         CartBean cartBean = new CartBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             cartBean = productService.getCartFoAUser(users.getId());
         } else {
@@ -175,10 +175,10 @@ public class UserController {
         return cartBean;
     }
 
-    @RequestMapping(value = "/get-cart-count", method = RequestMethod.POST)
+    @RequestMapping(value = "/get-cart-count", method = RequestMethod.POST) // number of item added in cart by user.
     public UserBean getCartCount(HttpServletResponse response, HttpServletRequest request) {
         UserBean userBean = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean.setCartCount(productService.getCartCountFoAUser(users.getId()));
             userBean.setStatusCode("200");
@@ -190,11 +190,11 @@ public class UserController {
         }
         return userBean;
     }
-    
-    @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)
+
+    @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)   // product remove from cart.
     public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             requistBean.setUserId(users.getId());
             statusBean.setStatus(productService.removeProductFromCart(requistBean));

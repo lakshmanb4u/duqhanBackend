@@ -32,35 +32,35 @@ public class HomeController {
         return "OK....";
     }
 
-    @RequestMapping(value = "/signup", method = RequestMethod.POST)
+    @RequestMapping(value = "/signup", method = RequestMethod.POST) // User registration by email id.
     public UserBean signup(HttpServletResponse response, @RequestBody LoginBean loginBean) {
         UserBean userBean = usersService.userRegistration(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
 
-    @RequestMapping(value = "/fb-login", method = RequestMethod.POST)
+    @RequestMapping(value = "/fb-login", method = RequestMethod.POST)   // login by FaceBook old user as well as new user. Auth-Token generate.
     public UserBean fbLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
         UserBean userBean = usersService.fbUserLogin(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
     public UserBean login(HttpServletResponse response, @RequestBody LoginBean loginBean) {
         UserBean userBean = usersService.userLogin(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
 
-    @RequestMapping(value = "/request-password-reset", method = RequestMethod.POST)
+    @RequestMapping(value = "/request-password-reset", method = RequestMethod.POST) // Password reset request send a 6 digits OPT to user's register email 
     public UserBean passwordResetRequest(HttpServletResponse response, @RequestBody String email) {
         UserBean userBean = usersService.passwordResetRequest(email);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
 
-    @RequestMapping(value = "/confirm-password_reset", method = RequestMethod.POST)
+    @RequestMapping(value = "/confirm-password_reset", method = RequestMethod.POST) // Password will change if user provide correct OPT which was send to their mail
     public UserBean passwordReset(HttpServletResponse response, @RequestBody LoginBean loginBean) {
         UserBean userBean = usersService.passwordReset(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));

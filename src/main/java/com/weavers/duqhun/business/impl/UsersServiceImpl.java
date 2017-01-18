@@ -8,7 +8,6 @@ package com.weavers.duqhun.business.impl;
 import com.weavers.duqhun.business.AouthService;
 import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.dao.OtpTableDao;
-import com.weavers.duqhun.dao.UserAouthDao;
 import com.weavers.duqhun.dao.UsersDao;
 import com.weavers.duqhun.domain.OtpTable;
 import com.weavers.duqhun.domain.Users;
@@ -46,7 +45,6 @@ public class UsersServiceImpl implements UsersService {
     public Users getAllUser() {
         Users userses = usersDao.loadById(1l);
         System.out.println("ddd" + userses.getEmail());
-//List<Users> userses= null;
         return userses;
     }
 
@@ -58,14 +56,14 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatusCode("403");
             userBean.setStatus("A user has already signed up with the supplied email");
         } else {
-            String pass = Crypting.encrypt(loginBean.getPassword());
+            String pass = Crypting.encrypt(loginBean.getPassword());    // password encription
             Users user2 = new Users();
             user2.setId(null);
             user2.setName(loginBean.getName());
             user2.setPassword(pass);
             user2.setEmail(loginBean.getEmail());
             user2.setRegDate(new Date());
-            Users saveUser = usersDao.save(user2);
+            Users saveUser = usersDao.save(user2);  // new user registration.
             if (saveUser != null) {
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
@@ -83,7 +81,7 @@ public class UsersServiceImpl implements UsersService {
     public UserBean fbUserLogin(LoginBean loginBean) {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
         UserBean userBean = new UserBean();
-        if (user != null) {
+        if (user != null) { // if user already exist
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
             userBean.setStatusCode("200");
@@ -93,7 +91,7 @@ public class UsersServiceImpl implements UsersService {
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
-        } else {
+        } else { // if user not exist
             Users user2 = new Users();
             Date newDate = new Date();
             user2.setId(null);
@@ -102,9 +100,9 @@ public class UsersServiceImpl implements UsersService {
             user2.setRegDate(newDate);
             user2.setLastloginDate(newDate);
             user2.setFbid(loginBean.getFbid());
-            Users saveUser = usersDao.save(user2);
+            Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
-                AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());
+                AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
                 userBean.setAuthtoken(aouthBean.getAouthToken());
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
@@ -130,7 +128,7 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
             Users user2 = usersDao.save(user);
-            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
+            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             userBean.setAuthtoken(aouthBean.getAouthToken());
         } else {
             userBean.setStatusCode("403");
@@ -142,7 +140,7 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public String userLogout(LoginBean loginBean) {
         String status;
-        status = aouthService.invalidatedToken(loginBean.getEmail(), loginBean.getAuthtoken());
+        status = aouthService.invalidatedToken(loginBean.getEmail(), loginBean.getAuthtoken()); // token invalidated
         return status;
     }
 
@@ -151,7 +149,7 @@ public class UsersServiceImpl implements UsersService {
         Users user = usersDao.loadByEmail(email);
         UserBean userBean = new UserBean();
         if (user != null) {
-            String otp = RandomCodeGenerator.getNumericCode(6);
+            String otp = RandomCodeGenerator.getNumericCode(6); // generate OTP
             String status = MailSender.sendEmail(user.getEmail(), "OTP For Password Resset", "Your OTP is:  " + otp, "");// send mail to user with otp.
             if (status.equals("success")) { // if mail send...
                 OtpTable otpTable = new OtpTable();
@@ -181,7 +179,7 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         if (user != null) {
             OtpTable otpTable = otpTableDao.getValidOtp(user.getId(), loginBean.getEmail(), loginBean.getResetCode());
-            if (otpTable != null) {
+            if (otpTable != null) { // check OTP
                 String pass = Crypting.encrypt(loginBean.getNewPassword());
                 user.setPassword(pass);
                 usersDao.save(user);
@@ -204,14 +202,14 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         userBean.setStatusCode("403");
         userBean.setStatus("Profile can not be update..");
-        if (userBean1.getEmail() != null) {
+        if (userBean1.getEmail() != null) { // whether user present with that email or not. 
             user.setDob(DateFormater.formateToDate(userBean1.getDob()));
             user.setEmail(userBean1.getEmail());
             user.setGender(userBean1.getGender());
             user.setMobile(userBean1.getMobile());
             user.setName(userBean1.getName());
             Users users = usersDao.save(user);
-            if (users != null) {
+            if (users != null) {    // change email in auth table
                 aouthService.updateEmailByUserId(users.getId(), users.getEmail());
                 userBean.setDob(DateFormater.formate(users.getDob(), "dd/MM/yyyy"));
                 userBean.setEmail(users.getEmail());
@@ -232,7 +230,7 @@ public class UsersServiceImpl implements UsersService {
         userBean.setStatusCode("403");
         userBean.setStatus("Profile image can not be update..");
         user.setProfileImg(userBean1.getProfileImg());
-        Users users = usersDao.save(user);
+        Users users = usersDao.save(user);  // update user profile image.
         if (users != null) {
             userBean.setProfileImg(users.getProfileImg());
             userBean.setStatusCode("200");

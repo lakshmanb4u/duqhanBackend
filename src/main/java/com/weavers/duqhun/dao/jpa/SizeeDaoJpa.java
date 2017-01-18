@@ -22,7 +22,7 @@ public class SizeeDaoJpa extends BaseDaoJpa<Sizee> implements SizeeDao {
     }
 
     @Override
-    public List<Sizee> loadByIds(List<Long> sizeeIds) {
+    public List<Sizee> loadByIds(List<Long> sizeeIds) { // load size by ids
         if (sizeeIds.isEmpty()) {
             return new ArrayList<>();
         }

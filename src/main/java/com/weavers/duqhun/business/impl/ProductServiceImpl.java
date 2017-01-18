@@ -91,10 +91,10 @@ public class ProductServiceImpl implements ProductService {
                 bean.setCategoryId(product.getCategoryId());
                 bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
                 bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
-                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {
+                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {     // if this product have any size
                     bean.setSize(mapSize.get(mapSizeColorMap.get(product.getId()).getSizeId()).getValu());
                 }
-                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {
+                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {    // if this product have any color
                     bean.setColor(mapColor.get(mapSizeColorMap.get(product.getId()).getColorId()).getName());
                 }
                 bean.setPrice(mapSizeColorMap.get(product.getId()).getPrice());
@@ -102,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
                 bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
                 Long qunty = mapSizeColorMap.get(product.getId()).getQuentity();
                 bean.setAvailable(qunty.intValue());
-                i = i + qunty.intValue();
+                i = i + qunty.intValue();   // count total product
                 beans.add(bean);
             }
         }
@@ -115,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
         Double discountPct = 0.00;
         Double less = original - discounted;
         if (original != null && discounted != null && less > 0.00) {
-            discountPct = original / less;
+            discountPct = original / less;  // calculate discount percentage
         }
         DecimalFormat df = new DecimalFormat("#.00");
         discountPct = Double.parseDouble(df.format(discountPct));
@@ -124,7 +124,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans getProductsByCategory(Long categoryId) {
-        List<Product> products = productDao.getProductsByCategory(categoryId);
+        List<Product> products = productDao.getProductsByCategory(categoryId);  // Find category wise product 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -135,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans getProductsByRecentView(Long userId) {
-        List<Product> products = productDao.getAllRecentViewProduct(userId);
+        List<Product> products = productDao.getAllRecentViewProduct(userId);    // Find recent view product 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -146,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans getAllProducts() {
-        List<Product> products = productDao.getAllAvailableProduct();
+        List<Product> products = productDao.getAllAvailableProduct();   // Find all products 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -292,7 +292,7 @@ public class ProductServiceImpl implements ProductService {
             cart.setLoadDate(new Date());
             cart.setSizecolormapId(requistBean.getMapId());
             cart.setUserId(requistBean.getUserId());
-            Cart cart1 = cartDao.save(cart);
+            Cart cart1 = cartDao.save(cart);    // add product to cart.
             if (cart1 != null) {
                 status = "success";
             }
@@ -305,7 +305,7 @@ public class ProductServiceImpl implements ProductService {
         String status = "failure";
         Cart cart = cartDao.getCartByIdAndMapId(requistBean.getCartId(), requistBean.getMapId());
         if (cart != null) {
-            cartDao.delete(cart);
+            cartDao.delete(cart);   //remove product from cart.
             status = "success";
         }
         return status;
@@ -315,7 +315,7 @@ public class ProductServiceImpl implements ProductService {
     public CartBean getCartFoAUser(Long userId) {
         CartBean cartBean = new CartBean();
         HashMap<Long, Cart> MapCart = new HashMap<>();
-        List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);
+        List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);   // Load user cart
         if (!sizeColorMaps.isEmpty()) {
             List<Cart> carts = cartDao.getCartByUserId(userId);
             for (Cart cart : carts) {
@@ -357,7 +357,7 @@ public class ProductServiceImpl implements ProductService {
             double orderTotal = 0.0;        //1500
             double discountTotal = 0.0;     //500
             double discountPctTotal = 0.0;  //25
-
+            //=====================ready product bean====================//
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 ProductBean productBean = new ProductBean();
                 productBean.setSizeColorMapId(sizeColorMap.getId());
@@ -382,7 +382,7 @@ public class ProductServiceImpl implements ProductService {
                 productBeans.add(productBean);
             }
             discountTotal = itemTotal - orderTotal;
-            discountPctTotal = this.getPercentage(itemTotal, orderTotal);
+            discountPctTotal = this.getPercentage(itemTotal, orderTotal);   // calcute discount percentage.
             cartBean.setProducts(productBeans);
             cartBean.setItemTotal(itemTotal);
             cartBean.setOrderTotal(orderTotal);
@@ -407,7 +407,7 @@ public class ProductServiceImpl implements ProductService {
             product.setLastUpdate(new Date());
             Product product1 = productDao.save(product);
             if (product1 != null) {
-                //====ProductSizeColorMap(can be multi..not implemented yet)=====//working....
+                //====multiple ProductSizeColorMap added=======//
                 List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
                 if (!sizeColorMapDtos.isEmpty()) {
                     for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
@@ -419,12 +419,11 @@ public class ProductServiceImpl implements ProductService {
                         sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
                         sizeColorMap.setQuentity(sizeColorMapDto.getCount());
                         sizeColorMap.setProductId(product1.getId());
-//                sizeColorMap.setProductImgId(0);////********************************************discerd
                         ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
                     }
                 }
 
-                //========color table(can be multi..not implemented yet)=====//working....
+                //===========multiple image add==========//
                 List<ImageDto> imageDtos = productBean.getImageDtos();
                 if (!imageDtos.isEmpty()) {
                     for (ImageDto imageDto : imageDtos) {
@@ -432,7 +431,6 @@ public class ProductServiceImpl implements ProductService {
                         productImg.setId(null);
                         productImg.setImgUrl(imageDto.getImgUrl());
                         productImg.setProductId(product1.getId());
-//                productImg.setSizecolormapId(sizeColorMap1.getId());
                         productImgDao.save(productImg);
                     }
                     status = "Product saved.";
@@ -450,7 +448,7 @@ public class ProductServiceImpl implements ProductService {
             category.setId(null);
             category.setName(categoryDto.getCategoryName());
             category.setParentId(categoryDto.getPatentId());
-            Category category2 = categoryDao.save(category);
+            Category category2 = categoryDao.save(category);    //save new category
             if (category2 != null) {
                 status = "Category saved.";
             }
@@ -465,7 +463,7 @@ public class ProductServiceImpl implements ProductService {
         sizee.setGroupId(sizeDto.getSizeGroupId());
         sizee.setValu(sizeDto.getSizeText());
         sizee.setUnit(sizeDto.getSizeText());
-        Sizee sizee1 = sizeeDao.save(sizee);
+        Sizee sizee1 = sizeeDao.save(sizee);    //save new size
         if (sizee1 != null) {
             return "ERROR: Size can not be saved!!";
         } else {
@@ -478,7 +476,7 @@ public class ProductServiceImpl implements ProductService {
         SizeGroup sizeGroup = new SizeGroup();
         sizeGroup.setId(null);
         sizeGroup.setName(sizeGroupName);
-        SizeGroup sizeGroup1 = sizeGroupDao.save(sizeGroup);
+        SizeGroup sizeGroup1 = sizeGroupDao.save(sizeGroup);    //save new size group
         if (sizeGroup1 != null) {
             return "ERROR: SizeGroup can not be saved!!";
         } else {
@@ -492,7 +490,7 @@ public class ProductServiceImpl implements ProductService {
         color1.setId(null);
         color1.setName(color);
         color1.setCode(color);
-        Color color2 = colorDao.save(color1);
+        Color color2 = colorDao.save(color1);   //save new color
         if (color2 != null) {
             return "ERROR: Color can not be saved!!";
         } else {
@@ -502,7 +500,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Long getCartCountFoAUser(Long userId) {
-        return cartDao.getCartCountByUserId(userId);
+        return cartDao.getCartCountByUserId(userId);    //number of item in cart fo a user.
     }
 
 }

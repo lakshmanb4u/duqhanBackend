@@ -23,7 +23,7 @@ public class OtpTableDaoJpa extends BaseDaoJpa<OtpTable> implements OtpTableDao 
     }
 
     @Override
-    public boolean isValidOtp(Long userId, String email, String otp) {
+    public boolean isValidOtp(Long userId, String email, String otp) {  // return true if OTP is valide else return false.
         try {
             Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.otp=:otp AND otp.userMail=:email AND otp.userId=:userId AND otp.sendTime>:time");
             query.setParameter("email", email);
@@ -41,7 +41,7 @@ public class OtpTableDaoJpa extends BaseDaoJpa<OtpTable> implements OtpTableDao 
     }
 
     @Override
-    public OtpTable getValidOtp(Long userId, String email, String otp) {
+    public OtpTable getValidOtp(Long userId, String email, String otp) {    // return OTP if it is valide
         try {
             Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.otp=:otp AND otp.userMail=:email AND otp.userId=:userId AND otp.sendTime>:time");
             query.setParameter("email", email);
