@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="duqhun-db" transaction-type="RESOURCE_LOCAL">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <!--    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
+      <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+      <property name="hibernate.connection.username" value="${jdbc.username}"/>
+      <property name="hibernate.connection.password" value="${jdbc.password}"/>
+      <property name="hibernate.connection.url" value="${jdbc.url}"/>
+      <property name="hibernate.hbm2ddl.auto" value="create-update"/>
+      <property name="hibernate.ejb.autodetection" value="class"/>
+    </properties>-->
+    <!--<class>in.cloudlabz.tradengain.domain.Test</class>-->
+    <class>com.weavers.duqhun.domain.Users</class>
+    <class>com.weavers.duqhun.domain.Kart</class>
+    <class>com.weavers.duqhun.domain.ProductImg</class>
+    <class>com.weavers.duqhun.domain.Product</class>
+    <class>com.weavers.duqhun.domain.RecentView</class>
+    <class>com.weavers.duqhun.domain.Store</class>
+    <class>com.weavers.duqhun.domain.PurchaseOrder</class>
+    <class>com.weavers.duqhun.domain.Color</class>
+    <class>com.weavers.duqhun.domain.ProductSizeColorMap</class>
+    <class>com.weavers.duqhun.domain.Category</class>
+    <class>com.weavers.duqhun.domain.OtpTable</class>
+    <class>com.weavers.duqhun.domain.Sizee</class>
+    <class>com.weavers.duqhun.domain.Cart</class>
+    <class>com.weavers.duqhun.domain.SizeGroup</class>
+  </persistence-unit>
+</persistence>
