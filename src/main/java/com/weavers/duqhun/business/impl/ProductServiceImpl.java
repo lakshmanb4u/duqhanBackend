@@ -21,6 +21,7 @@ import com.weavers.duqhun.domain.Color;
 import com.weavers.duqhun.domain.Product;
 import com.weavers.duqhun.domain.ProductImg;
 import com.weavers.duqhun.domain.ProductSizeColorMap;
+import com.weavers.duqhun.domain.RecentView;
 import com.weavers.duqhun.domain.SizeGroup;
 import com.weavers.duqhun.domain.Sizee;
 import com.weavers.duqhun.dto.CartBean;
@@ -33,6 +34,7 @@ import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
 import com.weavers.duqhun.dto.SizeColorMapDto;
 import com.weavers.duqhun.dto.SizeDto;
+import com.weavers.duqhun.util.FileUploader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
+        List<String> allImages = new ArrayList<>();
         List<ProductBean> beans = new ArrayList<>();
         List<Sizee> sizees = sizeeDao.loadAll();
         HashMap<Long, Sizee> mapSize = new HashMap<>();
@@ -87,6 +90,7 @@ public class ProductServiceImpl implements ProductService {
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
                 bean.setImgurl(product.getImgurl());
+                allImages.add(product.getImgurl());
                 bean.setDescription(product.getDescription());
                 bean.setCategoryId(product.getCategoryId());
                 bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
@@ -108,6 +112,7 @@ public class ProductServiceImpl implements ProductService {
         }
         productBeans.setTotalProducts(i);
         productBeans.setProducts(beans);
+        productBeans.setAllImages(allImages);
         return productBeans;
     }
 
@@ -156,7 +161,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailBean getProductDetailsById(Long productId) {
+    public ProductDetailBean getProductDetailsById(Long productId, Long userId) {
         ProductDetailBean productDetailBean = new ProductDetailBean();
         Product product = productDao.loadById(productId);
         if (product != null) {
@@ -274,6 +279,13 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setArrival("Not set yet..");
             productDetailBean.setShippingCost(null);
             productDetailBean.setRelatedProducts(new ProductBeans());
+
+            RecentView recentView = new RecentView();
+            recentView.setId(null);
+            recentView.setProductId(product.getId());
+            recentView.setUserId(userId);
+            recentView.setViewDate(new Date());
+            recentViewDao.save(recentView);
         } else {
             productDetailBean.setStatus("No Product Found");
         }
@@ -360,6 +372,7 @@ public class ProductServiceImpl implements ProductService {
             //=====================ready product bean====================//
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 ProductBean productBean = new ProductBean();
+                productBean.setQty("1");
                 productBean.setSizeColorMapId(sizeColorMap.getId());
                 productBean.setProductId(sizeColorMap.getProductId());
                 productBean.setName(MapProduct.get(sizeColorMap.getProductId()).getName());
@@ -501,6 +514,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Long getCartCountFoAUser(Long userId) {
         return cartDao.getCartCountByUserId(userId);    //number of item in cart fo a user.
+    }
+
+    @Override
+    public String saveProductImage(ProductBean productBean) {
+        return FileUploader.uploadImage(productBean.getFrontImage()).getUrl();
     }
 
 }

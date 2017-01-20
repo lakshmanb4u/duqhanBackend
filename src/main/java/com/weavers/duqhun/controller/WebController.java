@@ -15,6 +15,7 @@ import com.weavers.duqhun.dto.StatusBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -42,7 +43,7 @@ public class WebController {
 
     @RequestMapping(value = "/save-product", method = RequestMethod.POST)   // save a new product.
     @ResponseBody
-    public StatusBean addingContest(@RequestBody ProductBean productBean) {
+    public StatusBean addingProduct(@RequestBody ProductBean productBean) {
         StatusBean response = new StatusBean();
         response.setStatus(productService.saveProduct(productBean));
         return response;
@@ -80,4 +81,12 @@ public class WebController {
         return response;
     }
 
+    @RequestMapping(value = "/save-product-image", method = RequestMethod.POST)   // save product image.
+    @ResponseBody
+    public StatusBean addingProductImage(@ModelAttribute("productBean") ProductBean productBean) {
+        StatusBean response = new StatusBean();
+        response.setStatus("failure");
+        response.setStatus(productService.saveProductImage(productBean));
+        return response;
+    }
 }

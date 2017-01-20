@@ -7,6 +7,7 @@ package com.weavers.duqhun.dto;
 
 import java.util.Date;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -62,6 +63,8 @@ public class ProductBean {
     private Long cartId;
     private List<SizeColorMapDto> sizeColorMaps;
     private List<ImageDto> imageDtos;
+    private MultipartFile frontImage;
+    private String qty;
 
     /**
      * @return the productId
@@ -313,6 +316,34 @@ public class ProductBean {
      */
     public void setCartId(Long cartId) {
         this.cartId = cartId;
+    }
+
+    /**
+     * @return the frontImage
+     */
+    public MultipartFile getFrontImage() {
+        return frontImage;
+    }
+
+    /**
+     * @param frontImage the frontImage to set
+     */
+    public void setFrontImage(MultipartFile frontImage) {
+        this.frontImage = frontImage;
+    }
+
+    /**
+     * @return the qty
+     */
+    public String getQty() {
+        return qty;
+    }
+
+    /**
+     * @param qty the quantity to set
+     */
+    public void setQty(String qty) {
+        this.qty = qty;
     }
 
 }

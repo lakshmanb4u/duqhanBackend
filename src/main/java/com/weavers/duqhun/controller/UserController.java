@@ -137,7 +137,7 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductDetailBean productDetailBean = new ProductDetailBean();
         if (users != null) {
-            productDetailBean = productService.getProductDetailsById(requistBean.getProductId());
+            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users.getId());
         } else {
             response.setStatus(401);
             productDetailBean.setStatusCode("401");

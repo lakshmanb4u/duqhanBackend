@@ -17,6 +17,7 @@ public class ProductBeans {
     private int totalProducts;
     private String statusCode;
     private String status;
+    private List<String> allImages;
 
     /**
      * @return the statusCode
@@ -72,5 +73,19 @@ public class ProductBeans {
      */
     public void setTotalProducts(int totalProducts) {
         this.totalProducts = totalProducts;
+    }
+
+    /**
+     * @return the allImages
+     */
+    public List<String> getAllImages() {
+        return allImages;
+    }
+
+    /**
+     * @param allImages the allImages to set
+     */
+    public void setAllImages(List<String> allImages) {
+        this.allImages = allImages;
     }
 }

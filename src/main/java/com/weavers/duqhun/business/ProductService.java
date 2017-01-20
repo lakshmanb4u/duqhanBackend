@@ -26,7 +26,7 @@ public interface ProductService {
 
     ProductBeans getAllProducts();
 
-    ProductDetailBean getProductDetailsById(Long productId);
+    ProductDetailBean getProductDetailsById(Long productId, Long userId);
 
     Long getCartCountFoAUser(Long userId);
 
@@ -37,6 +37,8 @@ public interface ProductService {
     CartBean getCartFoAUser(Long userId);
 
     String saveProduct(ProductBean productBean);
+    
+    String saveProductImage(ProductBean productBean);
 
     String saveCategory(CategoryDto categoryDto);
 
