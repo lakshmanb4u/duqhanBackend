@@ -5,9 +5,14 @@
  */
 package com.weavers.duqhun.controller;
 
+import com.weavers.duqhun.business.ProductService;
 import com.weavers.duqhun.business.UsersService;
+import com.weavers.duqhun.dto.CategoryDto;
+import com.weavers.duqhun.dto.CategorysBean;
 import com.weavers.duqhun.dto.LoginBean;
+import com.weavers.duqhun.dto.ProductRequistBean;
 import com.weavers.duqhun.dto.UserBean;
+import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,6 +31,8 @@ public class HomeController {
 
     @Autowired
     UsersService usersService;
+    @Autowired
+    ProductService productService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home() {
@@ -65,5 +72,12 @@ public class HomeController {
         UserBean userBean = usersService.passwordReset(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
+    }
+
+    @RequestMapping(value = "/get-child-categoty", method = RequestMethod.POST) // get child category
+    public CategorysBean getChildCategoty(@RequestBody ProductRequistBean requistBean) {
+        CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
+//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        return categorysBean;
     }
 }

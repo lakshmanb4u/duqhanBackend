@@ -6,11 +6,13 @@
 package com.weavers.duqhun.dao;
 
 import com.weavers.duqhun.domain.Category;
+import java.util.List;
 
 /**
  *
  * @author Android-3
  */
-public interface CategoryDao extends BaseDao<Category>{
-    
+public interface CategoryDao extends BaseDao<Category> {
+
+    List<Category> getChildByParentId(Long parentId);
 }

@@ -26,6 +26,7 @@ import com.weavers.duqhun.domain.SizeGroup;
 import com.weavers.duqhun.domain.Sizee;
 import com.weavers.duqhun.dto.CartBean;
 import com.weavers.duqhun.dto.CategoryDto;
+import com.weavers.duqhun.dto.CategorysBean;
 import com.weavers.duqhun.dto.ColorDto;
 import com.weavers.duqhun.dto.ImageDto;
 import com.weavers.duqhun.dto.ProductBean;
@@ -519,6 +520,33 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String saveProductImage(ProductBean productBean) {
         return FileUploader.uploadImage(productBean.getFrontImage()).getUrl();
+    }
+
+    @Override
+    public CategorysBean getChildById(Long parentId) {
+        CategorysBean categorysBean = new CategorysBean();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<Category> categorys = categoryDao.getChildByParentId(parentId);
+        if (categorys.isEmpty()) {
+            categorysBean.setStatus("No child category found");
+        } else {
+            for (Category category : categorys) {
+                CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setCategoryId(category.getId());
+                categoryDto.setCategoryName(category.getName());
+                categoryDtos.add(categoryDto);
+            }
+            categorysBean.setCategoryDtos(categoryDtos);
+            categorysBean.setChildCount(categoryDtos.size());
+            List<Product> products = productDao.getProductsByCategory(parentId);
+            categorysBean.setProductCount(0);
+            if (!products.isEmpty()) {
+                categorysBean.setProductCount(products.size());
+            }
+            categorysBean.setStatus("success");
+            categorysBean.setStatusCode("200");
+        }
+        return categorysBean;
     }
 
 }
