@@ -9,7 +9,6 @@ import javax.persistence.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Created by Netbeans: 3Idiots Date: Sept 18, 2013 Time: 1:20:49 PM
  * Base domain class for all domain classes
  * @param <T>
  */

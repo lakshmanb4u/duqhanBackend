@@ -18,6 +18,7 @@ public class ProductBeans {
     private String statusCode;
     private String status;
     private List<String> allImages;
+    private String categoryName;
 
     /**
      * @return the statusCode
@@ -87,5 +88,19 @@ public class ProductBeans {
      */
     public void setAllImages(List<String> allImages) {
         this.allImages = allImages;
+    }
+
+    /**
+     * @return the categoryName
+     */
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    /**
+     * @param categoryName the categoryName to set
+     */
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 }

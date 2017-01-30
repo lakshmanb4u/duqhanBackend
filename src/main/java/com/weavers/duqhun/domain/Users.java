@@ -58,6 +58,9 @@ public class Users extends BaseDomain {
     @Size(max = 255)
     @Column(name = "profile_img")
     private String profileImg;
+    @Size(min = 1, max = 255)
+    @Column(name = "fcm_token")
+    private String fcmToken;
 
     public String getName() {
         return name;
@@ -143,5 +146,13 @@ public class Users extends BaseDomain {
      */
     public void setProfileImg(String profileImg) {
         this.profileImg = profileImg;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

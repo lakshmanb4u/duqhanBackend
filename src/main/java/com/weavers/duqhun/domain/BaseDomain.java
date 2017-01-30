@@ -9,7 +9,7 @@ import javax.persistence.Basic;
 import javax.persistence.Column;
 
 /**
- * User: Anirban De Date: May 22, 2014 Time: 11:20:49 AM Base domain class for
+ * Base domain class for
  * all domain classes
  */
 @MappedSuperclass

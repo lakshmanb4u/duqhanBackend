@@ -26,5 +26,8 @@
     <class>com.weavers.duqhun.domain.Sizee</class>
     <class>com.weavers.duqhun.domain.Cart</class>
     <class>com.weavers.duqhun.domain.SizeGroup</class>
+    <class>com.weavers.duqhun.domain.PaymentDetail</class>
+    <class>com.weavers.duqhun.domain.OrderDetails</class>
+    <class>com.weavers.duqhun.domain.UserAddress</class>
   </persistence-unit>
 </persistence>

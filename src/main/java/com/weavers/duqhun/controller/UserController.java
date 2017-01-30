@@ -6,11 +6,15 @@
 package com.weavers.duqhun.controller;
 
 import com.weavers.duqhun.business.AouthService;
+import com.weavers.duqhun.business.PaymentService;
 import com.weavers.duqhun.business.ProductService;
 import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.domain.Users;
+import com.weavers.duqhun.dto.AddressBean;
+import com.weavers.duqhun.dto.AddressDto;
 import com.weavers.duqhun.dto.CartBean;
 import com.weavers.duqhun.dto.LoginBean;
+import com.weavers.duqhun.dto.OrderDetailsBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -41,6 +46,8 @@ public class UserController {
     ProductService productService;
     @Autowired
     AouthService aouthService;
+    @Autowired
+    PaymentService paymentService;
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
@@ -204,5 +211,124 @@ public class UserController {
             statusBean.setStatus("Invalid Token.");
         }
         return statusBean;
+    }
+
+    @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
+    public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        StatusBean statusBean = new StatusBean();
+        String[] stringStr = new String[2];
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            cartBean.setUserId(users.getId());
+            stringStr = paymentService.transactionRequest(request, response, cartBean);
+            statusBean.setStatusCode(stringStr[1]); // pay key
+            statusBean.setStatus(stringStr[0]); // Paypal url
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+
+    @RequestMapping(value = "/check-payment-status", method = RequestMethod.POST)   // .
+    public StatusBean checkPaymentStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatusCode("200");
+            statusBean.setStatus(paymentService.getPaymentStatus(users.getId(), requistBean.getName()));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+
+    @RequestMapping(value = "/get-addresses", method = RequestMethod.POST)   // get Addresses.
+    public AddressBean getUserAddresses(HttpServletResponse response, HttpServletRequest request) {
+        AddressBean addressBean = new AddressBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            addressBean = usersService.getUserActiveAddresses(users.getId());
+        } else {
+            response.setStatus(401);
+            addressBean.setStatusCode("401");
+            addressBean.setStatus("Invalid Token.");
+        }
+        return addressBean;
+    }
+
+    @RequestMapping(value = "/save-address", method = RequestMethod.POST)   // saveUserAddress
+    public AddressBean saveOrUpdateUserAddress(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        AddressBean addressBean = new AddressBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            address.setUserId(users.getId());
+            addressBean = usersService.saveUserAddress(address);
+        } else {
+            response.setStatus(401);
+            addressBean.setStatusCode("401");
+            addressBean.setStatus("Invalid Token.");
+        }
+        return addressBean;
+    }
+
+    @RequestMapping(value = "/set-default-addresses", method = RequestMethod.POST)   // setUserAddressesAsDefault
+    public AddressBean setDefaultAddresses(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        AddressBean addressBean = new AddressBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            addressBean = usersService.setUserAddressesAsDefault(users.getId(), address.getAddressId());
+        } else {
+            response.setStatus(401);
+            addressBean.setStatusCode("401");
+            addressBean.setStatus("Invalid Token.");
+        }
+        return addressBean;
+    }
+    
+    @RequestMapping(value = "/get-default-addresses", method = RequestMethod.POST)   // get default Address
+    public AddressBean getDefaultAddresses(HttpServletResponse response, HttpServletRequest request) {
+        AddressBean addressBean = new AddressBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            addressBean = usersService.getUserDefaultAddress(users.getId());
+        } else {
+            response.setStatus(401);
+            addressBean.setStatusCode("401");
+            addressBean.setStatus("Invalid Token.");
+        }
+        return addressBean;
+    }
+
+    @RequestMapping(value = "/deactivate-address", method = RequestMethod.POST)   // deactivateAddress
+    public AddressBean deactivateAddress(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        AddressBean addressBean = new AddressBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            addressBean = usersService.deactivateUserAddress(users.getId(), address.getAddressId());
+        } else {
+            response.setStatus(401);
+            addressBean.setStatusCode("401");
+            addressBean.setStatus("Invalid Token.");
+        }
+        return addressBean;
+    }
+    
+    @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // deactivateAddress
+    public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request) {
+        OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            orderDetailsBean = productService.getOrderDetails(users.getId());
+        } else {
+            response.setStatus(401);
+            orderDetailsBean.setStatusCode("401");
+            orderDetailsBean.setStatus("Invalid Token.");
+        }
+        return orderDetailsBean;
     }
 }

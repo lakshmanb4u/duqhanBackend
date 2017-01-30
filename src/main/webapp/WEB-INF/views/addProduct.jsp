@@ -65,6 +65,7 @@
                     if (jdata.status !== "failure") {
                         if ($("#ImgFront").val() === "") {
                             $("#ImgFront").val(jdata.status);
+                            $("#ImgFront").prop('disabled',true);
                             $("#fileId").val("");
                         } else {
                             addImageTable(jdata.status);
@@ -198,11 +199,11 @@
             e.preventDefault();
             var jsondata = {};
             var color = $('#addcolorId').val();
-            jsondata.addcolor = $('#addcolorId').val();
+            jsondata.name = $('#addcolorId').val();
             if (color !== '' && color !== null) {
                 $.ajax({
                     type: "POST",
-                    data: color,
+                    data: JSON.stringify(jsondata),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: that.attr("action"),
@@ -225,11 +226,11 @@
             e.preventDefault();
             var jsondata = {};
             var sizeGroop = $('#AddSizeGroupId').val();
-            jsondata.addsize = $('#AddSizeGroupId').val();
+            jsondata.name = $('#AddSizeGroupId').val();
             if (sizeGroop !== '' && sizeGroop !== null) {
                 $.ajax({
                     type: "POST",
-                    data: sizeGroop,
+                    data: JSON.stringify(jsondata),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: that.attr("action"),
@@ -310,6 +311,7 @@
         html = "<tr id='tr" + itemCount + "' class='subimg'><td>" + obj['IMG_Size'] + " </td> </tr>";
         $("#bill_table2").append(html);
         $("#imgid").val("");
+        $("#fileId").val("");
     }
 
     $body = $("body");

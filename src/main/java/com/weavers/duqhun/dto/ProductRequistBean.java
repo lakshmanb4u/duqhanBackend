@@ -18,6 +18,7 @@ public class ProductRequistBean {
     private Long mapId;
     private Long quantity;
     private Long cartId;
+    private String name;
 
     /**
      * @return the productId
@@ -115,6 +116,20 @@ public class ProductRequistBean {
      */
     public void setCartId(Long cartId) {
         this.cartId = cartId;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

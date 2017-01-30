@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 17, 2017 at 12:14 PM
+-- Generation Time: Jan 24, 2017 at 11:25 AM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 7.0.9
 
@@ -54,6 +54,23 @@ CREATE TABLE `color` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `order_details`
+--
+
+CREATE TABLE `order_details` (
+  `id` bigint(32) NOT NULL,
+  `user_id` bigint(32) NOT NULL,
+  `payment_key` varchar(50) NOT NULL,
+  `map_id` bigint(32) NOT NULL,
+  `payment_amount` double NOT NULL,
+  `order_date` datetime NOT NULL,
+  `status` varchar(50) NOT NULL,
+  `quentity` bigint(32) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `otp_table`
 --
 
@@ -63,6 +80,25 @@ CREATE TABLE `otp_table` (
   `user_mail` varchar(255) NOT NULL,
   `otp` varchar(50) NOT NULL,
   `send_time` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_detail`
+--
+
+CREATE TABLE `payment_detail` (
+  `id` bigint(32) NOT NULL,
+  `user_id` bigint(32) NOT NULL,
+  `payment_key` varchar(50) NOT NULL,
+  `payer_id` varchar(50) DEFAULT NULL,
+  `pay_amount` double NOT NULL,
+  `payment_type` varchar(20) NOT NULL,
+  `payment_date` date NOT NULL,
+  `payment_status` varchar(10) NOT NULL,
+  `payment_account` varchar(255) DEFAULT NULL,
+  `access_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -218,9 +254,21 @@ ALTER TABLE `color`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `order_details`
+--
+ALTER TABLE `order_details`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `otp_table`
 --
 ALTER TABLE `otp_table`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `payment_detail`
+--
+ALTER TABLE `payment_detail`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -285,7 +333,7 @@ ALTER TABLE `user_aouth`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `category`
 --
@@ -295,27 +343,37 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT for table `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+--
+-- AUTO_INCREMENT for table `order_details`
+--
+ALTER TABLE `order_details`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- AUTO_INCREMENT for table `otp_table`
 --
 ALTER TABLE `otp_table`
   MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `payment_detail`
+--
+ALTER TABLE `payment_detail`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+--
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
 ALTER TABLE `product_img`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT for table `purchase_order`
 --
@@ -325,7 +383,7 @@ ALTER TABLE `purchase_order`
 -- AUTO_INCREMENT for table `recent_view`
 --
 ALTER TABLE `recent_view`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `sizee`
 --
@@ -335,7 +393,7 @@ ALTER TABLE `sizee`
 -- AUTO_INCREMENT for table `size_group`
 --
 ALTER TABLE `size_group`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 --
 -- AUTO_INCREMENT for table `users`
 --

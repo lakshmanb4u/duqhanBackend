@@ -21,7 +21,10 @@
     <bean id="productImgDao" class="com.weavers.duqhun.dao.jpa.ProductImgDaoJpa" />
     <bean id="colorDao" class="com.weavers.duqhun.dao.jpa.ColorDaoJpa" />
     <bean id="sizeeDao" class="com.weavers.duqhun.dao.jpa.SizeeDaoJpa" />
-    <bean id="sizeGroup" class="com.weavers.duqhun.dao.jpa.SizeGroupDaoJpa" />
+    <bean id="sizeGroupDao" class="com.weavers.duqhun.dao.jpa.SizeGroupDaoJpa" />
+    <bean id="paymentDetailDao" class="com.weavers.duqhun.dao.jpa.PaymentDetailDaoJpa" />
+    <bean id="orderDetailsDao" class="com.weavers.duqhun.dao.jpa.OrderDetailsDaoJpa" />
+    <bean id="userAddressDao" class="com.weavers.duqhun.dao.jpa.UserAddressDaoJpa" />
     
     <bean
         id="entityManagerFactory"
@@ -54,15 +57,15 @@
         
         <!-- Local Configuration -->
     
-                <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
+<!--        <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
         <property name="username" value="root" />
-        <property name="password" value="" />
+        <property name="password" value="" />-->
     
         <!-- Server Configuration -->
         
-<!--        <property name="url" value="jdbc:mysql://aanxvc9ums2nm5.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhundb" />
+                <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
-        <property name="password" value="wgJncDU2M-=vMkEU" />-->
+        <property name="password" value="wgJncDU2M-=vMkEU" />
         
     </bean>
 

@@ -23,11 +23,10 @@ public class RestApiHitter {
     //------------------JSON Read By Using Java Dependency (org.json) (net.sf.json-lib)----------------------//http://www.jsonschema2pojo.org/
     public static void readJsonFromUrl() throws IOException, JSONException {
         JSONObject JsonData = new JSONObject();
-
         JsonData.put("MID", "DIY12386817555501617");
         JsonData.put("TOKEN", "bKMfNxPPf_QdZppa");
 
-        InputStream is = new URL("https://pguat.paytm.com/oltp/HANDLER_INTERNAL/checkBalance?JsonData=:" + JsonData).openStream();
+        InputStream is = new URL("https://fcm.googleapis.com/fcm/send?JsonData=:" + JsonData).openStream();
         Object obj;
         try {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
@@ -48,4 +47,5 @@ public class RestApiHitter {
     public static void main(String[] args) throws IOException {
         RestApiHitter.readJsonFromUrl();
     }
+
 }

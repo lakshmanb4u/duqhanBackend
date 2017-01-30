@@ -6,6 +6,8 @@
 package com.weavers.duqhun.business;
 
 import com.weavers.duqhun.domain.Users;
+import com.weavers.duqhun.dto.AddressBean;
+import com.weavers.duqhun.dto.AddressDto;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.UserBean;
 
@@ -30,7 +32,17 @@ public interface UsersService {
     UserBean passwordReset(LoginBean loginBean);
 
     UserBean updateUserProfile(Users users, UserBean userBean);
-    
+
     UserBean updateUserProfileImage(Users users, UserBean userBean);
+
+    AddressBean saveUserAddress(AddressDto addressDto);
+
+    AddressBean getUserActiveAddresses(Long userId);
     
+    AddressBean getUserDefaultAddress(Long userId);
+
+    AddressBean setUserAddressesAsDefault(Long userId, Long addressId);
+
+    AddressBean deactivateUserAddress(Long userId, Long addressId);
+
 }

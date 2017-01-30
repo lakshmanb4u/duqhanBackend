@@ -8,9 +8,13 @@ package com.weavers.duqhun.business.impl;
 import com.weavers.duqhun.business.AouthService;
 import com.weavers.duqhun.business.UsersService;
 import com.weavers.duqhun.dao.OtpTableDao;
+import com.weavers.duqhun.dao.UserAddressDao;
 import com.weavers.duqhun.dao.UsersDao;
 import com.weavers.duqhun.domain.OtpTable;
+import com.weavers.duqhun.domain.UserAddress;
 import com.weavers.duqhun.domain.Users;
+import com.weavers.duqhun.dto.AddressBean;
+import com.weavers.duqhun.dto.AddressDto;
 import com.weavers.duqhun.dto.AouthBean;
 import com.weavers.duqhun.dto.LoginBean;
 import com.weavers.duqhun.dto.UserBean;
@@ -18,7 +22,9 @@ import com.weavers.duqhun.util.Crypting;
 import com.weavers.duqhun.util.DateFormater;
 import com.weavers.duqhun.util.MailSender;
 import com.weavers.duqhun.util.RandomCodeGenerator;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class UsersServiceImpl implements UsersService {
@@ -31,6 +37,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     AouthService aouthService;
+
+    @Autowired
+    UserAddressDao userAddressDao;
 
     private UserBean setUserBean(Users users) {
         UserBean userBean = new UserBean();
@@ -88,6 +97,7 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
             user.setFbid(loginBean.getFbid());
+            user.setFcmToken(loginBean.getFcmToken());
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
@@ -100,6 +110,7 @@ public class UsersServiceImpl implements UsersService {
             user2.setRegDate(newDate);
             user2.setLastloginDate(newDate);
             user2.setFbid(loginBean.getFbid());
+            user2.setFcmToken(loginBean.getFcmToken());
             Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
                 AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
@@ -127,6 +138,7 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
+            user.setFcmToken(loginBean.getFcmToken());
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             userBean.setAuthtoken(aouthBean.getAouthToken());
@@ -238,4 +250,188 @@ public class UsersServiceImpl implements UsersService {
         }
         return userBean;
     }
+//===========================================Address moduses start========================================//
+// <editor-fold defaultstate="collapsed" desc="Address moduses">
+// <editor-fold defaultstate="collapsed" desc="setAddressDto">
+
+    private AddressDto setAddressDto(UserAddress userAddress) {
+        AddressDto addressDto = new AddressDto();
+        if (userAddress != null) {
+            addressDto.setAddressId(userAddress.getId());
+            addressDto.setCity(userAddress.getCity());
+            addressDto.setCompanyName(userAddress.getCompanyName());
+            addressDto.setContactName(userAddress.getContactName());
+            addressDto.setCountry(userAddress.getCountry());
+            addressDto.setEmail(userAddress.getEmail());
+            addressDto.setIsResidential(userAddress.getResidential());
+            addressDto.setPhone(userAddress.getPhone());
+            addressDto.setState(userAddress.getState());
+            addressDto.setStatus(userAddress.getStatus());
+            addressDto.setStreetOne(userAddress.getStreetOne());
+            addressDto.setStreetTwo(userAddress.getStreetTwo());
+            addressDto.setUserId(userAddress.getUserId());
+            addressDto.setZipCode(userAddress.getZipCode());
+        }
+        return addressDto;
+    }
+// </editor-fold>
+
+    @Override
+    public AddressBean saveUserAddress(AddressDto address) {
+        AddressBean addressBean = new AddressBean();
+        List<AddressDto> addressDtos = new ArrayList<>();
+        UserAddress userAddress2;
+        if (address.getAddressId() != null) {
+            UserAddress userAddress = userAddressDao.getAddressByIdAndUserId(address.getUserId(), address.getAddressId());
+            if (userAddress != null) {
+                userAddress.setCity(address.getCity());
+                userAddress.setCompanyName(address.getCompanyName());
+                userAddress.setContactName(address.getContactName());
+                userAddress.setCountry(address.getCountry());
+                userAddress.setEmail(address.getEmail());
+                userAddress.setPhone(address.getPhone());
+                userAddress.setResidential(address.getIsResidential());
+                userAddress.setState(address.getState());
+                userAddress.setStatus(2l);
+                userAddress.setStreetOne(address.getStreetOne());
+                userAddress.setStreetTwo(address.getStreetTwo());
+                userAddress.setUserId(address.getUserId());
+                userAddress.setZipCode(address.getZipCode());
+                try {
+                    userAddress2 = userAddressDao.save(userAddress);
+                    addressDtos.add(this.setAddressDto(userAddress2));
+                    if (address.getStatus() != null && address.getStatus().equals(1L)) {
+                        return this.setUserAddressesAsDefault(userAddress2.getUserId(), userAddress2.getId());
+                    }
+                    addressBean.setAddresses(addressDtos);
+                    addressBean.setStatus("Success address update");
+                    addressBean.setStatusCode("200");
+                    return addressBean;
+                } catch (Exception e) {
+                    addressBean.setAddresses(null);
+                    addressBean.setStatus("Address can not be update.");
+                    addressBean.setStatusCode("500");
+                    return addressBean;
+                }
+            } else {
+                addressBean.setAddresses(null);
+                addressBean.setStatus("Address can not be update...null");
+                addressBean.setStatusCode("500");
+                return addressBean;
+            }
+        } else {
+            UserAddress userAddress = new UserAddress();
+            userAddress.setId(null);
+            userAddress.setCity(address.getCity());
+            userAddress.setCompanyName(address.getCompanyName());
+            userAddress.setContactName(address.getContactName());
+            userAddress.setCountry(address.getCountry());
+            userAddress.setEmail(address.getEmail());
+            userAddress.setPhone(address.getPhone());
+            userAddress.setResidential(address.getIsResidential());
+            userAddress.setState(address.getState());
+            userAddress.setStatus(2l);
+            userAddress.setStreetOne(address.getStreetOne());
+            userAddress.setStreetTwo(address.getStreetTwo());
+            userAddress.setUserId(address.getUserId());
+            userAddress.setZipCode(address.getZipCode());
+            try {
+                userAddress2 = userAddressDao.save(userAddress);
+                if (address.getStatus() != null && address.getStatus().equals(1L)) {
+                    return this.setUserAddressesAsDefault(userAddress2.getUserId(), userAddress2.getId());
+                }
+                addressDtos.add(this.setAddressDto(userAddress2));
+                addressBean.setAddresses(addressDtos);
+                addressBean.setStatus("Success.. address saved");
+                addressBean.setStatusCode("200");
+                return addressBean;
+            } catch (Exception e) {
+                addressBean.setAddresses(null);
+                addressBean.setStatus("Address can not be saved.");
+                addressBean.setStatusCode("500");
+                return addressBean;
+            }
+        }
+    }
+
+    @Override
+    public AddressBean getUserActiveAddresses(Long userId) {
+        AddressBean addressBean = new AddressBean();
+        List<AddressDto> addressDtos = new ArrayList<>();
+        List<UserAddress> userAddresses = userAddressDao.getActiveAddressByUserId(userId);
+        for (UserAddress userAddress : userAddresses) {
+            addressDtos.add(this.setAddressDto(userAddress));
+        }
+        addressBean.setAddresses(addressDtos);
+        addressBean.setStatus("Success");
+        addressBean.setStatusCode("200");
+        return addressBean;
+    }
+
+    @Override
+    public AddressBean setUserAddressesAsDefault(Long userId, Long addressId) {
+        AddressBean addressBean = new AddressBean();
+        List<AddressDto> addressDtos = new ArrayList<>();
+        List<UserAddress> userAddresses = userAddressDao.getActiveAddressByUserId(userId);
+        for (UserAddress userAddress : userAddresses) {
+            if (!userAddress.getId().equals(addressId) && userAddress.getStatus() == 1L) {
+                userAddress.setStatus(2L);
+                userAddressDao.save(userAddress);
+            }
+            if (userAddress.getId().equals(addressId)) {
+                userAddress.setStatus(1L);
+                UserAddress userAddress2 = userAddressDao.save(userAddress);
+                addressDtos.add(this.setAddressDto(userAddress2));
+            }
+        }
+        addressBean.setAddresses(addressDtos);
+        addressBean.setStatus("Success");
+        addressBean.setStatusCode("200");
+        return addressBean;
+    }
+
+    @Override
+    public AddressBean deactivateUserAddress(Long userId, Long addressId) {
+        UserAddress userAddress = userAddressDao.getAddressByIdAndUserId(userId, addressId);
+        AddressBean addressBean = new AddressBean();
+        List<AddressDto> addressDtos = new ArrayList<>();
+        if (userAddress != null) {
+            userAddress.setStatus(0L);
+            try {
+                UserAddress userAddress2 = userAddressDao.save(userAddress);
+                addressDtos.add(this.setAddressDto(userAddress2));
+                addressBean.setAddresses(addressDtos);
+                addressBean.setStatus("Success");
+                addressBean.setStatusCode("200");
+                return addressBean;
+            } catch (Exception e) {
+                addressBean.setAddresses(null);
+                addressBean.setStatus("Address can not be deactivate.");
+                addressBean.setStatusCode("500");
+                return addressBean;
+            }
+        }
+        addressBean.setAddresses(null);
+        addressBean.setStatus("No address found");
+        addressBean.setStatusCode("500");
+        return addressBean;
+    }
+
+    @Override
+    public AddressBean getUserDefaultAddress(Long userId) {
+        AddressBean addressBean = new AddressBean();
+        addressBean.setStatus("No default address found.");
+        addressBean.setStatusCode("200");
+        List<AddressDto> addresses = new ArrayList<>();
+        UserAddress userAddress = userAddressDao.getDefaultAddressByUserId(userId);
+        if (userAddress != null) {
+            addresses.add(this.setAddressDto(userAddress));
+            addressBean.setStatus("success");
+        }
+        addressBean.setAddresses(addresses);
+        return addressBean;
+    }
+// </editor-fold>
+//===========================================Address moduses end==========================================//
+
 }

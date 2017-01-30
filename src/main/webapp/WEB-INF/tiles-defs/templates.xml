@@ -26,4 +26,9 @@
         <put-attribute name="body" value="/WEB-INF/views/addProduct.jsp" />
     </definition>
     
+    <definition name="paymentStatus" extends="common">
+        <put-attribute name="title" value="duqhun.com-payment-status" />
+        <put-attribute name="body" value="/WEB-INF/views/paymentStatus.jsp" />
+    </definition>
+    
 </tiles-definitions>

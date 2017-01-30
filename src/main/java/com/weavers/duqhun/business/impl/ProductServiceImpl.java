@@ -9,32 +9,40 @@ import com.weavers.duqhun.business.ProductService;
 import com.weavers.duqhun.dao.CartDao;
 import com.weavers.duqhun.dao.CategoryDao;
 import com.weavers.duqhun.dao.ColorDao;
+import com.weavers.duqhun.dao.OrderDetailsDao;
 import com.weavers.duqhun.dao.ProductDao;
 import com.weavers.duqhun.dao.ProductImgDao;
 import com.weavers.duqhun.dao.ProductSizeColorMapDao;
 import com.weavers.duqhun.dao.RecentViewDao;
 import com.weavers.duqhun.dao.SizeGroupDao;
 import com.weavers.duqhun.dao.SizeeDao;
+import com.weavers.duqhun.dao.UserAddressDao;
 import com.weavers.duqhun.domain.Cart;
 import com.weavers.duqhun.domain.Category;
 import com.weavers.duqhun.domain.Color;
+import com.weavers.duqhun.domain.OrderDetails;
 import com.weavers.duqhun.domain.Product;
 import com.weavers.duqhun.domain.ProductImg;
 import com.weavers.duqhun.domain.ProductSizeColorMap;
 import com.weavers.duqhun.domain.RecentView;
 import com.weavers.duqhun.domain.SizeGroup;
 import com.weavers.duqhun.domain.Sizee;
+import com.weavers.duqhun.domain.UserAddress;
+import com.weavers.duqhun.dto.AddressDto;
 import com.weavers.duqhun.dto.CartBean;
 import com.weavers.duqhun.dto.CategoryDto;
 import com.weavers.duqhun.dto.CategorysBean;
 import com.weavers.duqhun.dto.ColorDto;
 import com.weavers.duqhun.dto.ImageDto;
+import com.weavers.duqhun.dto.OrderDetailsBean;
+import com.weavers.duqhun.dto.OrderDetailsDto;
 import com.weavers.duqhun.dto.ProductBean;
 import com.weavers.duqhun.dto.ProductBeans;
 import com.weavers.duqhun.dto.ProductDetailBean;
 import com.weavers.duqhun.dto.ProductRequistBean;
 import com.weavers.duqhun.dto.SizeColorMapDto;
 import com.weavers.duqhun.dto.SizeDto;
+import com.weavers.duqhun.util.DateFormater;
 import com.weavers.duqhun.util.FileUploader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -69,6 +77,31 @@ public class ProductServiceImpl implements ProductService {
     CartDao cartDao;
     @Autowired
     SizeGroupDao sizeGroupDao;
+    @Autowired
+    OrderDetailsDao orderDetailsDao;
+    @Autowired
+    UserAddressDao userAddressDao;
+
+    // <editor-fold defaultstate="collapsed" desc="setAddressDto">
+    private AddressDto setAddressDto(UserAddress userAddress) {
+        AddressDto addressDto = new AddressDto();
+        addressDto.setAddressId(userAddress.getId());
+        addressDto.setCity(userAddress.getCity());
+        addressDto.setCompanyName(userAddress.getCompanyName());
+        addressDto.setContactName(userAddress.getContactName());
+        addressDto.setCountry(userAddress.getCountry());
+        addressDto.setEmail(userAddress.getEmail());
+        addressDto.setIsResidential(userAddress.getResidential());
+        addressDto.setPhone(userAddress.getPhone());
+        addressDto.setState(userAddress.getState());
+        addressDto.setStatus(userAddress.getStatus());
+        addressDto.setStreetOne(userAddress.getStreetOne());
+        addressDto.setStreetTwo(userAddress.getStreetTwo());
+        addressDto.setUserId(userAddress.getUserId());
+        addressDto.setZipCode(userAddress.getZipCode());
+        return addressDto;
+    }
+// </editor-fold>
 
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
@@ -111,6 +144,9 @@ public class ProductServiceImpl implements ProductService {
                 beans.add(bean);
             }
         }
+        if (!products.isEmpty()) {
+            productBeans.setCategoryName(categoryDao.loadById(products.get(0).getCategoryId()).getName());
+        }
         productBeans.setTotalProducts(i);
         productBeans.setProducts(beans);
         productBeans.setAllImages(allImages);
@@ -121,7 +157,7 @@ public class ProductServiceImpl implements ProductService {
         Double discountPct = 0.00;
         Double less = original - discounted;
         if (original != null && discounted != null && less > 0.00) {
-            discountPct = original / less;  // calculate discount percentage
+            discountPct = (less / original) * 100;  // calculate discount percentage
         }
         DecimalFormat df = new DecimalFormat("#.00");
         discountPct = Double.parseDouble(df.format(discountPct));
@@ -529,6 +565,7 @@ public class ProductServiceImpl implements ProductService {
         List<Category> categorys = categoryDao.getChildByParentId(parentId);
         if (categorys.isEmpty()) {
             categorysBean.setStatus("No child category found");
+            categorysBean.setStatusCode("403");
         } else {
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
@@ -547,6 +584,62 @@ public class ProductServiceImpl implements ProductService {
             categorysBean.setStatusCode("200");
         }
         return categorysBean;
+    }
+
+    @Override
+    public OrderDetailsBean getOrderDetails(Long userId) {
+        OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
+        List<OrderDetailsDto> orderdetailsDtos = new ArrayList<>();
+        List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId);
+        List<UserAddress> userAddresses = userAddressDao.getAddressByUserId(userId);
+        HashMap<Long, UserAddress> mapUserAddress = new HashMap<>();
+        for (UserAddress userAddress : userAddresses) {
+            mapUserAddress.put(userAddress.getId(), userAddress);
+        }
+        List<Product> products = productDao.loadAll();
+        HashMap<Long, Product> mapProduct = new HashMap<>();
+        for (Product product : products) {
+            mapProduct.put(product.getId(), product);
+        }
+        List<Sizee> sizees = sizeeDao.loadAll();
+        HashMap<Long, Sizee> mapSize = new HashMap<>();
+        for (Sizee sizee : sizees) {
+            mapSize.put(sizee.getId(), sizee);
+        }
+        List<Color> colors = colorDao.loadAll();
+        HashMap<Long, Color> mapColor = new HashMap<>();
+        for (Color color : colors) {
+            mapColor.put(color.getId(), color);
+        }
+        for (Object[] object : objects) {
+            OrderDetails orderDetailse = (OrderDetails) object[0];//********************
+            ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) object[1];//***********
+            OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
+            orderDetailsDto.setAddressDto(this.setAddressDto(mapUserAddress.get(orderDetailse.getAddressId())));
+            if (mapColor.containsKey(sizeColorMap.getColorId())) {
+                orderDetailsDto.setColor(mapColor.get(sizeColorMap.getColorId()).getName());
+            }
+            if (mapSize.containsKey(sizeColorMap.getSizeId())) {
+                orderDetailsDto.setSize(mapSize.get(sizeColorMap.getSizeId()).getValu());
+            }
+            orderDetailsDto.setDeliveryDate(DateFormater.formate(orderDetailse.getDeliveryDate()));
+            orderDetailsDto.setEmail(mapUserAddress.get(orderDetailse.getAddressId()).getEmail());
+            orderDetailsDto.setMapId(orderDetailse.getMapId());
+            orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
+            orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
+            orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
+            orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
+            orderDetailsDto.setProductName(mapProduct.get(sizeColorMap.getProductId()).getName());
+            orderDetailsDto.setStatus(orderDetailse.getStatus());
+            orderDetailsDto.setProdImg(mapProduct.get(sizeColorMap.getProductId()).getImgurl());
+            orderDetailsDto.setPrice(sizeColorMap.getPrice());
+            orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
+            orderdetailsDtos.add(orderDetailsDto);
+        }
+        orderDetailsBean.setOrderDetailsDtos(orderdetailsDtos);
+        orderDetailsBean.setStatus("success");
+        orderDetailsBean.setStatusCode("200");
+        return orderDetailsBean;
     }
 
 }

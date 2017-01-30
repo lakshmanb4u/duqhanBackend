@@ -23,7 +23,8 @@ public class LoginBean {
     private String resetCode;
     private String newPassword;
     private Long fbid;
-    
+    private String fcmToken;
+
     /**
      * @return the fbid
      */
@@ -65,7 +66,7 @@ public class LoginBean {
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
     }
-    
+
     /**
      * @return the name
      */
@@ -191,5 +192,19 @@ public class LoginBean {
     public void setAuthtoken(String authtoken) {
         this.authtoken = authtoken;
     }
-    
+
+    /**
+     * @return the fcmToken
+     */
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    /**
+     * @param fcmToken the fcmToken to set
+     */
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
+    }
+
 }

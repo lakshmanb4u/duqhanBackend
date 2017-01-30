@@ -7,12 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- *  Created by Suvankar Sen
- *	User: Suvankar Sen
- *  Company: CloudLabz
- *  Date: Aug 29, 2014
- *  Time: 12:15:06 PM
- *	Description:
  * @param <T>
  */
 public interface BaseDao<T extends BaseDomain> {

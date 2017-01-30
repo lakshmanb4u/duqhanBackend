@@ -20,7 +20,10 @@ public class CartBean {
     private int totalProducts;
     private String statusCode;
     private String status;
+    private Long deliveryAddressId;
     private List<ProductBean> products;
+    private Long userId;
+    private AddressDto addressDto;
 
     /**
      * @return the itemTotal
@@ -132,5 +135,47 @@ public class CartBean {
      */
     public void setProducts(List<ProductBean> products) {
         this.products = products;
+    }
+
+    /**
+     * @return the userId
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
+    /**
+     * @param userId the userId to set
+     */
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * @return the deliveryAddressId
+     */
+    public Long getDeliveryAddressId() {
+        return deliveryAddressId;
+    }
+
+    /**
+     * @param deliveryAddressId the deliveryAddressId to set
+     */
+    public void setDeliveryAddressId(Long deliveryAddressId) {
+        this.deliveryAddressId = deliveryAddressId;
+    }
+
+    /**
+     * @return the addressDto
+     */
+    public AddressDto getAddressDto() {
+        return addressDto;
+    }
+
+    /**
+     * @param addressDto the addressDto to set
+     */
+    public void setAddressDto(AddressDto addressDto) {
+        this.addressDto = addressDto;
     }
 }

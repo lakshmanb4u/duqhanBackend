@@ -27,6 +27,20 @@ public class DateFormater {
         }
         return formatedDate;
     }
+    
+    public static String formate(Date date) {
+        String formate = "dd/MM/yyyy"; //it is fixed for all project
+        String formatedDate = null;
+        if (date != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(formate);
+                formatedDate = sdf.format(date);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return formatedDate;
+    }
 
     public static Date formateToDate(String date) {
         Date formatedDate = null;
