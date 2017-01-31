@@ -10,28 +10,28 @@
     http://www.springframework.org/schema/tx
     http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
     
-    <bean id="usersDao" class="com.weavers.duqhun.dao.jpa.UsersDaoJpa" />
-    <bean id="otpTableDao" class="com.weavers.duqhun.dao.jpa.OtpTableDaoJpa" />
-    <bean id="userAouthDao" class="com.weavers.duqhun.dao.jpa.UserAouthDaoJpa" />
-    <bean id="categoryDao" class="com.weavers.duqhun.dao.jpa.CategoryDaoJpa" />
-    <bean id="cartDao" class="com.weavers.duqhun.dao.jpa.CartDaoJpa" />
-    <bean id="recentViewDao" class="com.weavers.duqhun.dao.jpa.RecentViewDaoJpa" />
-    <bean id="productSizeColorMapDao" class="com.weavers.duqhun.dao.jpa.ProductSizeColorMapDaoJpa" />
-    <bean id="productDao" class="com.weavers.duqhun.dao.jpa.ProductDaoJpa" />
-    <bean id="productImgDao" class="com.weavers.duqhun.dao.jpa.ProductImgDaoJpa" />
-    <bean id="colorDao" class="com.weavers.duqhun.dao.jpa.ColorDaoJpa" />
-    <bean id="sizeeDao" class="com.weavers.duqhun.dao.jpa.SizeeDaoJpa" />
-    <bean id="sizeGroupDao" class="com.weavers.duqhun.dao.jpa.SizeGroupDaoJpa" />
-    <bean id="paymentDetailDao" class="com.weavers.duqhun.dao.jpa.PaymentDetailDaoJpa" />
-    <bean id="orderDetailsDao" class="com.weavers.duqhun.dao.jpa.OrderDetailsDaoJpa" />
-    <bean id="userAddressDao" class="com.weavers.duqhun.dao.jpa.UserAddressDaoJpa" />
+    <bean id="usersDao" class="com.weavers.duqhan.dao.jpa.UsersDaoJpa" />
+    <bean id="otpTableDao" class="com.weavers.duqhan.dao.jpa.OtpTableDaoJpa" />
+    <bean id="userAouthDao" class="com.weavers.duqhan.dao.jpa.UserAouthDaoJpa" />
+    <bean id="categoryDao" class="com.weavers.duqhan.dao.jpa.CategoryDaoJpa" />
+    <bean id="cartDao" class="com.weavers.duqhan.dao.jpa.CartDaoJpa" />
+    <bean id="recentViewDao" class="com.weavers.duqhan.dao.jpa.RecentViewDaoJpa" />
+    <bean id="productSizeColorMapDao" class="com.weavers.duqhan.dao.jpa.ProductSizeColorMapDaoJpa" />
+    <bean id="productDao" class="com.weavers.duqhan.dao.jpa.ProductDaoJpa" />
+    <bean id="productImgDao" class="com.weavers.duqhan.dao.jpa.ProductImgDaoJpa" />
+    <bean id="colorDao" class="com.weavers.duqhan.dao.jpa.ColorDaoJpa" />
+    <bean id="sizeeDao" class="com.weavers.duqhan.dao.jpa.SizeeDaoJpa" />
+    <bean id="sizeGroupDao" class="com.weavers.duqhan.dao.jpa.SizeGroupDaoJpa" />
+    <bean id="paymentDetailDao" class="com.weavers.duqhan.dao.jpa.PaymentDetailDaoJpa" />
+    <bean id="orderDetailsDao" class="com.weavers.duqhan.dao.jpa.OrderDetailsDaoJpa" />
+    <bean id="userAddressDao" class="com.weavers.duqhan.dao.jpa.UserAddressDaoJpa" />
     
     <bean
         id="entityManagerFactory"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
         p:dataSource-ref="dataSource"
         p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
-        p:persistenceUnitName="duqhun-db" />
+        p:persistenceUnitName="duqhan-db" />
     
     <!-- bean post-processor for JPA annotations -->
     <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
@@ -57,13 +57,13 @@
         
         <!-- Local Configuration -->
     
-<!--        <property name="url" value="jdbc:mysql://localhost:3306/duqhundb" />
+<!--                <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
         <property name="password" value="" />-->
     
         <!-- Server Configuration -->
         
-                <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+        <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />
         

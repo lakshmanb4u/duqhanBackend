@@ -17,17 +17,17 @@
     
     
     <definition name="index" extends="common">
-        <put-attribute name="title" value="duqhun.com" />
+        <put-attribute name="title" value="duqhan.com" />
         <put-attribute name="body" value="/WEB-INF/views/index.jsp" />
     </definition>
     
     <definition name="addProduct" extends="common">
-        <put-attribute name="title" value="duqhun.com-add-product" />
+        <put-attribute name="title" value="duqhan.com-add-product" />
         <put-attribute name="body" value="/WEB-INF/views/addProduct.jsp" />
     </definition>
     
     <definition name="paymentStatus" extends="common">
-        <put-attribute name="title" value="duqhun.com-payment-status" />
+        <put-attribute name="title" value="duqhan.com-payment-status" />
         <put-attribute name="body" value="/WEB-INF/views/paymentStatus.jsp" />
     </definition>
     
