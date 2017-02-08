@@ -28,6 +28,8 @@ public class ProductDetailBean {
     private Set<ColorDto> colors;
     private String arrival;
     private Double shippingCost;
+    private Long vendorId;
+    private String shippingTime;
     private ProductBeans relatedProducts;
     private String statusCode;
     private String status;
@@ -268,5 +270,33 @@ public class ProductDetailBean {
      */
     public void setProductImg(String productImg) {
         this.productImg = productImg;
+    }
+
+    /**
+     * @return the vendorId
+     */
+    public Long getVendorId() {
+        return vendorId;
+    }
+
+    /**
+     * @param vendorId the vendorId to set
+     */
+    public void setVendorId(Long vendorId) {
+        this.vendorId = vendorId;
+    }
+
+    /**
+     * @return the shippingTime
+     */
+    public String getShippingTime() {
+        return shippingTime;
+    }
+
+    /**
+     * @param shippingTime the shippingTime to set
+     */
+    public void setShippingTime(String shippingTime) {
+        this.shippingTime = shippingTime;
     }
 }

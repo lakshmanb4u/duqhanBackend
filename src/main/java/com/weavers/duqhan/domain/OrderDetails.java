@@ -67,6 +67,9 @@ public class OrderDetails extends BaseDomain {
     @Column(name = "delivery_date")
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveryDate;
+    @Size(min = 1, max = 255)
+    @Column(name = "shipment_id")
+    private String shipmentId;
 
     public long getUserId() {
         return userId;
@@ -146,6 +149,14 @@ public class OrderDetails extends BaseDomain {
 
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    public String getShipmentId() {
+        return shipmentId;
+    }
+
+    public void setShipmentId(String shipmentId) {
+        this.shipmentId = shipmentId;
     }
 
 }

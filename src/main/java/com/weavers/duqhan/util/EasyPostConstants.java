@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.weavers.duqhan.business;
-
-import com.weavers.duqhan.dto.ColorAndSizeDto;
+package com.weavers.duqhan.util;
 
 /**
  *
  * @author Android-3
  */
-public interface WebService {
+public class EasyPostConstants {
 
-    ColorAndSizeDto getColorSizeList();
+    public static final String API_KEY = "HL3SCslaysZZS0eIUlZLOw";
+    public static final String BUY_CARRIER = "USPS";
+
 }

@@ -59,8 +59,9 @@ public class HomeController {
     }
 
     @RequestMapping(value = "/request-password-reset", method = RequestMethod.POST) // Password reset request send a 6 digits OPT to user's register email 
-    public UserBean passwordResetRequest(HttpServletResponse response, @RequestBody String email) {
-        UserBean userBean = usersService.passwordResetRequest(email);
+    public UserBean passwordResetRequest(HttpServletResponse response, @RequestBody LoginBean loginBean) {
+        UserBean userBean = usersService.passwordResetRequest(loginBean.getEmail());
+        System.out.println("loginBean.getEmail() = " + loginBean.getEmail());
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }

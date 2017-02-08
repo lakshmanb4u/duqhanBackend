@@ -8,6 +8,7 @@ package com.weavers.duqhan.business;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
+import com.weavers.duqhan.dto.ColorAndSizeDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
@@ -20,6 +21,8 @@ import com.weavers.duqhan.dto.SizeDto;
  * @author Android-3
  */
 public interface ProductService {
+    
+    ColorAndSizeDto getColorSizeList();
 
     ProductBeans getProductsByCategory(Long categoryId);
 

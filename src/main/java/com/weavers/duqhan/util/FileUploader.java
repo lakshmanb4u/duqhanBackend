@@ -31,14 +31,16 @@ public class FileUploader {
         Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", CLOUD_NAME,
                 "api_key", API_KEY,
-                "api_secret", API_SECRET));
+                "api_secret", API_SECRET,
+                "upload_preset", "gpucdhrn"
+               /* "transformation", new Transformation().width(512).height(512).crop("limit")*/));
 
         Map uploadResult;
         String url = null;
         try {
             byte[] file1 = file.getBytes();
             uploadResult = cloudinary.uploader().upload(file1, params);
-            cloudinary.url().transformation(new Transformation().width(100).height(150).crop("fill")).imageTag(params);
+            cloudinary.url().transformation(new Transformation().width(512).height(512).crop("fill")).imageTag(params);
             String publicId = (String) uploadResult.get("public_id");
             url = (String) uploadResult.get("url");
             String signature = (String) uploadResult.get("signature");

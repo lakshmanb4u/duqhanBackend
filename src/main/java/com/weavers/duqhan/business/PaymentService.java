@@ -5,7 +5,9 @@
  */
 package com.weavers.duqhan.business;
 
+import com.easypost.model.Shipment;
 import com.weavers.duqhan.dto.CartBean;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface PaymentService {
 
-    String[] transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean);
+    String[] transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments);
 
     String getPayerInformation(String payer, String payment, String accessToken);
 

@@ -5,16 +5,9 @@
  */
 package com.weavers.duqhan.domain;
 
-import java.io.Serializable;
-import java.math.BigInteger;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -44,8 +37,18 @@ public class ProductSizeColorMap extends BaseDomain {
     private Double discount;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "quentity")
+    @Column(name = "quantity")
     private long quentity;
+    @Column(name = "product_length")
+    private Double productLength;
+    @Column(name = "product_width")
+    private Double productWidth;
+    @Column(name = "product_height")
+    private Double productHeight;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_weight")
+    private Double productWeight;
 
     public long getProductId() {
         return productId;
@@ -93,6 +96,38 @@ public class ProductSizeColorMap extends BaseDomain {
 
     public void setQuentity(long quentity) {
         this.quentity = quentity;
+    }
+
+    public Double getProductLength() {
+        return productLength;
+    }
+
+    public void setProductLength(Double productLength) {
+        this.productLength = productLength;
+    }
+
+    public Double getProductWidth() {
+        return productWidth;
+    }
+
+    public void setProductWidth(Double productWidth) {
+        this.productWidth = productWidth;
+    }
+
+    public Double getProductHeight() {
+        return productHeight;
+    }
+
+    public void setProductHeight(Double productHeight) {
+        this.productHeight = productHeight;
+    }
+
+    public Double getProductWeight() {
+        return productWeight;
+    }
+
+    public void setProductWeight(Double productWeight) {
+        this.productWeight = productWeight;
     }
 
 }

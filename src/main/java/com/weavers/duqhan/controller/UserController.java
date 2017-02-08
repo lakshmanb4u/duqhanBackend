@@ -5,9 +5,11 @@
  */
 package com.weavers.duqhan.controller;
 
+import com.easypost.model.Shipment;
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
+import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
@@ -21,6 +23,7 @@ import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.DateFormater;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -48,6 +50,8 @@ public class UserController {
     AouthService aouthService;
     @Autowired
     PaymentService paymentService;
+    @Autowired
+    ShippingService shippingService;
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
@@ -213,6 +217,21 @@ public class UserController {
         return statusBean;
     }
 
+    @RequestMapping(value = "/get-shipment", method = RequestMethod.POST)   // .
+    public CartBean getShipment(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        CartBean cartBean1 = new CartBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            cartBean.setUserId(users.getId());
+            cartBean1 = shippingService.getCartAfterShipment(cartBean);
+        } else {
+            response.setStatus(401);
+            cartBean1.setStatusCode("401");
+            cartBean1.setStatus("Invalid Token.");
+        }
+        return cartBean1;
+    }
+
     @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
     public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
         StatusBean statusBean = new StatusBean();
@@ -220,9 +239,30 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             cartBean.setUserId(users.getId());
-            stringStr = paymentService.transactionRequest(request, response, cartBean);
-            statusBean.setStatusCode(stringStr[1]); // pay key
-            statusBean.setStatus(stringStr[0]); // Paypal url
+            Object[] objects = shippingService.createShipments(cartBean);
+            if (null != objects) {
+                Double shippingCost = (Double) objects[0];
+                List<Shipment> shipments = (List<Shipment>) objects[1];
+                if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
+                    stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                    if (stringStr != null) {
+                        statusBean.setStatusCode(stringStr[1]); // pay key
+                        statusBean.setStatus(stringStr[0]); // Paypal url
+                    } else {
+                        response.setStatus(500);
+                        statusBean.setStatusCode("500");
+                        statusBean.setStatus("Payment not done. Please try again.");
+                    }
+                } else {
+                    response.setStatus(500);
+                    statusBean.setStatusCode("500");
+                    statusBean.setStatus("Shipment can not create. Please try again.");
+                }
+            } else {
+                response.setStatus(500);
+                statusBean.setStatusCode("500");
+                statusBean.setStatus("Shipment can not create. Please try again2.");
+            }
         } else {
             response.setStatus(401);
             statusBean.setStatusCode("401");
@@ -267,7 +307,14 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             address.setUserId(users.getId());
-            addressBean = usersService.saveUserAddress(address);
+            StatusBean statusBean = shippingService.verifyAddress(address);
+            if (statusBean.getStatusCode().equals("200")) {
+                addressBean = usersService.saveUserAddress(address);
+            } else {
+                response.setStatus(402);
+                addressBean.setStatusCode(statusBean.getStatusCode());
+                addressBean.setStatus(statusBean.getStatus());
+            }
         } else {
             response.setStatus(401);
             addressBean.setStatusCode("401");
@@ -330,5 +377,18 @@ public class UserController {
             orderDetailsBean.setStatus("Invalid Token.");
         }
         return orderDetailsBean;
+    }
+
+    @RequestMapping(value = "/change-password", method = RequestMethod.POST)
+    public StatusBean changePassword(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            statusBean = usersService.changePassword(loginBean, users);
+        } else {
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
     }
 }

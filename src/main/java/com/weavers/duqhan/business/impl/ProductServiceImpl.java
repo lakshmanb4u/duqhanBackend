@@ -5,7 +5,9 @@
  */
 package com.weavers.duqhan.business.impl;
 
+import com.easypost.model.Shipment;
 import com.weavers.duqhan.business.ProductService;
+import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.ColorDao;
@@ -17,6 +19,7 @@ import com.weavers.duqhan.dao.RecentViewDao;
 import com.weavers.duqhan.dao.SizeGroupDao;
 import com.weavers.duqhan.dao.SizeeDao;
 import com.weavers.duqhan.dao.UserAddressDao;
+import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Color;
@@ -25,13 +28,16 @@ import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductImg;
 import com.weavers.duqhan.domain.ProductSizeColorMap;
 import com.weavers.duqhan.domain.RecentView;
+import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.SizeGroup;
 import com.weavers.duqhan.domain.Sizee;
 import com.weavers.duqhan.domain.UserAddress;
+import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
+import com.weavers.duqhan.dto.ColorAndSizeDto;
 import com.weavers.duqhan.dto.ColorDto;
 import com.weavers.duqhan.dto.ImageDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
@@ -81,6 +87,10 @@ public class ProductServiceImpl implements ProductService {
     OrderDetailsDao orderDetailsDao;
     @Autowired
     UserAddressDao userAddressDao;
+    @Autowired
+    VendorDao vendorDao;
+    @Autowired
+    ShippingService shippingService;
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
     private AddressDto setAddressDto(UserAddress userAddress) {
@@ -102,6 +112,58 @@ public class ProductServiceImpl implements ProductService {
         return addressDto;
     }
 // </editor-fold>
+
+    @Override
+    public ColorAndSizeDto getColorSizeList() { // get color size category from database on add produc page load.
+        List<Sizee> sizees = sizeeDao.loadAll();
+        List<Color> colors = colorDao.loadAll();
+        List<Category> categorys = categoryDao.loadAll();
+        List<SizeGroup> sizeGroups = sizeGroupDao.loadAll();
+        List<Vendor> vendors = vendorDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<SizeDto> sizeDtos = new ArrayList<>();
+        List<ColorDto> colorDtos = new ArrayList<>();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<SizeDto> sizeGroupDtos = new ArrayList<>();
+        List<AddressDto> vendorsDtos = new ArrayList<>();
+        for (Sizee sizee : sizees) {    //=============get size.
+            SizeDto SizeDto = new SizeDto();
+            SizeDto.setSizeId(sizee.getId());
+            SizeDto.setSizeText(sizee.getValu());
+            sizeDtos.add(SizeDto);
+        }
+        for (Color color : colors) {    //=============get colors.
+            ColorDto ColorDto = new ColorDto();
+            ColorDto.setColorId(color.getId());
+            ColorDto.setColorText(color.getName());
+            colorDtos.add(ColorDto);
+        }
+        for (Category category : categorys) {   //=============get category.
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setCategoryId(category.getId());
+            categoryDto.setCategoryName(category.getName());
+            categoryDtos.add(categoryDto);
+        }
+        for (SizeGroup sizeGroup : sizeGroups) {    //=============get size groups.
+            SizeDto sizeGroupDto = new SizeDto();
+            sizeGroupDto.setSizeGroupId(sizeGroup.getId());
+            sizeGroupDto.setSizeText(sizeGroup.getName());
+            sizeGroupDtos.add(sizeGroupDto);
+        }
+        for (Vendor vendor : vendors) {    //=============get Vendor.
+            AddressDto vendorDto = new AddressDto();
+            vendorDto.setUserId(vendor.getId());
+            vendorDto.setContactName(vendor.getVendorName());
+            vendorsDtos.add(vendorDto);
+        }
+        colorAndSizeDto.setSizeGroupDtos(sizeGroupDtos);
+        colorAndSizeDto.setSizeDtos(sizeDtos);
+        colorAndSizeDto.setColorDtos(colorDtos);
+        colorAndSizeDto.setCategoryDtos(categoryDtos);
+        colorAndSizeDto.setVendorDtos(vendorsDtos);
+        return colorAndSizeDto;
+    }
 
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
@@ -140,6 +202,9 @@ public class ProductServiceImpl implements ProductService {
                 bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
                 Long qunty = mapSizeColorMap.get(product.getId()).getQuentity();
                 bean.setAvailable(qunty.intValue());
+                bean.setVendorId(product.getVendorId());
+                bean.setShippingRate(product.getShippingRate());
+                bean.setShippingTime(product.getShippingTime());
                 i = i + qunty.intValue();   // count total product
                 beans.add(bean);
             }
@@ -220,6 +285,9 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setCategoryId(category.getId());
             productDetailBean.setCategoryName(category.getName());
             productDetailBean.setProductImg(product.getImgurl());
+            productDetailBean.setVendorId(product.getVendorId());
+            productDetailBean.setShippingCost(product.getShippingRate());
+            productDetailBean.setShippingTime(product.getShippingTime());
             //===============================add imgDto==============================
             List<ImageDto> imgDtos = new ArrayList<>();
             for (ProductImg productImg : imgs) {
@@ -428,6 +496,13 @@ public class ProductServiceImpl implements ProductService {
                 productBean.setDiscountPCT(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
                 productBean.setAvailable(Long.valueOf(sizeColorMap.getQuentity()).intValue());
                 productBean.setCartId(MapCart.get(sizeColorMap.getId()).getId());
+                productBean.setShippingRate(MapProduct.get(sizeColorMap.getProductId()).getShippingRate());
+                productBean.setShippingTime(MapProduct.get(sizeColorMap.getProductId()).getShippingTime());
+                productBean.setVendorId(MapProduct.get(sizeColorMap.getProductId()).getVendorId());
+                productBean.setProductHeight(sizeColorMap.getProductHeight());
+                productBean.setProductLength(sizeColorMap.getProductLength());
+                productBean.setProductWeight(sizeColorMap.getProductWeight());
+                productBean.setProductWidth(sizeColorMap.getProductWidth());
                 productBeans.add(productBean);
             }
             discountTotal = itemTotal - orderTotal;
@@ -454,6 +529,15 @@ public class ProductServiceImpl implements ProductService {
             product.setCategoryId(productBean.getCategoryId());
             product.setDescription(productBean.getDescription());
             product.setLastUpdate(new Date());
+            product.setVendorId(productBean.getVendorId());     //>>>>>>>>
+            Shipment shipment = shippingService.createDefaultShipmentDomestic();
+            if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
+                product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
+                product.setShippingRate(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null);
+            } else {
+                product.setShippingTime(null);
+                product.setShippingRate(null);
+            }
             Product product1 = productDao.save(product);
             if (product1 != null) {
                 //====multiple ProductSizeColorMap added=======//
@@ -468,6 +552,10 @@ public class ProductServiceImpl implements ProductService {
                         sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
                         sizeColorMap.setQuentity(sizeColorMapDto.getCount());
                         sizeColorMap.setProductId(product1.getId());
+                        sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
+                        sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
+                        sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
+                        sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
                         ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
                     }
                 }
@@ -513,7 +601,7 @@ public class ProductServiceImpl implements ProductService {
         sizee.setValu(sizeDto.getSizeText());
         sizee.setUnit(sizeDto.getSizeText());
         Sizee sizee1 = sizeeDao.save(sizee);    //save new size
-        if (sizee1 != null) {
+        if (sizee1 == null) {
             return "ERROR: Size can not be saved!!";
         } else {
             return "Size saved..";
@@ -526,7 +614,7 @@ public class ProductServiceImpl implements ProductService {
         sizeGroup.setId(null);
         sizeGroup.setName(sizeGroupName);
         SizeGroup sizeGroup1 = sizeGroupDao.save(sizeGroup);    //save new size group
-        if (sizeGroup1 != null) {
+        if (sizeGroup1 == null) {
             return "ERROR: SizeGroup can not be saved!!";
         } else {
             return "SizeGroup saved..";
@@ -540,7 +628,7 @@ public class ProductServiceImpl implements ProductService {
         color1.setName(color);
         color1.setCode(color);
         Color color2 = colorDao.save(color1);   //save new color
-        if (color2 != null) {
+        if (color2 == null) {
             return "ERROR: Color can not be saved!!";
         } else {
             return "Color saved..";
@@ -635,6 +723,10 @@ public class ProductServiceImpl implements ProductService {
             orderDetailsDto.setPrice(sizeColorMap.getPrice());
             orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
             orderDetailsDto.setQuty(orderDetailse.getQuentity());
+            ShipmentTable shipmentTable = shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId());
+            if (null != shipmentTable && !shipmentTable.getTrackerId().equals("0")) {
+                orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable.getTrackerId()));
+            }
             orderdetailsDtos.add(orderDetailsDto);
         }
         orderDetailsBean.setOrderDetailsDtos(orderdetailsDtos);

@@ -7,7 +7,9 @@ package com.weavers.duqhan.controller;
 
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
-import com.weavers.duqhan.business.WebService;
+import com.weavers.duqhan.business.ShippingService;
+import com.weavers.duqhan.business.VendorService;
+import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.ColorAndSizeDto;
 import com.weavers.duqhan.dto.ProductBean;
@@ -35,16 +37,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class WebController {
 
     @Autowired
-    WebService webService;
-    @Autowired
     ProductService productService;
     @Autowired
     PaymentService paymentService;
+    @Autowired
+    VendorService vendorService;
+    @Autowired
+    ShippingService shippingService;
     private final org.slf4j.Logger logger = LoggerFactory.getLogger(WebController.class);
 
     @RequestMapping(value = "/add-product", method = RequestMethod.GET) // open main view page
     public String addProduct(ModelMap modelMap) {
-        ColorAndSizeDto colorAndSizeDto = webService.getColorSizeList();
+        ColorAndSizeDto colorAndSizeDto = productService.getColorSizeList();
         modelMap.addAttribute("sizeAndColor", colorAndSizeDto);
         return "addProduct";
     }
@@ -95,6 +99,20 @@ public class WebController {
         StatusBean response = new StatusBean();
         response.setStatus("failure");
         response.setStatus(productService.saveProductImage(productBean));
+        return response;
+    }
+
+    @RequestMapping(value = "/save-vendor", method = RequestMethod.POST)  // save a new category
+    @ResponseBody
+    public StatusBean saveVendor(@RequestBody AddressDto addressDto) {
+        StatusBean response = new StatusBean();
+        StatusBean statusBean = shippingService.verifyAddress(addressDto);
+        if (statusBean.getStatusCode().equals("200")) {
+            response.setStatus(vendorService.saveVendor(addressDto));
+        } else {
+            response.setStatusCode(statusBean.getStatusCode());
+            response.setStatus(statusBean.getStatus());
+        }
         return response;
     }
 

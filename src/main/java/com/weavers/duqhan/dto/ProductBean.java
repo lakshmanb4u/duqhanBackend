@@ -65,6 +65,13 @@ public class ProductBean {
     private List<ImageDto> imageDtos;
     private MultipartFile frontImage;
     private String qty;
+    private Long vendorId;
+    private String shippingTime;
+    private Double shippingRate;
+    private Double productLength;
+    private Double productWidth;
+    private Double productHeight;
+    private Double productWeight;
 
     /**
      * @return the productId
@@ -344,6 +351,104 @@ public class ProductBean {
      */
     public void setQty(String qty) {
         this.qty = qty;
+    }
+
+    /**
+     * @return the vendorId
+     */
+    public Long getVendorId() {
+        return vendorId;
+    }
+
+    /**
+     * @param vendorId the vendorId to set
+     */
+    public void setVendorId(Long vendorId) {
+        this.vendorId = vendorId;
+    }
+
+    /**
+     * @return the shippingTime
+     */
+    public String getShippingTime() {
+        return shippingTime;
+    }
+
+    /**
+     * @param shippingTime the shippingTime to set
+     */
+    public void setShippingTime(String shippingTime) {
+        this.shippingTime = shippingTime;
+    }
+
+    /**
+     * @return the shippingRate
+     */
+    public Double getShippingRate() {
+        return shippingRate;
+    }
+
+    /**
+     * @param shippingRate the shippingRate to set
+     */
+    public void setShippingRate(Double shippingRate) {
+        this.shippingRate = shippingRate;
+    }
+
+    /**
+     * @return the productLength
+     */
+    public Double getProductLength() {
+        return productLength;
+    }
+
+    /**
+     * @param productLength the productLength to set
+     */
+    public void setProductLength(Double productLength) {
+        this.productLength = productLength;
+    }
+
+    /**
+     * @return the productWidth
+     */
+    public Double getProductWidth() {
+        return productWidth;
+    }
+
+    /**
+     * @param productWidth the productWidth to set
+     */
+    public void setProductWidth(Double productWidth) {
+        this.productWidth = productWidth;
+    }
+
+    /**
+     * @return the productHeight
+     */
+    public Double getProductHeight() {
+        return productHeight;
+    }
+
+    /**
+     * @param productHeight the productHeight to set
+     */
+    public void setProductHeight(Double productHeight) {
+        this.productHeight = productHeight;
+    }
+
+    /**
+     * @return the productWeight
+     */
+    public Double getProductWeight() {
+        return productWeight;
+    }
+
+    /**
+     * @param productWeight the productWeight to set
+     */
+    public void setProductWeight(Double productWeight) {
+        this.productWeight = productWeight;
     }
 
 }

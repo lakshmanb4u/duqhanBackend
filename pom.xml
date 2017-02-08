@@ -176,6 +176,15 @@
             <type>jar</type>
         </dependency>
         
+        <!--easypost shipping-->
+        <!-- https://mvnrepository.com/artifact/com.easypost/easypost-api-client -->
+        <dependency>
+            <groupId>com.easypost</groupId>
+            <artifactId>easypost-api-client</artifactId>
+            <version>3.0.0</version>
+            <type>jar</type>
+        </dependency>
+
     </dependencies>
 
     <build>

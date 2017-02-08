@@ -17,6 +17,7 @@ import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.AouthBean;
 import com.weavers.duqhan.dto.LoginBean;
+import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.Crypting;
 import com.weavers.duqhan.util.DateFormater;
@@ -431,7 +432,23 @@ public class UsersServiceImpl implements UsersService {
         addressBean.setAddresses(addresses);
         return addressBean;
     }
+
+    @Override
+    public StatusBean changePassword(LoginBean loginBean, Users user) {
+        StatusBean statusBean = new StatusBean();
+        if (user.getPassword().equals(Crypting.encrypt(loginBean.getPassword()))) {
+            String pass = Crypting.encrypt(loginBean.getNewPassword());
+            user.setPassword(pass);
+            usersDao.save(user);
+            statusBean.setStatusCode("200");
+            statusBean.setStatus("Password change successfully");
+        } else {
+            statusBean.setStatusCode("403");
+            statusBean.setStatus("password did not match");
+        }
+        return statusBean;
+    }
+
 // </editor-fold>
 //===========================================Address moduses end==========================================//
-
 }

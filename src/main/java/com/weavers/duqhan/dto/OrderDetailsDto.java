@@ -29,6 +29,7 @@ public class OrderDetailsDto {
     private String prodImg;
     private Long quty;
     private AddressDto addressDto;
+    private TrackerBean trackerBean;
 
     /**
      * @return the userId
@@ -280,6 +281,20 @@ public class OrderDetailsDto {
      */
     public void setOrderId(String orderId) {
         this.orderId = orderId;
+    }
+
+    /**
+     * @return the trackerBean
+     */
+    public TrackerBean getTrackerBean() {
+        return trackerBean;
+    }
+
+    /**
+     * @param trackerBean the trackerBean to set
+     */
+    public void setTrackerBean(TrackerBean trackerBean) {
+        this.trackerBean = trackerBean;
     }
 
 }

@@ -19,6 +19,10 @@ public class SizeColorMapDto {
     private Double salesPrice;
     private Double discount;
     private Long sizeId;
+    private Double productLength;
+    private Double productWidth;
+    private Double productHeight;
+    private Double productWeight;
 
     /**
      * @return the colorId
@@ -130,5 +134,61 @@ public class SizeColorMapDto {
      */
     public void setSizeId(Long sizeId) {
         this.sizeId = sizeId;
+    }
+
+    /**
+     * @return the productLength
+     */
+    public Double getProductLength() {
+        return productLength;
+    }
+
+    /**
+     * @param productLength the productLength to set
+     */
+    public void setProductLength(Double productLength) {
+        this.productLength = productLength;
+    }
+
+    /**
+     * @return the productWidth
+     */
+    public Double getProductWidth() {
+        return productWidth;
+    }
+
+    /**
+     * @param productWidth the productWidth to set
+     */
+    public void setProductWidth(Double productWidth) {
+        this.productWidth = productWidth;
+    }
+
+    /**
+     * @return the productHeight
+     */
+    public Double getProductHeight() {
+        return productHeight;
+    }
+
+    /**
+     * @param productHeight the productHeight to set
+     */
+    public void setProductHeight(Double productHeight) {
+        this.productHeight = productHeight;
+    }
+
+    /**
+     * @return the productWeight
+     */
+    public Double getProductWeight() {
+        return productWeight;
+    }
+
+    /**
+     * @param productWeight the productWeight to set
+     */
+    public void setProductWeight(Double productWeight) {
+        this.productWeight = productWeight;
     }
 }

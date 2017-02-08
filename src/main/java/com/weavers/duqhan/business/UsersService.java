@@ -9,6 +9,7 @@ import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.LoginBean;
+import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 
 /**
@@ -44,5 +45,7 @@ public interface UsersService {
     AddressBean setUserAddressesAsDefault(Long userId, Long addressId);
 
     AddressBean deactivateUserAddress(Long userId, Long addressId);
+    
+    StatusBean changePassword(LoginBean loginBean, Users users);
 
 }
