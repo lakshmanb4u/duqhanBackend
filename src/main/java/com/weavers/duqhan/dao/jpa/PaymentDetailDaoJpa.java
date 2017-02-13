@@ -43,4 +43,16 @@ public class PaymentDetailDaoJpa extends BaseDaoJpa<PaymentDetail> implements Pa
         }
     }
 
+    @Override
+    public PaymentDetail getDetailByPayKey(String paymentId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT pd FROM PaymentDetail AS pd WHERE pd.paymentKey = :paymentId");
+            query.setParameter("paymentId", paymentId);
+            PaymentDetail paymentDetail = (PaymentDetail) query.getSingleResult();
+            return paymentDetail;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }

@@ -31,12 +31,16 @@ import java.util.logging.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.weavers.duqhan.dao.ShipmentTableDao;
+import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.TrackerBean;
 import com.weavers.duqhan.dto.TrackerDto;
+import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.DateFormater;
+import com.weavers.duqhan.util.StatusConstants;
 
 /**
  *
@@ -81,7 +85,7 @@ public class ShippingServiceImpl implements ShippingService {
 //        addressDto.setStreetTwo("");
 //        addressDto.setZipCode("700009");
 //        impl.getShipmentByShipmentId("shp_496320b580ac41c0ba8ce43cf9f7ee48");
-        System.out.println("statusBean.getStatus() : " + impl.getTrackerByTrackerId("trk_f7e3633b9d6f49deb63cbf2575279a90").getStatus());
+//        System.out.println("statusBean.getStatus() : " + impl.getTrackerByTrackerId("trk_f7e3633b9d6f49deb63cbf2575279a90").getStatus());
     }
 
     @Override
@@ -185,7 +189,7 @@ public class ShippingServiceImpl implements ShippingService {
         Map<String, Object> customsItemMap = new HashMap<String, Object>();
         customsItemMap.put("description", product.getName());
         customsItemMap.put("quantity", Integer.parseInt(product.getQty()));
-        customsItemMap.put("value", product.getDiscountedPrice());
+        customsItemMap.put("value", CurrencyConverter.inrTOusd(product.getDiscountedPrice()));
         customsItemMap.put("weight", product.getProductWeight());
         customsItemMap.put("origin_country", vendor.getCountry());
         customsItemMap.put("hs_tariff_number", product.getSizeColorMapId().toString());
@@ -285,7 +289,7 @@ public class ShippingServiceImpl implements ShippingService {
                 Shipment shipment = Shipment.create(shipmentMap);
                 if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
                     product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
-                    product.setShippingRate(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null);
+                    product.setShippingRate(CurrencyConverter.usdTOinr(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null));
                 } else {
                     product.setShippingTime("10");
                     product.setShippingRate(27.00);
@@ -362,27 +366,131 @@ public class ShippingServiceImpl implements ShippingService {
     }
 
     @Override
-    public TrackerBean getTrackerByTrackerId(String trackerId) {
+    public TrackerBean getTrackerByTrackerId(ShipmentTable shipmentTable, String paymentStatus, PaymentDetail paymentDetail) {
         EasyPost.apiKey = EasyPostConstants.API_KEY;
         Tracker tracker;
         TrackerBean trackerBean = new TrackerBean();
+        TrackerDto trackerDto;
+        List<TrackerDto> trackerDtos = new ArrayList<>();
+
+        HashMap<Integer, TrackerDto> mapTracker = new HashMap<>();
+//        trackerDto = new TrackerDto();
+//        trackerDto.setIsActive(false);
+//        trackerDto.setState("Order cancelled");
+//        mapTracker.put(0, trackerDto);
+
+        trackerDto = new TrackerDto();
+        trackerDto.setIsActive(false);
+        trackerDto.setState("Waiting for payment approval");
+        mapTracker.put(1, trackerDto);
+
+        trackerDto = new TrackerDto();
+        trackerDto.setIsActive(false);
+        trackerDto.setState("Payment Approved");
+        mapTracker.put(2, trackerDto);
+
+        trackerDto = new TrackerDto();
+        trackerDto.setIsActive(false);
+        trackerDto.setState("Your item has been packed");
+        mapTracker.put(3, trackerDto);
+
+        trackerDto = new TrackerDto();
+        trackerDto.setIsActive(false);
+        trackerDto.setState("Your item has been dispatched");
+        mapTracker.put(4, trackerDto);
+
+        trackerDto = new TrackerDto();
+        trackerDto.setIsActive(false);
+        trackerDto.setState("Your item has been delivered");
+        mapTracker.put(5, trackerDto);
         try {
-            tracker = Tracker.retrieve(trackerId);
-            if (null != tracker) {
-                List<TrackerDto> trackerDtos = new ArrayList<>();
-                List<TrackingDetail> trackingDetails = tracker.getTrackingDetails();
+            tracker = Tracker.retrieve(shipmentTable.getTrackerId());
+            List<TrackingDetail> trackingDetails = tracker.getTrackingDetails();
+//            if (null != tracker) {
+
+            if (paymentStatus.equals(StatusConstants.ESS_FAILED) || paymentDetail.getPaymentStatus().equals(StatusConstants.PPS_FAILED)) {
+                trackerDto = new TrackerDto();
+                trackerDto.setIsActive(true);
+                trackerDto.setState("Order cancelled");
+                trackerDto.setDatetime(DateFormater.formate(paymentDetail.getPaymentDate()));
+//                mapTracker.remove(0);
+                mapTracker.put(0, trackerDto);
+            } else {
+                trackerDto = new TrackerDto();
+                trackerDto.setIsActive(true);
+                trackerDto.setState("Waiting for payment approval");
+                trackerDto.setDatetime(DateFormater.formate(paymentDetail.getPaymentDate()));
+                mapTracker.remove(1);
+                mapTracker.put(1, trackerDto);
+
                 for (TrackingDetail trackingDetail : trackingDetails) {
-                    TrackerDto trackerDto = new TrackerDto();
-                    trackerDto.setCity(trackingDetail.getTrackingLocation().getCity());
-                    trackerDto.setCountry(trackingDetail.getTrackingLocation().getCountry());
-                    trackerDto.setState(trackingDetail.getTrackingLocation().getState());
-                    trackerDto.setZip(trackingDetail.getTrackingLocation().getZip());
-                    trackerDto.setDatetime(DateFormater.formate(trackingDetail.getDatetime()));
-                    trackerDto.setMessage(trackingDetail.getMessage());
-                    trackerDto.setStatus(trackingDetail.getStatus());
-//                    trackerDto.setSource(trackingDetai);
-                    trackerDtos.add(trackerDto);
+                    if (trackingDetail.getStatus().equals(StatusConstants.ESS_UNKNOWN)) {
+                        trackerDto = new TrackerDto();
+                        trackerDto.setCity(trackingDetail.getTrackingLocation().getCity());
+                        trackerDto.setCountry(trackingDetail.getTrackingLocation().getCountry());
+                        trackerDto.setState("Payment Approved");
+                        trackerDto.setZip(trackingDetail.getTrackingLocation().getZip());
+                        trackerDto.setDatetime(DateFormater.formate(trackingDetail.getDatetime()));
+                        trackerDto.setMessage(trackingDetail.getMessage());
+                        trackerDto.setStatus(trackingDetail.getStatus());
+                        trackerDto.setIsActive(true);
+//                              trackerDto.setSource(trackingDetai);
+                        mapTracker.remove(2);
+                        mapTracker.put(2, trackerDto);
+
+                    } else if (trackingDetail.getStatus().equals(StatusConstants.ESS_PRE_TRANSIT)) {
+
+                        trackerDto = new TrackerDto();
+                        trackerDto.setCity(trackingDetail.getTrackingLocation().getCity());
+                        trackerDto.setCountry(trackingDetail.getTrackingLocation().getCountry());
+                        trackerDto.setState("Your item has been packed");
+                        trackerDto.setZip(trackingDetail.getTrackingLocation().getZip());
+                        trackerDto.setDatetime(DateFormater.formate(trackingDetail.getDatetime()));
+                        trackerDto.setMessage(trackingDetail.getMessage());
+                        trackerDto.setStatus(trackingDetail.getStatus());
+                        trackerDto.setIsActive(true);
+//                              trackerDto.setSource(trackingDetai);
+                        mapTracker.remove(3);
+                        mapTracker.put(3, trackerDto);
+
+                    } else if (trackingDetail.getStatus().equals(StatusConstants.ESS_IN_TRANSIT) || trackingDetail.getStatus().equals(StatusConstants.ESS_OUT_FOR_DELIVERY)) {
+                        trackerDto = new TrackerDto();
+                        trackerDto.setCity(trackingDetail.getTrackingLocation().getCity());
+                        trackerDto.setCountry(trackingDetail.getTrackingLocation().getCountry());
+                        trackerDto.setState("Your item has been dispatched");
+                        trackerDto.setZip(trackingDetail.getTrackingLocation().getZip());
+                        trackerDto.setDatetime(DateFormater.formate(trackingDetail.getDatetime()));
+                        trackerDto.setMessage(trackingDetail.getMessage());
+                        trackerDto.setStatus(trackingDetail.getStatus());
+                        trackerDto.setIsActive(true);
+//                              trackerDto.setSource(trackingDetai);
+                        mapTracker.remove(4);
+                        mapTracker.put(4, trackerDto);
+
+                    } else if (trackingDetail.getStatus().equals(StatusConstants.ESS_DELIVERED)) {
+
+                        trackerDto = new TrackerDto();
+                        trackerDto.setCity(trackingDetail.getTrackingLocation().getCity());
+                        trackerDto.setCountry(trackingDetail.getTrackingLocation().getCountry());
+                        trackerDto.setState("Your item has been delivered");
+                        trackerDto.setZip(trackingDetail.getTrackingLocation().getZip());
+                        trackerDto.setDatetime(DateFormater.formate(trackingDetail.getDatetime()));
+                        trackerDto.setMessage(trackingDetail.getMessage());
+                        trackerDto.setStatus(trackingDetail.getStatus());
+                        trackerDto.setIsActive(true);
+                        mapTracker.remove(5);
+//                              trackerDto.setSource(trackingDetai);
+                        mapTracker.put(5, trackerDto);
+                    }
                 }
+
+                for (Map.Entry<Integer, TrackerDto> entry : mapTracker.entrySet()) {
+                    Integer key = entry.getKey();
+                    TrackerDto value = entry.getValue();
+                    trackerDtos.add(value);
+                    trackerBean.setTrackingDetails(trackerDtos);
+                }
+
                 trackerBean.setCarrier(tracker.getCarrier());
                 trackerBean.setEstDeliveryDate(DateFormater.formate(tracker.getEstDeliveryDate()));
                 trackerBean.setMode(tracker.getMode());
@@ -395,15 +503,21 @@ public class ShippingServiceImpl implements ShippingService {
                 trackerBean.setTrackingDetails(trackerDtos);
 //                trackerBean.setCreatedAt(tracker.get);
 //                trackerBean.setUpdatedAt(tracker.);
-
-            } else {
-                logger.error("No Tracker found.");
-                trackerBean.setStatus("No Tracker found.");
-                trackerBean.setStatusCode("402");
             }
+
+//            } else {
+//                logger.error("No Tracker found.");
+//                trackerBean.setStatus("No Tracker found.");
+//                trackerBean.setStatusCode("402");
+//            }
         } catch (EasyPostException ex) {
             Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             logger.error("Problem to get Tracker.");
+            trackerDto = new TrackerDto();
+            trackerDto.setIsActive(true);
+            trackerDto.setState("Waiting for payment approval");
+            trackerDtos.add(trackerDto);
+            trackerBean.setTrackingDetails(trackerDtos);
             trackerBean.setStatus("Problem to get Tracker.");
             trackerBean.setStatusCode("402");
         }
@@ -413,6 +527,20 @@ public class ShippingServiceImpl implements ShippingService {
     @Override
     public ShipmentTable getShipmentTableByShipmentId(String shipmentId) {
         return shipmentTableDao.getShipmentByShipmentId(shipmentId);
+    }
+
+    @Override
+    public List<ShipmentDto> getPendingShipmentButPaymentApproved() {
+        List<ShipmentDto> shipmentDtos = new ArrayList<>();
+        List<ShipmentTable> shipmentTables = shipmentTableDao.getPendingShipmentsButPaymentApproved();
+        for (ShipmentTable shipmentTable : shipmentTables) {
+            ShipmentDto shipmentDto = new ShipmentDto();
+            shipmentDto.setPayKey(shipmentTable.getPayKey());
+            shipmentDto.setShipmentId(shipmentTable.getShipmentId());
+            shipmentDto.setUserId(shipmentTable.getUserId());
+            shipmentDtos.add(shipmentDto);
+        }
+        return shipmentDtos;
     }
 
 }

@@ -38,8 +38,11 @@ import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.GenerateAccessToken;
 import com.weavers.duqhan.dto.ProductBean;
+import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.PayPalConstants;
+import com.weavers.duqhan.util.StatusConstants;
 import java.io.InputStream;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -87,7 +90,8 @@ public class PaymentServiceImpl implements PaymentService {
         String returnUrl = null;
         String payKey = null;
         InputStream is;
-        Double totalCost = (cartBean.getOrderTotal() + shippingCost);
+        DecimalFormat df2 = new DecimalFormat(".##");
+//        Double totalCost = (cartBean.getOrderTotal() + shippingCost);
         List<ProductBean> productBeans = cartBean.getProducts();
         is = this.getClass().getResourceAsStream("/sdk_config.properties");
         try {
@@ -108,27 +112,38 @@ public class PaymentServiceImpl implements PaymentService {
             APIContext apiContext = new APIContext(accessToken);
             apiContext.setConfigurationMap(sdkConfig);
             List<Item> items = new ArrayList<>();
+            Double totalItemCost = 0.0;
+            String itemCost = "0";
+            Double inrRate = CurrencyConverter.convert("USD", "INR");//Return INR For 1 USD
             for (ProductBean productBean : productBeans) {
+                itemCost = "0";
                 Item item = new Item();
                 item.setName(productBean.getName() + " " + productBean.getSize() != null ? productBean.getSize() : "" + " " + productBean.getColor() != null ? productBean.getColor() : "");//***********************
                 item.setCurrency(PayPalConstants.CURRENCY);
                 item.setQuantity(productBean.getQty());//**********************
-                item.setPrice(productBean.getDiscountedPrice().toString());//****************************
+                itemCost = df2.format(inrRate * productBean.getDiscountedPrice());
+                item.setPrice(itemCost);//****************************
+                System.out.println("itemCost====== "+itemCost);
                 items.add(item);
+                itemCost = df2.format(Double.parseDouble(itemCost) * Double.parseDouble(productBean.getQty()));
+                totalItemCost = totalItemCost + Double.parseDouble(itemCost);
             }
+            itemCost = "0";
             Item item = new Item();
             item.setName("Shipping Cost");
             item.setCurrency(PayPalConstants.CURRENCY);
             item.setQuantity("1");
-            item.setPrice(shippingCost.toString());
+            itemCost = df2.format(shippingCost);
+            item.setPrice(itemCost);
+            totalItemCost = totalItemCost + Double.parseDouble(itemCost);
             items.add(item);
             ItemList itemList = new ItemList();
             itemList.setItems(items);
 
             Amount amount = new Amount();
             amount.setCurrency(PayPalConstants.CURRENCY);
-            amount.setTotal(totalCost.toString());
-
+            amount.setTotal(df2.format(totalItemCost));
+            System.out.println("df2.format(totalItemCost) "+df2.format(totalItemCost));
             Payer payer = new Payer();
             payer.setPaymentMethod("paypal");
             PayerInfo payerInfo = new PayerInfo();
@@ -225,7 +240,7 @@ public class PaymentServiceImpl implements PaymentService {
                         shipmentTable.setPostageLabelId("0");
                         shipmentTable.setRateId("0");
                         shipmentTable.setShipmentId(shipment.getId());
-                        shipmentTable.setStatus("just_create");
+                        shipmentTable.setStatus(StatusConstants.ESS_CREATED);
                         shipmentTable.setTrackerId("0");
                         shipmentTable.setUserId(cartBean.getUserId());
                         shipmentTable.setPayKey(createdPayment.getId());
@@ -268,7 +283,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment createdPayment = new Payment();
         PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(paymentId);
         List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(paymentId, paymentDetail.getUserId());
-        //=============================buy shipment==========================//
+        /*//=============================buy shipment==========================//
         List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(paymentId, paymentDetail.getUserId());
         for (ShipmentTable shipmentTable : shipmentTables) {
             Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
@@ -284,12 +299,13 @@ public class PaymentServiceImpl implements PaymentService {
                 shipmentTable.setStatus(shipment1.getStatus());
                 shipmentTable.setTrackerId(shipment1.getTracker().getId());
                 shipmentTableDao.save(shipmentTable);
-            } catch (EasyPostException ex) {
+            } catch (EasyPostException | NullPointerException ex) {
                 shipmentTable.setStatus("can_not_buy");
+
                 shipmentTableDao.save(shipmentTable);
                 Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
+        }*/
         try {
 
             Map<String, String> sdkConfig = new HashMap<>();
@@ -346,7 +362,69 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public String getPaymentStatus(Long userId, String payKey) {
-        return paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
+        PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(payKey);
+        String status = StatusConstants.ARS_RETRY;
+        List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(payKey, userId);
+        //=============================check payment status===========================//
+        Payment payment = new Payment();
+        try {
+            APIContext apiContext = new APIContext(paymentDetail.getAccessToken());
+            payment = Payment.get(apiContext, payKey);
+            status = payment.getState();
+        } catch (PayPalRESTException e) {
+            Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, e);
+        }
+
+        if (payment.getState() != null && !status.equals(StatusConstants.ARS_RETRY)) {
+            if (payment.getState().equals(StatusConstants.PPS_APPROVED)) {
+                //=============================buy shipment==========================//
+                List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(payKey, userId);
+                for (ShipmentTable shipmentTable : shipmentTables) {
+                    Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
+                    try {
+                        Shipment shipment1 = shippingService.BuyShipment(shipment);
+                        shipmentTable.setRateId(shipment1.lowestRate().getId());
+                        shipmentTable.setCreatedAt(new Date());
+                        shipmentTable.setCustomsInfoId(shipment1.getCustomsInfo().getId());
+                        shipmentTable.setIsReturn(false);
+                        shipmentTable.setParcelId(shipment1.getParcel().getId());
+                        shipmentTable.setPostageLabelId(shipment1.getPostageLabel().getId());
+                        shipmentTable.setShipmentId(shipment1.getId());
+                        shipmentTable.setStatus(shipment1.getStatus());
+                        shipmentTable.setTrackerId(shipment1.getTracker().getId());
+                        shipmentTableDao.save(shipmentTable);
+                    } catch (EasyPostException | NullPointerException ex) {
+                        shipmentTable.setStatus(StatusConstants.ESS_FAILED);
+                        shipmentTableDao.save(shipmentTable);
+                        Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+//                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
+            } else {
+                status = payment.getState();
+                if (payment.getState().equals(StatusConstants.PPS_CREATED)) {
+                    status = StatusConstants.PPS_FAILED;
+                }
+                paymentDetail.setPaymentStatus(status);
+                paymentDetailDao.save(paymentDetail);
+                for (OrderDetails orderDetail : orderDetails) {
+                    orderDetail.setStatus(status);
+                    orderDetailsDao.save(orderDetail);
+                }
+            }
+        }
+        return status;
     }
 
+    public static void main(String[] args) {
+        try {
+            APIContext apiContext = new APIContext("Bearer A101.Z7lFreKp-Xvr5B8B5BlpR9Dv0WHVF0gMNyqIEsEORTWzShPucVCHhkTlEuU6mt0C.kl3QKinNvXBGarL_DwEB838fBye");
+
+            Payment payment = Payment.get(apiContext,
+                    "PAY-47K21227BJ588124FLCOIJMA");
+            System.out.println("Payment retrieved ID = " + payment.getId()
+                    + ", status = " + payment.getState());
+        } catch (PayPalRESTException e) {
+        }
+    }
 }

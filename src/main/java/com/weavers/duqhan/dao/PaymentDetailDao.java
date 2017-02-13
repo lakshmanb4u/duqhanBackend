@@ -16,4 +16,6 @@ public interface PaymentDetailDao extends BaseDao<PaymentDetail> {
     PaymentDetail getDetailBypaymentId(String paymentId);
 
     String getPamentStatusBypaymentIdAndUserId(String payKey, Long userId);
+
+    PaymentDetail getDetailByPayKey(String paymentKey);
 }

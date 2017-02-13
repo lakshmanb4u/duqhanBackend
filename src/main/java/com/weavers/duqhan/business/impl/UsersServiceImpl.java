@@ -136,6 +136,9 @@ public class UsersServiceImpl implements UsersService {
         if (user != null) {
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
+            userBean.setDob(DateFormater.formate(user.getDob()));
+            userBean.setMobile(user.getMobile());
+            userBean.setProfileImg(user.getProfileImg());
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
@@ -288,7 +291,8 @@ public class UsersServiceImpl implements UsersService {
                 userAddress.setCity(address.getCity());
                 userAddress.setCompanyName(address.getCompanyName());
                 userAddress.setContactName(address.getContactName());
-                userAddress.setCountry(address.getCountry());
+//                userAddress.setCountry(address.getCountry());
+                userAddress.setCountry("IN");
                 userAddress.setEmail(address.getEmail());
                 userAddress.setPhone(address.getPhone());
                 userAddress.setResidential(address.getIsResidential());
@@ -326,7 +330,8 @@ public class UsersServiceImpl implements UsersService {
             userAddress.setCity(address.getCity());
             userAddress.setCompanyName(address.getCompanyName());
             userAddress.setContactName(address.getContactName());
-            userAddress.setCountry(address.getCountry());
+//            userAddress.setCountry(address.getCountry());
+            userAddress.setCountry("IN");
             userAddress.setEmail(address.getEmail());
             userAddress.setPhone(address.getPhone());
             userAddress.setResidential(address.getIsResidential());

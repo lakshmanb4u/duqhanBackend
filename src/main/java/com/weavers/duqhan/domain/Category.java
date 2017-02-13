@@ -30,6 +30,11 @@ public class Category extends BaseDomain{
     @NotNull
     @Column(name = "parent_id")
     private long parentId;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "parent_path")
+    private String parentPath;
 
 
     public String getName() {
@@ -46,6 +51,13 @@ public class Category extends BaseDomain{
 
     public void setParentId(long parentId) {
         this.parentId = parentId;
+    }
+    public String getParentPath() {
+        return parentPath;
+    }
+
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
     }
 
     

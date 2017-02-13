@@ -14,8 +14,10 @@ import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.ColorAndSizeDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
+import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.StatusBean;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,5 +145,20 @@ public class WebController {
 //            logger.error("This is Error message", new Exception("Testing"));
 //        }
         return "paymentStatus";
+    }
+
+    @RequestMapping(value = "/get-pending-shipment", method = RequestMethod.GET)
+    public String getPendingShipment(ModelMap modelMap) {
+        List<ShipmentDto> shipmentDtos = shippingService.getPendingShipmentButPaymentApproved();
+        modelMap.addAttribute("shipmentDtos", shipmentDtos);
+        return "shipmentDetails";
+    }
+    
+    @RequestMapping(value = "/buy-pending-shipment", method = RequestMethod.POST)
+    @ResponseBody
+    public StatusBean buyPendingShipment(@RequestBody ShipmentDto shipmentDto) {
+        StatusBean statusBean = new StatusBean();
+        statusBean.setStatus(paymentService.getPaymentStatus(shipmentDto.getUserId(), shipmentDto.getPayKey()));
+        return statusBean;
     }
 }

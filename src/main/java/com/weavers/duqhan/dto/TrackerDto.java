@@ -19,6 +19,7 @@ public class TrackerDto {
     private String state;
     private String country;
     private String zip;
+    private Boolean isActive;
 
     /**
      * @return the message
@@ -130,5 +131,19 @@ public class TrackerDto {
      */
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    /**
+     * @return the isActive
+     */
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    /**
+     * @param isActive the isActive to set
+     */
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }

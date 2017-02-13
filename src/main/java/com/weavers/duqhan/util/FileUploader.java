@@ -9,8 +9,13 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
 import com.weavers.duqhan.dto.CloudineryImageDto;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -28,19 +33,25 @@ public class FileUploader {
         imageBean.setUrl("failure");
         String timeInMili = String.valueOf(new Date().getTime());
         Map params = Cloudinary.asMap("public_id", timeInMili);
+        Calendar calendar = Calendar.getInstance();
+        List<Transformation> eager = Arrays.asList(new Transformation().width(512).height(512).crop("thumb"));
         Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", CLOUD_NAME,
                 "api_key", API_KEY,
+                "tags", "product",
+                "timestamp", calendar.getTimeInMillis(),
                 "api_secret", API_SECRET,
-                "upload_preset", "gpucdhrn"
-               /* "transformation", new Transformation().width(512).height(512).crop("limit")*/));
+                // "upload_preset", "gpucdhrn",
+                //  "transformation", incoming,
+                "eager", eager
+        ));
 
         Map uploadResult;
         String url = null;
         try {
             byte[] file1 = file.getBytes();
             uploadResult = cloudinary.uploader().upload(file1, params);
-            cloudinary.url().transformation(new Transformation().width(512).height(512).crop("fill")).imageTag(params);
+//            cloudinary.url().transformation(new Transformation().width(512).height(512).crop("fill")).imageTag(params);
             String publicId = (String) uploadResult.get("public_id");
             url = (String) uploadResult.get("url");
             String signature = (String) uploadResult.get("signature");
@@ -58,6 +69,8 @@ public class FileUploader {
 //</editor-fold>
 
         } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(FileUploader.class.getName()).log(Level.SEVERE, null, ex);
+//            System.out.println("eeeeeeeeeee"+ex.getLocalizedMessage());
             imageBean.setUrl("failure");
         }
         return imageBean;

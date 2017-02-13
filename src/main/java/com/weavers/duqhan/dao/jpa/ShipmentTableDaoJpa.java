@@ -40,4 +40,12 @@ public class ShipmentTableDaoJpa extends BaseDaoJpa<ShipmentTable> implements Sh
         }
     }
 
+    @Override
+    public List<ShipmentTable> getPendingShipmentsButPaymentApproved() {
+        Query query = getEntityManager().createQuery("SELECT DISTINCT st FROM ShipmentTable AS st, PaymentDetail AS pd WHERE st.payKey = pd.paymentKey AND st.status=:status AND pd.paymentStatus=:paymentStatus");
+        query.setParameter("paymentStatus", "approved");
+        query.setParameter("status", "created");
+        return query.getResultList();
+    }
+
 }

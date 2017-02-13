@@ -51,6 +51,11 @@ public class Product extends BaseDomain {
     private String shippingTime;
     @Column(name = "shipping_rate")
     private Double shippingRate;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "parent_path")
+    private String parentPath;
 
     public String getName() {
         return name;
@@ -114,6 +119,20 @@ public class Product extends BaseDomain {
 
     public void setShippingRate(Double shippingRate) {
         this.shippingRate = shippingRate;
+    }
+
+    /**
+     * @return the parentPath
+     */
+    public String getParentPath() {
+        return parentPath;
+    }
+
+    /**
+     * @param parentPath the parentPath to set
+     */
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
     }
 
 }

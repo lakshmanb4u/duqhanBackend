@@ -31,4 +31,9 @@
         <put-attribute name="body" value="/WEB-INF/views/paymentStatus.jsp" />
     </definition>
     
+    <definition name="shipmentDetails" extends="common">
+        <put-attribute name="title" value="duqhan.com-shipment-status" />
+        <put-attribute name="body" value="/WEB-INF/views/shipmentDetails.jsp" />
+    </definition>
+    
 </tiles-definitions>

@@ -6,11 +6,14 @@
 package com.weavers.duqhan.business;
 
 import com.easypost.model.Shipment;
+import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
+import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.TrackerBean;
+import java.util.List;
 
 /**
  *
@@ -30,9 +33,11 @@ public interface ShippingService {
 
     Shipment getShipmentByShipmentId(String shipmentId);
 
-    TrackerBean getTrackerByTrackerId(String trackerId);
+    TrackerBean getTrackerByTrackerId(ShipmentTable shipmentTable, String paymentStatus,PaymentDetail paymentDetail);
 
 //  From Shipment Table
     ShipmentTable getShipmentTableByShipmentId(String shipmentId);
+    
+    List<ShipmentDto> getPendingShipmentButPaymentApproved();
 
 }

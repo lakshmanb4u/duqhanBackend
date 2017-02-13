@@ -19,6 +19,7 @@ public class ProductBeans {
     private String status;
     private List<String> allImages;
     private String categoryName;
+    private String searchString;
 
     /**
      * @return the statusCode
@@ -102,5 +103,19 @@ public class ProductBeans {
      */
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    /**
+     * @return the searchString
+     */
+    public String getSearchString() {
+        return searchString;
+    }
+
+    /**
+     * @param searchString the searchString to set
+     */
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
     }
 }

@@ -19,8 +19,12 @@ public interface ProductDao extends BaseDao<Product> {
     List<Product> getAllAvailableProductByProductIds(List<Long> productIds);
 
     List<Product> getAllAvailableProduct();
+    
+    List<Product> SearchProductByName(String searchName);
 
     List<Product> getAllRecentViewProduct(Long userid);
 
     List<Product> getProductsByCategory(Long categoryId);
+    
+    List<Product> getProductsByCategoryIncludeChild(Long categoryId);
 }

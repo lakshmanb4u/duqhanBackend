@@ -143,6 +143,21 @@ public class UserController {
         return productBeans;
     }
 
+    @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
+    public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductBeans productBeans = new ProductBeans();
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            productBeans = productService.searchProducts(requistBean);
+        } else {
+            response.setStatus(401);
+            productBeans.setStatusCode("401");
+            productBeans.setStatus("Invalid Token.");
+        }
+        return productBeans;
+    }
+
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
     public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
@@ -307,14 +322,14 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             address.setUserId(users.getId());
-            StatusBean statusBean = shippingService.verifyAddress(address);
-            if (statusBean.getStatusCode().equals("200")) {
+//            StatusBean statusBean = shippingService.verifyAddress(address);
+//            if (statusBean.getStatusCode().equals("200")) {
                 addressBean = usersService.saveUserAddress(address);
-            } else {
-                response.setStatus(402);
-                addressBean.setStatusCode(statusBean.getStatusCode());
-                addressBean.setStatus(statusBean.getStatus());
-            }
+//            } else {
+//                response.setStatus(402);
+//                addressBean.setStatusCode(statusBean.getStatusCode());
+//                addressBean.setStatus(statusBean.getStatus());
+//            }
         } else {
             response.setStatus(401);
             addressBean.setStatusCode("401");

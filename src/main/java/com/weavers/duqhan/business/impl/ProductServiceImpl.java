@@ -12,6 +12,7 @@ import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.ColorDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
+import com.weavers.duqhan.dao.PaymentDetailDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductImgDao;
 import com.weavers.duqhan.dao.ProductSizeColorMapDao;
@@ -24,6 +25,7 @@ import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Color;
 import com.weavers.duqhan.domain.OrderDetails;
+import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductImg;
 import com.weavers.duqhan.domain.ProductSizeColorMap;
@@ -91,6 +93,8 @@ public class ProductServiceImpl implements ProductService {
     VendorDao vendorDao;
     @Autowired
     ShippingService shippingService;
+    @Autowired
+    PaymentDetailDao paymentDetailDao;
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
     private AddressDto setAddressDto(UserAddress userAddress) {
@@ -179,6 +183,11 @@ public class ProductServiceImpl implements ProductService {
         for (Color color : colors) {
             mapColor.put(color.getId(), color);
         }
+        List<Category> categorys = categoryDao.loadAll();
+        HashMap<Long, String> mapCategory = new HashMap<>();
+        for (Category category : categorys) {
+            mapCategory.put(category.getId(), category.getName());
+        }
         int i = 0;
         for (Product product : products) {
             if (mapSizeColorMap.containsKey(product.getId())) {
@@ -189,6 +198,7 @@ public class ProductServiceImpl implements ProductService {
                 allImages.add(product.getImgurl());
                 bean.setDescription(product.getDescription());
                 bean.setCategoryId(product.getCategoryId());
+                bean.setCategoryName(mapCategory.get(product.getCategoryId()));
                 bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
                 bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
                 if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {     // if this product have any size
@@ -228,7 +238,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans getProductsByCategory(Long categoryId) {
-        List<Product> products = productDao.getProductsByCategory(categoryId);  // Find category wise product 
+        List<Product> products = productDao.getProductsByCategoryIncludeChild(categoryId);  // Find category wise product 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -259,6 +269,19 @@ public class ProductServiceImpl implements ProductService {
         }
         HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
         return this.setProductBeans(products, mapSizeColorMaps);
+    }
+
+    @Override
+    public ProductBeans searchProducts(ProductRequistBean requistBean) {
+        List<Product> products = productDao.SearchProductByName(requistBean.getName());   // Search products by name
+        List<Long> productIds = new ArrayList<>();
+        for (Product product : products) {
+            productIds.add(product.getId());
+        }
+        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
+        ProductBeans productBeans = this.setProductBeans(products, mapSizeColorMaps);
+        productBeans.setSearchString(requistBean.getName());
+        return productBeans;
     }
 
     @Override
@@ -522,6 +545,7 @@ public class ProductServiceImpl implements ProductService {
     public String saveProduct(ProductBean productBean) {
         String status = "ERROR: Product can not be saved!!";
         if (productBean != null) {
+            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());
             Product product = new Product();
             product.setId(null);
             product.setName(productBean.getName());
@@ -530,6 +554,7 @@ public class ProductServiceImpl implements ProductService {
             product.setDescription(productBean.getDescription());
             product.setLastUpdate(new Date());
             product.setVendorId(productBean.getVendorId());     //>>>>>>>>
+            product.setParentPath(parentCategory.getParentPath());
             Shipment shipment = shippingService.createDefaultShipmentDomestic();
             if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
                 product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
@@ -580,11 +605,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String saveCategory(CategoryDto categoryDto) {
         String status = "ERROR: Category can not be saved!!";
-        if (categoryDto.getCategoryName() != null) {
+        Category parentCategory = categoryDao.loadById(categoryDto.getPatentId());
+        if (categoryDto.getCategoryName() != null && null != parentCategory) {
             Category category = new Category();
             category.setId(null);
             category.setName(categoryDto.getCategoryName());
             category.setParentId(categoryDto.getPatentId());
+            category.setParentPath(parentCategory.getParentPath() + "_" + categoryDto.getPatentId());
             Category category2 = categoryDao.save(category);    //save new category
             if (category2 != null) {
                 status = "Category saved.";
@@ -678,61 +705,64 @@ public class ProductServiceImpl implements ProductService {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         List<OrderDetailsDto> orderdetailsDtos = new ArrayList<>();
         List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId);
-        List<UserAddress> userAddresses = userAddressDao.getAddressByUserId(userId);
-        HashMap<Long, UserAddress> mapUserAddress = new HashMap<>();
-        for (UserAddress userAddress : userAddresses) {
-            mapUserAddress.put(userAddress.getId(), userAddress);
-        }
-        List<Product> products = productDao.loadAll();
-        HashMap<Long, Product> mapProduct = new HashMap<>();
-        for (Product product : products) {
-            mapProduct.put(product.getId(), product);
-        }
-        List<Sizee> sizees = sizeeDao.loadAll();
-        HashMap<Long, Sizee> mapSize = new HashMap<>();
-        for (Sizee sizee : sizees) {
-            mapSize.put(sizee.getId(), sizee);
-        }
-        List<Color> colors = colorDao.loadAll();
-        HashMap<Long, Color> mapColor = new HashMap<>();
-        for (Color color : colors) {
-            mapColor.put(color.getId(), color);
-        }
-        for (Object[] object : objects) {
-            OrderDetails orderDetailse = (OrderDetails) object[0];//********************
-            ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) object[1];//***********
-            OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
-            orderDetailsDto.setAddressDto(this.setAddressDto(mapUserAddress.get(orderDetailse.getAddressId())));
-            if (mapColor.containsKey(sizeColorMap.getColorId())) {
-                orderDetailsDto.setColor(mapColor.get(sizeColorMap.getColorId()).getName());
+        if (!objects.isEmpty()) {
+            Object[] od = objects.get(0);
+            OrderDetails details = (OrderDetails) od[0];
+            PaymentDetail paymentDetail = paymentDetailDao.getDetailByPayKey(details.getPaymentKey());
+            List<UserAddress> userAddresses = userAddressDao.getAddressByUserId(userId);
+            HashMap<Long, UserAddress> mapUserAddress = new HashMap<>();
+            for (UserAddress userAddress : userAddresses) {
+                mapUserAddress.put(userAddress.getId(), userAddress);
             }
-            if (mapSize.containsKey(sizeColorMap.getSizeId())) {
-                orderDetailsDto.setSize(mapSize.get(sizeColorMap.getSizeId()).getValu());
+            List<Product> products = productDao.loadAll();
+            HashMap<Long, Product> mapProduct = new HashMap<>();
+            for (Product product : products) {
+                mapProduct.put(product.getId(), product);
             }
-            orderDetailsDto.setOrderId(orderDetailse.getOrderId());
-            orderDetailsDto.setDeliveryDate(DateFormater.formate(orderDetailse.getDeliveryDate()));
-            orderDetailsDto.setEmail(mapUserAddress.get(orderDetailse.getAddressId()).getEmail());
-            orderDetailsDto.setMapId(orderDetailse.getMapId());
-            orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
-            orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
-            orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
-            orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
-            orderDetailsDto.setProductName(mapProduct.get(sizeColorMap.getProductId()).getName());
-            orderDetailsDto.setStatus(orderDetailse.getStatus());
-            orderDetailsDto.setProdImg(mapProduct.get(sizeColorMap.getProductId()).getImgurl());
-            orderDetailsDto.setPrice(sizeColorMap.getPrice());
-            orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
-            orderDetailsDto.setQuty(orderDetailse.getQuentity());
-            ShipmentTable shipmentTable = shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId());
-            if (null != shipmentTable && !shipmentTable.getTrackerId().equals("0")) {
-                orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable.getTrackerId()));
+            List<Sizee> sizees = sizeeDao.loadAll();
+            HashMap<Long, Sizee> mapSize = new HashMap<>();
+            for (Sizee sizee : sizees) {
+                mapSize.put(sizee.getId(), sizee);
             }
-            orderdetailsDtos.add(orderDetailsDto);
+            List<Color> colors = colorDao.loadAll();
+            HashMap<Long, Color> mapColor = new HashMap<>();
+            for (Color color : colors) {
+                mapColor.put(color.getId(), color);
+            }
+            for (Object[] object : objects) {
+                OrderDetails orderDetailse = (OrderDetails) object[0];//********************
+                ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) object[1];//***********
+                OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
+                orderDetailsDto.setAddressDto(this.setAddressDto(mapUserAddress.get(orderDetailse.getAddressId())));
+                if (mapColor.containsKey(sizeColorMap.getColorId())) {
+                    orderDetailsDto.setColor(mapColor.get(sizeColorMap.getColorId()).getName());
+                }
+                if (mapSize.containsKey(sizeColorMap.getSizeId())) {
+                    orderDetailsDto.setSize(mapSize.get(sizeColorMap.getSizeId()).getValu());
+                }
+                orderDetailsDto.setOrderId(orderDetailse.getOrderId());
+                orderDetailsDto.setDeliveryDate(DateFormater.formate(orderDetailse.getDeliveryDate()));
+                orderDetailsDto.setEmail(mapUserAddress.get(orderDetailse.getAddressId()).getEmail());
+                orderDetailsDto.setMapId(orderDetailse.getMapId());
+                orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
+                orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
+                orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
+                orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
+                orderDetailsDto.setProductName(mapProduct.get(sizeColorMap.getProductId()).getName());
+                orderDetailsDto.setStatus(orderDetailse.getStatus());
+                orderDetailsDto.setProdImg(mapProduct.get(sizeColorMap.getProductId()).getImgurl());
+                orderDetailsDto.setPrice(sizeColorMap.getPrice());
+                orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
+                orderDetailsDto.setQuty(orderDetailse.getQuentity());
+                ShipmentTable shipmentTable = shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId());
+                orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable, orderDetailse.getStatus(), paymentDetail));
+                orderdetailsDtos.add(orderDetailsDto);
+            }
+            orderDetailsBean.setOrderDetailsDtos(orderdetailsDtos);
+            orderDetailsBean.setStatus("success");
+            orderDetailsBean.setStatusCode("200");
+            return orderDetailsBean;
         }
-        orderDetailsBean.setOrderDetailsDtos(orderdetailsDtos);
-        orderDetailsBean.setStatus("success");
-        orderDetailsBean.setStatusCode("200");
         return orderDetailsBean;
     }
-
 }

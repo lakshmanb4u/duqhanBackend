@@ -74,8 +74,23 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
+    public List<Product> getProductsByCategoryIncludeChild(Long categoryId) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate");
+        query.setParameter("categoryId", categoryId);
+        query.setParameter("parentPath", "%_" + categoryId + "_%");
+        return query.getResultList();
+    }
+
+    @Override
     public List<Product> getAllAvailableProduct() {
         Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY p.lastUpdate");
+        return query.getResultList();
+    }
+
+    @Override
+    public List<Product> SearchProductByName(String searchName) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.name LIKE :searchName ORDER BY p.lastUpdate");
+        query.setParameter("searchName", "%" + searchName + "%");
         return query.getResultList();
     }
 

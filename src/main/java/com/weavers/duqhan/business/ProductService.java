@@ -21,7 +21,7 @@ import com.weavers.duqhan.dto.SizeDto;
  * @author Android-3
  */
 public interface ProductService {
-    
+
     ColorAndSizeDto getColorSizeList();
 
     ProductBeans getProductsByCategory(Long categoryId);
@@ -29,6 +29,8 @@ public interface ProductService {
     ProductBeans getProductsByRecentView(Long userId);
 
     ProductBeans getAllProducts();
+
+    ProductBeans searchProducts(ProductRequistBean requistBean);
 
     ProductDetailBean getProductDetailsById(Long productId, Long userId);
 

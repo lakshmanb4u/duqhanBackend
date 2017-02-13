@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 24, 2017 at 11:25 AM
+-- Generation Time: Feb 13, 2017 at 06:23 AM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 7.0.9
 
@@ -36,7 +36,8 @@ CREATE TABLE `cart` (
 CREATE TABLE `category` (
   `id` bigint(20) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `parent_id` bigint(20) NOT NULL
+  `parent_id` bigint(20) NOT NULL,
+  `parent_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -59,13 +60,17 @@ CREATE TABLE `color` (
 
 CREATE TABLE `order_details` (
   `id` bigint(32) NOT NULL,
+  `order_id` varchar(255) NOT NULL,
   `user_id` bigint(32) NOT NULL,
   `payment_key` varchar(50) NOT NULL,
   `map_id` bigint(32) NOT NULL,
   `payment_amount` double NOT NULL,
   `order_date` datetime NOT NULL,
   `status` varchar(50) NOT NULL,
-  `quentity` bigint(32) NOT NULL
+  `quentity` bigint(32) NOT NULL,
+  `address_id` bigint(32) NOT NULL,
+  `delivery_date` datetime DEFAULT NULL,
+  `shipment_id` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -113,7 +118,11 @@ CREATE TABLE `product` (
   `category_id` bigint(32) NOT NULL,
   `description` varchar(255) DEFAULT NULL,
   `imgurl` varchar(255) NOT NULL,
-  `last_update` datetime NOT NULL
+  `last_update` datetime NOT NULL,
+  `vendor_id` bigint(32) NOT NULL,
+  `shipping_time` varchar(20) DEFAULT NULL,
+  `shipping_rate` double DEFAULT NULL,
+  `parent_path` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -141,23 +150,11 @@ CREATE TABLE `product_size_color_map` (
   `color_id` bigint(20) DEFAULT NULL,
   `price` double NOT NULL,
   `discount` double DEFAULT NULL,
-  `quentity` bigint(32) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `purchase_order`
---
-
-CREATE TABLE `purchase_order` (
-  `id` int(11) NOT NULL,
-  `order id` bigint(20) NOT NULL,
-  `product id` bigint(20) NOT NULL,
-  `quantity` bigint(20) NOT NULL,
-  `rate` double NOT NULL,
-  `discount` double DEFAULT NULL,
-  `status` varchar(50) NOT NULL
+  `quantity` bigint(32) NOT NULL,
+  `product_length` double DEFAULT NULL,
+  `product_width` double DEFAULT NULL,
+  `product_height` double DEFAULT NULL,
+  `product_weight` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -171,6 +168,27 @@ CREATE TABLE `recent_view` (
   `user_id` bigint(20) NOT NULL,
   `product_id` bigint(20) NOT NULL,
   `view_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `shipment_table`
+--
+
+CREATE TABLE `shipment_table` (
+  `id` bigint(32) NOT NULL,
+  `shipment_id` varchar(255) NOT NULL,
+  `parcel_id` varchar(255) NOT NULL,
+  `postage_label_id` varchar(255) NOT NULL,
+  `rate_id` varchar(255) NOT NULL,
+  `tracker_id` varchar(255) NOT NULL,
+  `is_return` tinyint(1) NOT NULL,
+  `customs_info_id` varchar(255) NOT NULL,
+  `user_id` bigint(32) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `status` varchar(255) NOT NULL,
+  `pay_key` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -214,7 +232,31 @@ CREATE TABLE `users` (
   `lastlogin_date` datetime DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `fbid` bigint(32) DEFAULT NULL,
-  `profile_img` varchar(255) DEFAULT NULL
+  `profile_img` varchar(255) DEFAULT NULL,
+  `fcm_token` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_address`
+--
+
+CREATE TABLE `user_address` (
+  `id` bigint(32) NOT NULL,
+  `user_id` bigint(32) NOT NULL,
+  `status` bigint(20) NOT NULL,
+  `street_one` varchar(255) NOT NULL,
+  `street_two` varchar(255) DEFAULT NULL,
+  `city` varchar(255) DEFAULT NULL,
+  `state` varchar(255) DEFAULT NULL,
+  `zip_code` varchar(255) DEFAULT NULL,
+  `country` varchar(255) DEFAULT NULL,
+  `residential` tinyint(1) DEFAULT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -229,6 +271,24 @@ CREATE TABLE `user_aouth` (
   `email` varchar(255) NOT NULL,
   `aouth_token` varchar(255) NOT NULL,
   `valid_till` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vendor`
+--
+
+CREATE TABLE `vendor` (
+  `id` bigint(32) NOT NULL,
+  `vendor_name` varchar(255) NOT NULL,
+  `street_one` varchar(255) NOT NULL,
+  `street_two` varchar(255) DEFAULT NULL,
+  `city` varchar(255) NOT NULL,
+  `state` varchar(255) NOT NULL,
+  `country` varchar(255) NOT NULL,
+  `zip` varchar(255) NOT NULL,
+  `phone` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -257,7 +317,8 @@ ALTER TABLE `color`
 -- Indexes for table `order_details`
 --
 ALTER TABLE `order_details`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `order_id` (`order_id`);
 
 --
 -- Indexes for table `otp_table`
@@ -290,15 +351,15 @@ ALTER TABLE `product_size_color_map`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `purchase_order`
---
-ALTER TABLE `purchase_order`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `recent_view`
 --
 ALTER TABLE `recent_view`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `shipment_table`
+--
+ALTER TABLE `shipment_table`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -320,9 +381,21 @@ ALTER TABLE `users`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `user_address`
+--
+ALTER TABLE `user_address`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `user_aouth`
 --
 ALTER TABLE `user_aouth`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `vendor`
+--
+ALTER TABLE `vendor`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -333,22 +406,22 @@ ALTER TABLE `user_aouth`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 --
 -- AUTO_INCREMENT for table `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 --
 -- AUTO_INCREMENT for table `otp_table`
 --
@@ -358,32 +431,32 @@ ALTER TABLE `otp_table`
 -- AUTO_INCREMENT for table `payment_detail`
 --
 ALTER TABLE `payment_detail`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
 ALTER TABLE `product_img`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 --
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
---
--- AUTO_INCREMENT for table `purchase_order`
---
-ALTER TABLE `purchase_order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 --
 -- AUTO_INCREMENT for table `recent_view`
 --
 ALTER TABLE `recent_view`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+--
+-- AUTO_INCREMENT for table `shipment_table`
+--
+ALTER TABLE `shipment_table`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 --
 -- AUTO_INCREMENT for table `sizee`
 --
@@ -393,14 +466,24 @@ ALTER TABLE `sizee`
 -- AUTO_INCREMENT for table `size_group`
 --
 ALTER TABLE `size_group`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+--
+-- AUTO_INCREMENT for table `user_address`
+--
+ALTER TABLE `user_address`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 --
 -- AUTO_INCREMENT for table `user_aouth`
 --
 ALTER TABLE `user_aouth`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+--
+-- AUTO_INCREMENT for table `vendor`
+--
+ALTER TABLE `vendor`
   MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;

@@ -17,4 +17,6 @@ public interface ShipmentTableDao extends BaseDao<ShipmentTable> {
     List<ShipmentTable> getShipmentByPayKeyAndUserId(String paymentId, Long userId);
 
     ShipmentTable getShipmentByShipmentId(String shipmentId);
+    
+    List<ShipmentTable> getPendingShipmentsButPaymentApproved();
 }

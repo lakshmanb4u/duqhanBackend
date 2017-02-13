@@ -12,6 +12,7 @@ import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,6 +32,8 @@ public class HomeController {
     UsersService usersService;
     @Autowired
     ProductService productService;
+
+    private final Logger logger = Logger.getLogger(HomeController.class);
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home() {
@@ -78,5 +81,11 @@ public class HomeController {
         CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return categorysBean;
+    }
+
+    @RequestMapping(value = "/test", method = RequestMethod.GET) // for test
+    public String test() {
+        logger.error("This is Error message", new Exception("Testing"));
+        return "OOKK";
     }
 }

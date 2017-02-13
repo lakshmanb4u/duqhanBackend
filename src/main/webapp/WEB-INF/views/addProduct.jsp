@@ -52,6 +52,33 @@
         $('#priceid').on('keyup blur change', function (e) {
             $('#discountid').val($('#priceid').val());
         });
+//==========================Image Validate========================//
+
+        function displayPreview(files) {
+            var reader = new FileReader();
+            var img = new Image();
+            reader.onload = function (e) {
+                img.src = e.target.result;
+                fileSize = Math.round(files.size / 1024);
+//                alert("File size is " + fileSize + " kb");
+//                swal('Image!', 'File size is + fileSize +  kb', 'success');
+                img.onload = function () {
+                    var height = this.height;
+                    var width = this.width;
+                    if (height > 512 || width > 512) {
+                        swal('Error!', 'Your image is ' + this.width + ' X ' + this.height + '. max image is 512 X 512.', 'warning');
+                        $("#fileId").val("");
+                        return false;
+                    }
+                    $('#preview').append('<img src="' + e.target.result + '"/>');
+                };
+            };
+            reader.readAsDataURL(files);
+        }
+        $("#fileId").change(function () {
+            var fileId = this.files[0];
+//            displayPreview(fileId);
+        });
 //===========================image upload==========================//
         $("#image-form").submit(function (e) {
             var that = $(this);
