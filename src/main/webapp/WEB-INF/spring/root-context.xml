@@ -58,13 +58,13 @@
         
         <!-- Local Configuration -->
     
-        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+                <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
         <property name="password" value="" />
     
         <!-- Server Configuration -->
         
-<!--                <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+<!--        <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />-->
         

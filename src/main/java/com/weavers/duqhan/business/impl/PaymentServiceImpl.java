@@ -19,8 +19,10 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.core.rest.APIContext;
 import com.paypal.core.rest.PayPalRESTException;
 import com.paypal.core.rest.PayPalResource;
+import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ShippingService;
+import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
@@ -36,7 +38,7 @@ import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
-import com.weavers.duqhan.dto.GenerateAccessToken;
+import com.weavers.duqhan.util.GenerateAccessToken;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.PayPalConstants;
@@ -51,11 +53,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -80,9 +80,13 @@ public class PaymentServiceImpl implements PaymentService {
     ShippingService shippingService;
     @Autowired
     ShipmentTableDao shipmentTableDao;
+    @Autowired
+    UsersService usersService;
+    @Autowired
+    NotificationService notificationService;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(PaymentServiceImpl.class);
+    private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
 
     @Override
     public String[] transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {
@@ -90,22 +94,20 @@ public class PaymentServiceImpl implements PaymentService {
         String returnUrl = null;
         String payKey = null;
         InputStream is;
+        String paypalToken = null;
         DecimalFormat df2 = new DecimalFormat(".##");
-//        Double totalCost = (cartBean.getOrderTotal() + shippingCost);
         List<ProductBean> productBeans = cartBean.getProducts();
         is = this.getClass().getResourceAsStream("/sdk_config.properties");
         try {
             PayPalResource.initConfig(is);
         } catch (PayPalRESTException ex) {
-            logger.error("PayPalRESTException=" + ex);
-            Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)PayPalRESTException for PayPalResource.initConfig " + ex);
         }
 
         String accessToken = null;
         Payment createdPayment = new Payment();
         try {
             accessToken = GenerateAccessToken.getAccessToken();
-
             Map<String, String> sdkConfig = new HashMap<>();
             sdkConfig.put("mode", PayPalConstants.MODE);
 
@@ -114,16 +116,15 @@ public class PaymentServiceImpl implements PaymentService {
             List<Item> items = new ArrayList<>();
             Double totalItemCost = 0.0;
             String itemCost = "0";
-            Double inrRate = CurrencyConverter.convert("USD", "INR");//Return INR For 1 USD
+            Double inrRate = CurrencyConverter.convert("INR", "USD");//Return USD For 1 INR
             for (ProductBean productBean : productBeans) {
                 itemCost = "0";
                 Item item = new Item();
                 item.setName(productBean.getName() + " " + productBean.getSize() != null ? productBean.getSize() : "" + " " + productBean.getColor() != null ? productBean.getColor() : "");//***********************
                 item.setCurrency(PayPalConstants.CURRENCY);
-                item.setQuantity(productBean.getQty());//**********************
+                item.setQuantity(productBean.getQty());
                 itemCost = df2.format(inrRate * productBean.getDiscountedPrice());
-                item.setPrice(itemCost);//****************************
-                System.out.println("itemCost====== "+itemCost);
+                item.setPrice(itemCost);
                 items.add(item);
                 itemCost = df2.format(Double.parseDouble(itemCost) * Double.parseDouble(productBean.getQty()));
                 totalItemCost = totalItemCost + Double.parseDouble(itemCost);
@@ -143,11 +144,9 @@ public class PaymentServiceImpl implements PaymentService {
             Amount amount = new Amount();
             amount.setCurrency(PayPalConstants.CURRENCY);
             amount.setTotal(df2.format(totalItemCost));
-            System.out.println("df2.format(totalItemCost) "+df2.format(totalItemCost));
             Payer payer = new Payer();
             payer.setPaymentMethod("paypal");
-            PayerInfo payerInfo = new PayerInfo();
-
+//            PayerInfo payerInfo = new PayerInfo();
             Transaction transaction = new Transaction();
             transaction.setDescription("creating a payment");
             transaction.setAmount(amount);
@@ -174,15 +173,15 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 createdPayment = payment.create(apiContext);
             } catch (PayPalRESTException ex) {
-                logger.error("PayPal Payment Create Exception :" + ex);
-                Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("(==E==)PayPal Payment Create Exception :" + ex);
                 return null;
             }
 
             returnUrl = createdPayment.getLinks().get(1).getHref();
+            String[] parts = returnUrl.split("&token=");
+            paypalToken = parts[1];
         } catch (Exception e) {
-            Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, e);
-            logger.error("PayPalRESTExceptionsdsa=" + e);
+            logger.error("(==E==)Multi Exceptions at the time of payment " + e);
             return null;
         }
         if (createdPayment != null && createdPayment.getState().equalsIgnoreCase("created")) {
@@ -194,10 +193,11 @@ public class PaymentServiceImpl implements PaymentService {
             paymentDetail.setPaymentKey(createdPayment.getId());
             paymentDetail.setPaymentStatus(createdPayment.getState());
             paymentDetail.setAccessToken(accessToken);
+            paymentDetail.setPaypalToken(paypalToken);
             try {
                 paymentDetail.setPaymentDate(sdf.parse(createdPayment.getCreateTime()));
             } catch (ParseException ex) {
-                Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("(==E==)Date ParseException :" + ex);
             }
             paymentDetailDao.save(paymentDetail);
 
@@ -246,12 +246,11 @@ public class PaymentServiceImpl implements PaymentService {
                         shipmentTable.setPayKey(createdPayment.getId());
                         shipmentTableDao.save(shipmentTable);
                     } else {
-                        logger.error("shipment.lowestRate().getRate() = null");
-                        Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, "shipment.lowestRate().getRate() = null");
+                        logger.error("(==E==)shipment.lowestRate().getRate() = null");
                         return null;
                     }
                 } catch (EasyPostException ex) {
-                    Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.error("(==E==)EasyPostException :shipment.lowestRate().getRate() = null" + ex);
                 }
             }
             Date date = new Date();
@@ -322,7 +321,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             status = createdPayment.getState();
         } catch (PayPalRESTException ex) {
-            Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)PayPalRESTException :whene get payer information by success url" + ex);
         }
         if (status != null) {
             if (status.equals("approved")) {
@@ -357,6 +356,8 @@ public class PaymentServiceImpl implements PaymentService {
                 orderDetailsDao.save(orderDetail);
             }
         }
+        //========================send notification to user=====================//
+        notificationService.sendPaymentNotification(paymentDetail.getUserId(), status);
         return status;
     }
 
@@ -365,6 +366,7 @@ public class PaymentServiceImpl implements PaymentService {
         PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(payKey);
         String status = StatusConstants.ARS_RETRY;
         List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(payKey, userId);
+        List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(payKey, userId);
         //=============================check payment status===========================//
         Payment payment = new Payment();
         try {
@@ -372,13 +374,12 @@ public class PaymentServiceImpl implements PaymentService {
             payment = Payment.get(apiContext, payKey);
             status = payment.getState();
         } catch (PayPalRESTException e) {
-            Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, e);
+            logger.error("(==E==)PayPalRESTException :getPaymentStatus by pay key" + e);
         }
 
         if (payment.getState() != null && !status.equals(StatusConstants.ARS_RETRY)) {
             if (payment.getState().equals(StatusConstants.PPS_APPROVED)) {
                 //=============================buy shipment==========================//
-                List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(payKey, userId);
                 for (ShipmentTable shipmentTable : shipmentTables) {
                     Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
                     try {
@@ -396,7 +397,7 @@ public class PaymentServiceImpl implements PaymentService {
                     } catch (EasyPostException | NullPointerException ex) {
                         shipmentTable.setStatus(StatusConstants.ESS_FAILED);
                         shipmentTableDao.save(shipmentTable);
-                        Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                        logger.error("(==E==)PayPalRESTException : At buy shipment" + ex);
                     }
                 }
 //                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
@@ -411,20 +412,13 @@ public class PaymentServiceImpl implements PaymentService {
                     orderDetail.setStatus(status);
                     orderDetailsDao.save(orderDetail);
                 }
+                for (ShipmentTable shipmentTable : shipmentTables) {
+                    shipmentTable.setStatus(StatusConstants.ESS_FAILED);
+                    shipmentTableDao.save(shipmentTable);
+                }
             }
         }
         return status;
     }
 
-    public static void main(String[] args) {
-        try {
-            APIContext apiContext = new APIContext("Bearer A101.Z7lFreKp-Xvr5B8B5BlpR9Dv0WHVF0gMNyqIEsEORTWzShPucVCHhkTlEuU6mt0C.kl3QKinNvXBGarL_DwEB838fBye");
-
-            Payment payment = Payment.get(apiContext,
-                    "PAY-47K21227BJ588124FLCOIJMA");
-            System.out.println("Payment retrieved ID = " + payment.getId()
-                    + ", status = " + payment.getState());
-        } catch (PayPalRESTException e) {
-        }
-    }
 }

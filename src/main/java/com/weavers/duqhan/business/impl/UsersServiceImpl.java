@@ -26,6 +26,7 @@ import com.weavers.duqhan.util.RandomCodeGenerator;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class UsersServiceImpl implements UsersService {
@@ -41,6 +42,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     UserAddressDao userAddressDao;
+    private final Logger logger = Logger.getLogger(UsersServiceImpl.class);
 
     private UserBean setUserBean(Users users) {
         UserBean userBean = new UserBean();
@@ -168,8 +170,12 @@ public class UsersServiceImpl implements UsersService {
             String otp = RandomCodeGenerator.getNumericCode(6); // generate OTP
             String status = MailSender.sendEmail(user.getEmail(), "OTP For Password Resset", "Your OTP is:  " + otp, "");// send mail to user with otp.
             if (status.equals("success")) { // if mail send...
-                OtpTable otpTable = new OtpTable();
-                otpTable.setId(null);
+                OtpTable otpTable = otpTableDao.getOtpTableByUserId(user.getId());
+                if (null != otpTable) {
+                } else {
+                    otpTable = new OtpTable();
+                    otpTable.setId(null);
+                }
                 otpTable.setUserId(user.getId());
                 otpTable.setUserMail(user.getEmail());
                 otpTable.setOtp(otp);
@@ -254,7 +260,7 @@ public class UsersServiceImpl implements UsersService {
         }
         return userBean;
     }
-//===========================================Address moduses start========================================//
+//===========================================Address module start========================================//
 // <editor-fold defaultstate="collapsed" desc="Address moduses">
 // <editor-fold defaultstate="collapsed" desc="setAddressDto">
 
@@ -438,6 +444,8 @@ public class UsersServiceImpl implements UsersService {
         return addressBean;
     }
 
+    // </editor-fold>
+//===========================================Address module end==========================================//
     @Override
     public StatusBean changePassword(LoginBean loginBean, Users user) {
         StatusBean statusBean = new StatusBean();
@@ -454,6 +462,4 @@ public class UsersServiceImpl implements UsersService {
         return statusBean;
     }
 
-// </editor-fold>
-//===========================================Address moduses end==========================================//
 }

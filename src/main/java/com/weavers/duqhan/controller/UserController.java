@@ -26,6 +26,7 @@ import com.weavers.duqhan.util.DateFormater;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,8 @@ public class UserController {
     PaymentService paymentService;
     @Autowired
     ShippingService shippingService;
+
+    private final Logger logger = Logger.getLogger(UserController.class);
 
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
@@ -192,7 +195,7 @@ public class UserController {
         CartBean cartBean = new CartBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            cartBean = productService.getCartFoAUser(users.getId());
+            cartBean = productService.getCartForUser(users.getId());
         } else {
             response.setStatus(401);
             cartBean.setStatusCode("401");
@@ -324,7 +327,7 @@ public class UserController {
             address.setUserId(users.getId());
 //            StatusBean statusBean = shippingService.verifyAddress(address);
 //            if (statusBean.getStatusCode().equals("200")) {
-                addressBean = usersService.saveUserAddress(address);
+            addressBean = usersService.saveUserAddress(address);
 //            } else {
 //                response.setStatus(402);
 //                addressBean.setStatusCode(statusBean.getStatusCode());

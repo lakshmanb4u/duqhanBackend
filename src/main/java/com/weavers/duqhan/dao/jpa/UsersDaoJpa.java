@@ -46,4 +46,15 @@ public class UsersDaoJpa extends BaseDaoJpa<Users> implements UsersDao {
         }
     }
 
+    @Override
+    public String GetFcmTokenByuserId(Long userId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT u.fcmToken FROM Users AS u WHERE u.id=:userId");
+            query.setParameter("userId", userId);
+            return (String) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
 }

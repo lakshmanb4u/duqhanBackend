@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.weavers.duqhan.dto;
+package com.weavers.duqhan.util;
 
 import com.paypal.core.ConfigManager;
 import com.paypal.core.rest.OAuthTokenCredential;
@@ -25,12 +25,9 @@ public class GenerateAccessToken {
         // OAuthTokenCredential by passing in
         // ClientID and ClientSecret
         String clientID = ConfigManager.getInstance().getValue("clientID");
-        String clientSecret = ConfigManager.getInstance().getValue(
-                "clientSecret");
+        String clientSecret = ConfigManager.getInstance().getValue("clientSecret");
         Map<String, String> sdkConfig = new HashMap<>();
-                sdkConfig.put("mode", PayPalConstants.MODE);
-//        sdkConfig.put("mode", "live");
-
+        sdkConfig.put("mode", PayPalConstants.MODE);
         String accessToken = new OAuthTokenCredential(clientID, clientSecret, sdkConfig).getAccessToken();
 
         return accessToken;

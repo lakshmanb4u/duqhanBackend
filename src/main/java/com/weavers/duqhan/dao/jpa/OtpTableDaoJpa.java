@@ -57,4 +57,15 @@ public class OtpTableDaoJpa extends BaseDaoJpa<OtpTable> implements OtpTableDao 
         }
     }
 
+    @Override
+    public OtpTable getOtpTableByUserId(Long userId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT otp FROM OtpTable otp WHERE otp.userId=:userId");
+            query.setParameter("userId", userId);
+            return (OtpTable) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
 }

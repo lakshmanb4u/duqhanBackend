@@ -25,7 +25,6 @@ public class CurrencyConverter {
         String responseBody = httpclient.execute(httpGet, responseHandler);
         httpclient.getConnectionManager().shutdown();
         return Double.parseDouble(responseBody);
-//        return Float.parseFloat(responseBody);
     }
 
     public static Double usdTOinr(Double usdValue) {

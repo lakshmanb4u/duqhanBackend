@@ -20,7 +20,7 @@ public interface ProductDao extends BaseDao<Product> {
 
     List<Product> getAllAvailableProduct();
     
-    List<Product> SearchProductByName(String searchName);
+    List<Product> SearchProductByNameAndDescription(String searchName);
 
     List<Product> getAllRecentViewProduct(Long userid);
 

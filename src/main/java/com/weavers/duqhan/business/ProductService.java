@@ -40,7 +40,7 @@ public interface ProductService {
 
     String removeProductFromCart(ProductRequistBean requistBean);
 
-    CartBean getCartFoAUser(Long userId);
+    CartBean getCartForUser(Long userId);
 
     String saveProduct(ProductBean productBean);
 

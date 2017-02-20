@@ -12,7 +12,7 @@
         <tiles-version>3.0.5</tiles-version>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
-        <org.slf4j-version>1.7.12</org.slf4j-version>
+        <org.slf4j-version>1.7.22</org.slf4j-version>
     </properties>
     
     
@@ -150,7 +150,6 @@
         </dependency>
         
         <!-- Logging -->
-    
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -173,7 +172,7 @@
                     <artifactId>jmxri</artifactId>
                 </exclusion>
             </exclusions>
-            <type>jar</type>
+            <scope>runtime</scope>
         </dependency>
         
         <!--easypost shipping-->
@@ -185,6 +184,17 @@
             <type>jar</type>
         </dependency>
 
+        <!-- Jackson JSON Mapper -->
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-mapper-asl</artifactId>
+            <version>1.8.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.jackson</groupId>
+            <artifactId>jackson-core-asl</artifactId>
+            <version>1.8.5</version>
+        </dependency>
     </dependencies>
 
     <build>

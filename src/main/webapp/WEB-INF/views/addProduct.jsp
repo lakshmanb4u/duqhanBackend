@@ -251,9 +251,6 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: that.attr("action"),
-                    beforeSend: function () {
-                        $("#addColor").validate();
-                    },
                     success: function (data) {
                         location.reload(true);
                         console.log(data);
@@ -278,9 +275,6 @@
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     url: that.attr("action"),
-                    beforeSend: function () {
-                        $("#Addsize").validate();
-                    },
                     success: function (data) {
                         location.reload(true);
                         console.log(data);
@@ -298,23 +292,22 @@
             var jsondata = {};
             jsondata.sizeGroupId = $('#sizegroupId').val();
             jsondata.sizeText = $('#size-name').val();
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify(jsondata),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                url: that.attr("action"),
-                beforeSend: function () {
-                    $("#SizeGroup").validate();
-                },
-                success: function (data) {
-                    location.reload(true);
-                    console.log(data);
-                },
-                complete: function () {
-                    return false;
-                }
-            });
+            if ($('#sizegroupId').val() !== null && $('#sizegroupId').val() !== "" && $('#size-name').val() !== null && $('#size-name').val() !== "") {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(jsondata),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: that.attr("action"),
+                    success: function (data) {
+                        location.reload(true);
+                        console.log(data);
+                    },
+                    complete: function () {
+                        return false;
+                    }
+                });
+            }
         });
         //********************* Category *****************
         $("#CategoryId ").submit(function (e) {
@@ -323,23 +316,22 @@
             var jsondata = {};
             jsondata.categoryName = $('#category-name').val();
             jsondata.patentId = $('#parentcategoryId').val();
-            $.ajax({
-                type: "POST",
-                data: JSON.stringify(jsondata),
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                url: that.attr("action"),
-                beforeSend: function () {
-                    $("#CategoryId").validate();
-                },
-                success: function (data) {
-                    location.reload(true);
-                    console.log(data);
-                },
-                complete: function () {
-                    return false;
-                }
-            });
+            if ($('#category-name').val() !== null && $('#parentcategoryId').val() !== null && $('#category-name').val() !== "" && $('#parentcategoryId').val() !== "") {
+                $.ajax({
+                    type: "POST",
+                    data: JSON.stringify(jsondata),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    url: that.attr("action"),
+                    success: function (data) {
+                        location.reload(true);
+                        console.log(data);
+                    },
+                    complete: function () {
+                        return false;
+                    }
+                });
+            }
         });
 
         // ****************** Add Vendor ************************

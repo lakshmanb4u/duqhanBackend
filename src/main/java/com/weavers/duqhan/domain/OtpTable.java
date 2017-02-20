@@ -21,7 +21,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "otp_table")
-public class OtpTable extends BaseDomain{
+public class OtpTable extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -43,7 +43,6 @@ public class OtpTable extends BaseDomain{
     @Column(name = "send_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date sendTime;
-
 
     public long getUserId() {
         return userId;

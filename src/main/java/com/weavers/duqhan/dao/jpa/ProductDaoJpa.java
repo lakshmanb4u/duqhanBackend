@@ -77,7 +77,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     public List<Product> getProductsByCategoryIncludeChild(Long categoryId) {
         Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate");
         query.setParameter("categoryId", categoryId);
-        query.setParameter("parentPath", "%_" + categoryId + "_%");
+        query.setParameter("parentPath", "%=" + categoryId + "=%");
         return query.getResultList();
     }
 
@@ -88,8 +88,8 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
-    public List<Product> SearchProductByName(String searchName) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.name LIKE :searchName ORDER BY p.lastUpdate");
+    public List<Product> SearchProductByNameAndDescription(String searchName) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.name LIKE :searchName OR p.description LIKE :searchName ORDER BY p.lastUpdate");
         query.setParameter("searchName", "%" + searchName + "%");
         return query.getResultList();
     }

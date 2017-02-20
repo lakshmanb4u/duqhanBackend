@@ -15,6 +15,7 @@ import com.weavers.duqhan.util.RandomCodeGenerator;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -28,6 +29,7 @@ public class AouthServiceImpl implements AouthService {
     @Autowired
     UsersDao usersDao;
 
+    private final Logger logger = Logger.getLogger(AouthServiceImpl.class);
     private String createToken(Long userId) {
         String token = null;
         Calendar cal = Calendar.getInstance();

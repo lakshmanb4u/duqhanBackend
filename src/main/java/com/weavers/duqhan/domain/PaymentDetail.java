@@ -56,8 +56,8 @@ public class PaymentDetail extends BaseDomain {
     @Column(name = "payment_status")
     private String paymentStatus;
     @Size(max = 255)
-    @Column(name = "payment_account")
-    private String paymentAccount;
+    @Column(name = "paypal_token")
+    private String paypalToken;
     @Basic(optional = false)
     @NotNull
     @Size(max = 255)
@@ -120,20 +120,20 @@ public class PaymentDetail extends BaseDomain {
         this.paymentStatus = paymentStatus;
     }
 
-    public String getPaymentAccount() {
-        return paymentAccount;
-    }
-
-    public void setPaymentAccount(String paymentAccount) {
-        this.paymentAccount = paymentAccount;
-    }
-
     public String getAccessToken() {
         return accessToken;
     }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getPaypalToken() {
+        return paypalToken;
+    }
+
+    public void setPaypalToken(String paypalToken) {
+        this.paypalToken = paypalToken;
     }
 
 }

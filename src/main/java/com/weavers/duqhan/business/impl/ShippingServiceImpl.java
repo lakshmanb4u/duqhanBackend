@@ -26,9 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.weavers.duqhan.dao.ShipmentTableDao;
 import com.weavers.duqhan.domain.PaymentDetail;
@@ -41,6 +38,7 @@ import com.weavers.duqhan.dto.TrackerDto;
 import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
+import org.apache.log4j.Logger;
 
 /**
  *
@@ -56,7 +54,7 @@ public class ShippingServiceImpl implements ShippingService {
     UsersDao usersDao;
     @Autowired
     ShipmentTableDao shipmentTableDao;
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(ShippingServiceImpl.class);
+    private final Logger logger = Logger.getLogger(ShippingServiceImpl.class);
 
     Map<String, Object> defaultFromAddress = new HashMap<String, Object>();
     Map<String, Object> defaultToAddress = new HashMap<String, Object>();
@@ -86,22 +84,6 @@ public class ShippingServiceImpl implements ShippingService {
 //        addressDto.setZipCode("700009");
 //        impl.getShipmentByShipmentId("shp_496320b580ac41c0ba8ce43cf9f7ee48");
 //        System.out.println("statusBean.getStatus() : " + impl.getTrackerByTrackerId("trk_f7e3633b9d6f49deb63cbf2575279a90").getStatus());
-    }
-
-    @Override
-    public Shipment createDefaultShipmentDomestic() {// create defaflt shipment
-        try {
-            setUp();
-            Map<String, Object> shipmentMap = new HashMap<String, Object>();
-            shipmentMap.put("to_address", defaultToAddress);
-            shipmentMap.put("from_address", defaultFromAddress);
-            shipmentMap.put("parcel", defaultParcel);
-            Shipment shipment = Shipment.create(shipmentMap);
-            return shipment;
-        } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
     }
 
     public void setUp() {
@@ -198,7 +180,7 @@ public class ShippingServiceImpl implements ShippingService {
             customsItem1 = CustomsItem.create(customsItemMap);
             customsItemsList.add(customsItem1);
         } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("EasyPostException=" + ex);
         }
         customsInfoMap.put("customs_certify", true);
         customsInfoMap.put("customs_signer", "Steve Brule");
@@ -210,6 +192,22 @@ public class ShippingServiceImpl implements ShippingService {
         customsInfoMap.put("restriction_comments", "");
         customsInfoMap.put("customs_items", customsItemsList);
         return customsInfoMap;
+    }
+
+    @Override
+    public Shipment createDefaultShipmentDomestic() {// create defaflt shipment
+        try {
+            setUp();
+            Map<String, Object> shipmentMap = new HashMap<String, Object>();
+            shipmentMap.put("to_address", defaultToAddress);
+            shipmentMap.put("from_address", defaultFromAddress);
+            shipmentMap.put("parcel", defaultParcel);
+            Shipment shipment = Shipment.create(shipmentMap);
+            return shipment;
+        } catch (EasyPostException ex) {
+            logger.error("(==E==)EasyPostException: createDefaultShipmentDomestic" + ex);
+            return null;
+        }
     }
 
     @Override
@@ -243,8 +241,7 @@ public class ShippingServiceImpl implements ShippingService {
             objects[1] = shipments;
             return objects;
         } catch (EasyPostException ex) {
-            logger.error("Shipment cannot create cause " + ex);
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)EasyPostException: Shipment cannot create " + ex);
             return null;
         }
     }
@@ -258,12 +255,11 @@ public class ShippingServiceImpl implements ShippingService {
                 buyCarriers.add(EasyPostConstants.BUY_CARRIER);
                 shipment = shipment.buy(shipment.lowestRate(buyCarriers));
             } catch (EasyPostException ex) {
-                Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                logger.error("(==E==)EasyPostException: Shipment cannot buy" + ex);
                 return null;
             }
         } else {
-            logger.error("Shipment cannot buy. ");
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, "Shipment cannot buy");
+            logger.info("(==I==)Shipment cannot buy. ");
             return null;
         }
         return shipment;
@@ -298,7 +294,7 @@ public class ShippingServiceImpl implements ShippingService {
             cartBean.setProducts(products);
             return cartBean;
         } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)EasyPostException: getCartAfterShipment" + ex);
             return null;
         }
     }
@@ -346,7 +342,7 @@ public class ShippingServiceImpl implements ShippingService {
                 statusBean.setStatusCode("402");
             }
         } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)EasyPostException: verifyAddress" + ex);
             statusBean.setStatus("Error in verification of address");
             statusBean.setStatusCode("500");
         }
@@ -360,7 +356,7 @@ public class ShippingServiceImpl implements ShippingService {
         try {
             shipment = Shipment.retrieve(shipmentId);
         } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("(==E==)EasyPostException: getShipmentByShipmentId" + ex);
         }
         return shipment;
     }
@@ -511,8 +507,7 @@ public class ShippingServiceImpl implements ShippingService {
 //                trackerBean.setStatusCode("402");
 //            }
         } catch (EasyPostException ex) {
-            Logger.getLogger(ShippingServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-            logger.error("Problem to get Tracker.");
+            logger.error("(==E==)EasyPostException: Problem to get Tracker.", ex);
             trackerDto = new TrackerDto();
             trackerDto.setIsActive(true);
             trackerDto.setState("Waiting for payment approval");

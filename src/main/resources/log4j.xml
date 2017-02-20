@@ -10,51 +10,10 @@
         </layout>
     </appender>
 	
-    <appender name="mailAppender" class="org.apache.log4j.net.SMTPAppender">
-        <param name="BufferSize" value="50" />
-        <param name="SMTPHost" value="smtp.gmail.com" />
-        <param name="SMTPPort" value="465" />
-        <param name="SMTPUsername" value="duqhanapp@gmail.com" />
-        <param name="SMTPPassword" value="duqhanapp123" />
-        <param name="From" value="duqhanapp@gmail.com" />
-        <param name="To" value="subhendu.sett@pkweb.in" />
-        <param name="Subject" value="Duqhan error log notification" />
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="[%d{ISO8601}]%n%n%-5p%n%n%c%n%n%m%n%n" />
-        </layout>
-        <filter class="org.apache.log4j.varia.LevelRangeFilter">
-            <param name="LevelMin" value="error" />
-            <param name="LevelMax" value="fatal" />
-        </filter>
-    </appender>
-        
-    <!-- Application Loggers -->
-    <logger name="com.weavers.product">
-        <level value="info" />
-    </logger>
-	
-    <!-- 3rdparty Loggers -->
-    <logger name="org.springframework.core">
-        <level value="info" />
-    </logger>
-	
-    <logger name="org.springframework.beans">
-        <level value="info" />
-    </logger>
-	
-    <logger name="org.springframework.context">
-        <level value="info" />
-    </logger>
-
-    <logger name="org.springframework.web">
-        <level value="info" />
-    </logger>
-
     <!-- Root Logger -->
     <root>
         <priority value="warn" />
         <appender-ref ref="console" />
-        <appender-ref ref="mailAppender" />
     </root>
 	
 </log4j:configuration>

@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -95,6 +96,8 @@ public class ProductServiceImpl implements ProductService {
     ShippingService shippingService;
     @Autowired
     PaymentDetailDao paymentDetailDao;
+    
+    private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
     private AddressDto setAddressDto(UserAddress userAddress) {
@@ -117,58 +120,7 @@ public class ProductServiceImpl implements ProductService {
     }
 // </editor-fold>
 
-    @Override
-    public ColorAndSizeDto getColorSizeList() { // get color size category from database on add produc page load.
-        List<Sizee> sizees = sizeeDao.loadAll();
-        List<Color> colors = colorDao.loadAll();
-        List<Category> categorys = categoryDao.loadAll();
-        List<SizeGroup> sizeGroups = sizeGroupDao.loadAll();
-        List<Vendor> vendors = vendorDao.loadAll();
-
-        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
-        List<SizeDto> sizeDtos = new ArrayList<>();
-        List<ColorDto> colorDtos = new ArrayList<>();
-        List<CategoryDto> categoryDtos = new ArrayList<>();
-        List<SizeDto> sizeGroupDtos = new ArrayList<>();
-        List<AddressDto> vendorsDtos = new ArrayList<>();
-        for (Sizee sizee : sizees) {    //=============get size.
-            SizeDto SizeDto = new SizeDto();
-            SizeDto.setSizeId(sizee.getId());
-            SizeDto.setSizeText(sizee.getValu());
-            sizeDtos.add(SizeDto);
-        }
-        for (Color color : colors) {    //=============get colors.
-            ColorDto ColorDto = new ColorDto();
-            ColorDto.setColorId(color.getId());
-            ColorDto.setColorText(color.getName());
-            colorDtos.add(ColorDto);
-        }
-        for (Category category : categorys) {   //=============get category.
-            CategoryDto categoryDto = new CategoryDto();
-            categoryDto.setCategoryId(category.getId());
-            categoryDto.setCategoryName(category.getName());
-            categoryDtos.add(categoryDto);
-        }
-        for (SizeGroup sizeGroup : sizeGroups) {    //=============get size groups.
-            SizeDto sizeGroupDto = new SizeDto();
-            sizeGroupDto.setSizeGroupId(sizeGroup.getId());
-            sizeGroupDto.setSizeText(sizeGroup.getName());
-            sizeGroupDtos.add(sizeGroupDto);
-        }
-        for (Vendor vendor : vendors) {    //=============get Vendor.
-            AddressDto vendorDto = new AddressDto();
-            vendorDto.setUserId(vendor.getId());
-            vendorDto.setContactName(vendor.getVendorName());
-            vendorsDtos.add(vendorDto);
-        }
-        colorAndSizeDto.setSizeGroupDtos(sizeGroupDtos);
-        colorAndSizeDto.setSizeDtos(sizeDtos);
-        colorAndSizeDto.setColorDtos(colorDtos);
-        colorAndSizeDto.setCategoryDtos(categoryDtos);
-        colorAndSizeDto.setVendorDtos(vendorsDtos);
-        return colorAndSizeDto;
-    }
-
+    // <editor-fold defaultstate="collapsed" desc="setProductBeans">
     private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
         ProductBeans productBeans = new ProductBeans();
         List<String> allImages = new ArrayList<>();
@@ -224,7 +176,9 @@ public class ProductServiceImpl implements ProductService {
         productBeans.setAllImages(allImages);
         return productBeans;
     }
+// </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="getPercentage">
     private Double getPercentage(Double original, Double discounted) {
         Double discountPct = 0.00;
         Double less = original - discounted;
@@ -234,6 +188,59 @@ public class ProductServiceImpl implements ProductService {
         DecimalFormat df = new DecimalFormat("#.00");
         discountPct = Double.parseDouble(df.format(discountPct));
         return discountPct;
+    }
+    // </editor-fold>
+
+    @Override
+    public ColorAndSizeDto getColorSizeList() { // get color size category from database for add produc page on load.
+        List<Sizee> sizees = sizeeDao.loadAll();
+        List<Color> colors = colorDao.loadAll();
+        List<Category> categorys = categoryDao.loadAll();
+        List<SizeGroup> sizeGroups = sizeGroupDao.loadAll();
+        List<Vendor> vendors = vendorDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<SizeDto> sizeDtos = new ArrayList<>();
+        List<ColorDto> colorDtos = new ArrayList<>();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<SizeDto> sizeGroupDtos = new ArrayList<>();
+        List<AddressDto> vendorsDtos = new ArrayList<>();
+        for (Sizee sizee : sizees) {    //=============get size.
+            SizeDto SizeDto = new SizeDto();
+            SizeDto.setSizeId(sizee.getId());
+            SizeDto.setSizeText(sizee.getValu());
+            sizeDtos.add(SizeDto);
+        }
+        for (Color color : colors) {    //=============get colors.
+            ColorDto ColorDto = new ColorDto();
+            ColorDto.setColorId(color.getId());
+            ColorDto.setColorText(color.getName());
+            colorDtos.add(ColorDto);
+        }
+        for (Category category : categorys) {   //=============get category.
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setCategoryId(category.getId());
+            categoryDto.setCategoryName(category.getName());
+            categoryDtos.add(categoryDto);
+        }
+        for (SizeGroup sizeGroup : sizeGroups) {    //=============get size groups.
+            SizeDto sizeGroupDto = new SizeDto();
+            sizeGroupDto.setSizeGroupId(sizeGroup.getId());
+            sizeGroupDto.setSizeText(sizeGroup.getName());
+            sizeGroupDtos.add(sizeGroupDto);
+        }
+        for (Vendor vendor : vendors) {    //=============get Vendor.
+            AddressDto vendorDto = new AddressDto();
+            vendorDto.setUserId(vendor.getId());
+            vendorDto.setContactName(vendor.getVendorName());
+            vendorsDtos.add(vendorDto);
+        }
+        colorAndSizeDto.setSizeGroupDtos(sizeGroupDtos);
+        colorAndSizeDto.setSizeDtos(sizeDtos);
+        colorAndSizeDto.setColorDtos(colorDtos);
+        colorAndSizeDto.setCategoryDtos(categoryDtos);
+        colorAndSizeDto.setVendorDtos(vendorsDtos);
+        return colorAndSizeDto;
     }
 
     @Override
@@ -273,7 +280,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans searchProducts(ProductRequistBean requistBean) {
-        List<Product> products = productDao.SearchProductByName(requistBean.getName());   // Search products by name
+        List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName());   // Search products by name and Description
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -313,8 +320,12 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setShippingTime(product.getShippingTime());
             //===============================add imgDto==============================
             List<ImageDto> imgDtos = new ArrayList<>();
+            ImageDto imgDto;
+            imgDto = new ImageDto();
+            imgDto.setImgUrl(product.getImgurl());
+            imgDtos.add(imgDto);    //including front image
             for (ProductImg productImg : imgs) {
-                ImageDto imgDto = new ImageDto();
+                imgDto = new ImageDto();
                 imgDto.setImgUrl(productImg.getImgUrl());
                 imgDtos.add(imgDto);
             }
@@ -406,7 +417,7 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setArrival("Not set yet..");
             productDetailBean.setShippingCost(null);
             productDetailBean.setRelatedProducts(new ProductBeans());
-
+            //==========================Save in recent view table===========================//
             RecentView recentView = new RecentView();
             recentView.setId(null);
             recentView.setProductId(product.getId());
@@ -451,7 +462,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public CartBean getCartFoAUser(Long userId) {
+    public CartBean getCartForUser(Long userId) {
         CartBean cartBean = new CartBean();
         HashMap<Long, Cart> MapCart = new HashMap<>();
         List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);   // Load user cart
@@ -463,12 +474,10 @@ public class ProductServiceImpl implements ProductService {
             List<Long> productIds = new ArrayList<>();
             List<Long> colorIds = new ArrayList<>();
             List<Long> sizeIds = new ArrayList<>();
-//            List<Long> imgIds = new ArrayList<>();
             for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
                 productIds.add(sizeColorMap.getProductId());
                 colorIds.add(sizeColorMap.getColorId());
                 sizeIds.add(sizeColorMap.getSizeId());
-//                imgIds.add(sizeColorMap.getProductImgId());
             }
             List<Product> products = productDao.loadByIds(productIds);
             HashMap<Long, Product> MapProduct = new HashMap<>();
@@ -485,11 +494,6 @@ public class ProductServiceImpl implements ProductService {
             for (Sizee sizee : sizees) {
                 MapSizee.put(sizee.getId(), sizee);
             }
-//            List<ProductImg> productImgs = productImgDao.loadByIds(imgIds);
-//            HashMap<Long, ProductImg> MapProductImg = new HashMap<>();
-//            for (ProductImg productImg : productImgs) {
-//                MapProductImg.put(productImg.getId(), productImg);
-//            }
             //============================================================//
             List<ProductBean> productBeans = new ArrayList<>();
             double itemTotal = 0.0;         //2000
@@ -611,7 +615,7 @@ public class ProductServiceImpl implements ProductService {
             category.setId(null);
             category.setName(categoryDto.getCategoryName());
             category.setParentId(categoryDto.getPatentId());
-            category.setParentPath(parentCategory.getParentPath() + "_" + categoryDto.getPatentId());
+            category.setParentPath(parentCategory.getParentPath() + categoryDto.getPatentId() + "=");
             Category category2 = categoryDao.save(category);    //save new category
             if (category2 != null) {
                 status = "Category saved.";

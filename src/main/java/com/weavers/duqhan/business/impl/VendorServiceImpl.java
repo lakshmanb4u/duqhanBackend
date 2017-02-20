@@ -9,6 +9,7 @@ import com.weavers.duqhan.business.VendorService;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -19,6 +20,7 @@ public class VendorServiceImpl implements VendorService {
 
     @Autowired
     VendorDao vendorDao;
+    private final Logger logger = Logger.getLogger(VendorServiceImpl.class);
 
     @Override
     public String saveVendor(AddressDto addressDto) {

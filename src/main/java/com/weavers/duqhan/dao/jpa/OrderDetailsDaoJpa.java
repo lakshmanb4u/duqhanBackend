@@ -30,7 +30,7 @@ public class OrderDetailsDaoJpa extends BaseDaoJpa<OrderDetails> implements Orde
 
     @Override
     public List<Object[]> getDetailByUserId(Long userId) {
-        Query query = getEntityManager().createQuery("SELECT od, map FROM OrderDetails AS od, ProductSizeColorMap AS map WHERE od.userId=:userId AND od.mapId=map.id");
+        Query query = getEntityManager().createQuery("SELECT od, map FROM OrderDetails AS od, ProductSizeColorMap AS map WHERE od.userId=:userId AND od.mapId=map.id ORDER BY od.orderDate DESC");
         query.setParameter("userId", userId);
         return query.getResultList();
     }

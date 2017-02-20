@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.controller;
 
+import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
@@ -19,7 +20,7 @@ import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.StatusBean;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -46,7 +47,10 @@ public class WebController {
     VendorService vendorService;
     @Autowired
     ShippingService shippingService;
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(WebController.class);
+    @Autowired
+    NotificationService notificationService;
+    
+    private final Logger logger = Logger.getLogger(WebController.class);
 
     @RequestMapping(value = "/add-product", method = RequestMethod.GET) // open main view page
     public String addProduct(ModelMap modelMap) {
@@ -136,14 +140,10 @@ public class WebController {
     }
 
     @RequestMapping(value = "/to-be-canceled", method = RequestMethod.GET)
-    public String canceled(ModelMap modelMap) {
+    public String canceled(ModelMap modelMap, @RequestParam String token) {
         modelMap.addAttribute("msg", "Payment canceled!");
         modelMap.addAttribute("altclass", "text-danger");
-//        try {
-//            Integer.parseInt("4hk");
-//        } catch (Exception e) {
-//            logger.error("This is Error message", new Exception("Testing"));
-//        }
+        notificationService.sendPaymentNotification(token);
         return "paymentStatus";
     }
 
@@ -153,7 +153,7 @@ public class WebController {
         modelMap.addAttribute("shipmentDtos", shipmentDtos);
         return "shipmentDetails";
     }
-    
+
     @RequestMapping(value = "/buy-pending-shipment", method = RequestMethod.POST)
     @ResponseBody
     public StatusBean buyPendingShipment(@RequestBody ShipmentDto shipmentDto) {

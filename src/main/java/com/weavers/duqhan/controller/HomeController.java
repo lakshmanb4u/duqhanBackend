@@ -11,6 +11,7 @@ import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
+import com.weavers.duqhan.util.NotificationPusher;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +86,7 @@ public class HomeController {
 
     @RequestMapping(value = "/test", method = RequestMethod.GET) // for test
     public String test() {
-        logger.error("This is Error message", new Exception("Testing"));
+//        System.out.println("ddddd " + NotificationPusher.pushOnSingleDevice("title_new", "body_new", "ejZtGLpjmqk:APA91bFCfB6aW2SsZVEG_0vau7ZaTa507NjzDJ9qgx-5knIvETJkyE3pVVFPCd03Xy70mVotCzhkP5HV_cGSpPlwzyfAEAv6mDceVDvIopCQf_-jBSqM6EEJT-XR70u_5Vo2nP92cYXh").getResults().size());
         return "OOKK";
     }
 }

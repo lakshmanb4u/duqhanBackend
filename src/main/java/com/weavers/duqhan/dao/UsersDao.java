@@ -11,10 +11,13 @@ import com.weavers.duqhan.domain.Users;
  *
  * @author clb14
  */
-public interface UsersDao extends BaseDao<Users>{
-    Users loadByuserId(Long id);//not required
-    
-    Users loadByEmail(String email);//not required
-    
-    Users loadByEmailAndPass(String email,String pass);
+public interface UsersDao extends BaseDao<Users> {
+
+    Users loadByuserId(Long id);
+
+    Users loadByEmail(String email);
+
+    Users loadByEmailAndPass(String email, String pass);
+
+    String GetFcmTokenByuserId(Long userId);
 }

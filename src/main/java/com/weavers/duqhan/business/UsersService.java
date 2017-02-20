@@ -39,13 +39,13 @@ public interface UsersService {
     AddressBean saveUserAddress(AddressDto addressDto);
 
     AddressBean getUserActiveAddresses(Long userId);
-    
+
     AddressBean getUserDefaultAddress(Long userId);
 
     AddressBean setUserAddressesAsDefault(Long userId, Long addressId);
 
     AddressBean deactivateUserAddress(Long userId, Long addressId);
-    
+
     StatusBean changePassword(LoginBean loginBean, Users users);
 
 }
