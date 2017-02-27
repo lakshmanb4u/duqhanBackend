@@ -19,6 +19,9 @@ public class ProductRequistBean {
     private Long quantity;
     private Long cartId;
     private String name;
+    private String orderId;
+    private int start;
+    private int limit;
 
     /**
      * @return the productId
@@ -130,6 +133,48 @@ public class ProductRequistBean {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * @return the orderId
+     */
+    public String getOrderId() {
+        return orderId;
+    }
+
+    /**
+     * @param orderId the orderId to set
+     */
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
+    /**
+     * @return the start
+     */
+    public int getStart() {
+        return start;
+    }
+
+    /**
+     * @param start the start to set
+     */
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    /**
+     * @return the limit
+     */
+    public int getLimit() {
+        return limit;
+    }
+
+    /**
+     * @param limit the limit to set
+     */
+    public void setLimit(int limit) {
+        this.limit = limit;
     }
 
 }

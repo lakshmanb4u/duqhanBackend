@@ -60,5 +60,5 @@ public class Category extends BaseDomain{
         this.parentPath = parentPath;
     }
 
-    
-}
+
+    }

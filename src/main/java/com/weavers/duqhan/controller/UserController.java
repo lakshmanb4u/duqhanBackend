@@ -23,6 +23,8 @@ import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.DateFormater;
+import com.weavers.duqhan.util.StatusConstants;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -114,29 +116,27 @@ public class UserController {
     }
 
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody(required = false) ProductRequistBean requistBean) {
+    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
             Long categoryId = null;
             Boolean isRecent = null;
-            if (requistBean != null) {
-                categoryId = requistBean.getCategoryId();
-                isRecent = requistBean.getIsRecent();
-            }
+            categoryId = requistBean.getCategoryId();
+            isRecent = requistBean.getIsRecent();
             if (isRecent == null) {
                 isRecent = Boolean.FALSE;
             }
 
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
-                productBeans = productService.getProductsByCategory(categoryId);
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit());
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
-                productBeans = productService.getProductsByRecentView(users.getId());
+                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit());
             } else if (categoryId == null && !isRecent) {
                 //******************all******************//
-                productBeans = productService.getAllProducts();
+                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit());
             }
         } else {
             response.setStatus(401);
@@ -254,32 +254,46 @@ public class UserController {
     public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
         StatusBean statusBean = new StatusBean();
         String[] stringStr = new String[2];
+        Double shippingCost = 0.0;
+        List<Shipment> shipments = new ArrayList<>();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             cartBean.setUserId(users.getId());
-            Object[] objects = shippingService.createShipments(cartBean);
-            if (null != objects) {
-                Double shippingCost = (Double) objects[0];
-                List<Shipment> shipments = (List<Shipment>) objects[1];
-                if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
-                    stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
-                    if (stringStr != null) {
-                        statusBean.setStatusCode(stringStr[1]); // pay key
-                        statusBean.setStatus(stringStr[0]); // Paypal url
+            if (StatusConstants.IS_SHIPMENT) {
+                Object[] objects = shippingService.createShipments(cartBean);
+                if (null != objects) {
+                    shippingCost = (Double) objects[0];
+                    shipments = (List<Shipment>) objects[1];
+                    if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
+                        stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                        if (stringStr != null) {
+                            statusBean.setStatusCode(stringStr[1]); // pay key
+                            statusBean.setStatus(stringStr[0]); // Paypal url
+                        } else {
+                            response.setStatus(500);
+                            statusBean.setStatusCode("500");
+                            statusBean.setStatus("Payment not done. Please try again.");
+                        }
                     } else {
                         response.setStatus(500);
                         statusBean.setStatusCode("500");
-                        statusBean.setStatus("Payment not done. Please try again.");
+                        statusBean.setStatus("Shipment can not create. Please try again.");
                     }
                 } else {
                     response.setStatus(500);
                     statusBean.setStatusCode("500");
-                    statusBean.setStatus("Shipment can not create. Please try again.");
+                    statusBean.setStatus("Shipment can not create. Please try again2.");
                 }
             } else {
-                response.setStatus(500);
-                statusBean.setStatusCode("500");
-                statusBean.setStatus("Shipment can not create. Please try again2.");
+                stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                if (stringStr != null) {
+                    statusBean.setStatusCode(stringStr[1]); // pay key
+                    statusBean.setStatus(stringStr[0]); // Paypal url
+                } else {
+                    response.setStatus(500);
+                    statusBean.setStatusCode("500");
+                    statusBean.setStatus("Payment not done. Please try again.");
+                }
             }
         } else {
             response.setStatus(401);
@@ -383,12 +397,12 @@ public class UserController {
         return addressBean;
     }
 
-    @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // deactivateAddress
-    public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request) {
+    @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // List of order
+    public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            orderDetailsBean = productService.getOrderDetails(users.getId());
+            orderDetailsBean = productService.getOrderDetails(users.getId(), requistBean.getStart(), requistBean.getLimit());
         } else {
             response.setStatus(401);
             orderDetailsBean.setStatusCode("401");
@@ -403,6 +417,21 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             statusBean = usersService.changePassword(loginBean, users);
+        } else {
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+
+    @RequestMapping(value = "/cancel-order", method = RequestMethod.POST)   //cancel order
+    public StatusBean cancelOrder(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            productService.cancelOrder(requistBean.getOrderId(), users.getId());
+            statusBean.setStatusCode("200");
+            statusBean.setStatus("Success");
         } else {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");

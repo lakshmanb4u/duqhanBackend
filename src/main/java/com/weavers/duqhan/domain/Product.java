@@ -9,6 +9,11 @@ import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,7 +34,6 @@ public class Product extends BaseDomain {
     @NotNull
     @Column(name = "category_id")
     private long categoryId;
-    @Size(max = 255)
     @Column(name = "description")
     private String description;
     @Basic(optional = false)
@@ -56,6 +60,8 @@ public class Product extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "parent_path")
     private String parentPath;
+    @Column(name = "external_link")
+    private String externalLink;
 
     public String getName() {
         return name;
@@ -133,6 +139,14 @@ public class Product extends BaseDomain {
      */
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
+    }
+
+    public String getExternalLink() {
+        return externalLink;
+    }
+
+    public void setExternalLink(String externalLink) {
+        this.externalLink = externalLink;
     }
 
 }

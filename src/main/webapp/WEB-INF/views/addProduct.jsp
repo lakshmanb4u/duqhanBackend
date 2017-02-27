@@ -117,6 +117,9 @@
             jsondata.categoryId = $('#categoryId').val();
             jsondata.vendorId = $('#vendorId').val();
             jsondata.description = $('#descriptionid').val();
+            jsondata.shippingTime = $('#shippingtimeid').val();
+            jsondata.shippingRate = $('#shippingcostid').val();
+            jsondata.externalLink = $('#externallinkid').val();
             var imageDtos = [];
             $('.subimg').each(function () {
                 var imageDto = {};
@@ -493,11 +496,28 @@
                             </table>
                         </div>
                     </div>
-
                     <div class="form-group has-success has-feedback">
                         <label class="col-sm-2 control-label" for="inputSuccess">Description</label>
                         <div class="col-sm-10">
                             <textarea class="form-control" name="description" rows="2" placeholder="description" id="descriptionid" required=""></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Shipping Time (Day)</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="shippingtime" id="shippingtimeid" type="text" placeholder="Shipping Time (Day)">
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">Shipping Cost</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" id="shippingcostid" value="0" name="shippingcost" type="number" placeholder="Shipping Cost" step="1" pattern="[0-9]+([\.,][0-9]+)?" value="discount" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group has-success has-feedback">
+                        <label class="col-sm-2 control-label" for="inputSuccess">External Link</label>
+                        <div class="col-sm-10">
+                            <input class="form-control" name="externallink" id="externallinkid" type="text" placeholder="External Link">
                         </div>
                     </div>
 

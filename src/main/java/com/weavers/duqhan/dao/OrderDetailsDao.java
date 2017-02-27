@@ -12,10 +12,12 @@ import java.util.List;
  *
  * @author Android-3
  */
-public interface OrderDetailsDao extends BaseDao<OrderDetails>{
-    
+public interface OrderDetailsDao extends BaseDao<OrderDetails> {
+
     List<OrderDetails> getDetailBypaymentIdAndUserId(String paymentId, Long userId);
-    
-    List<Object[]> getDetailByUserId(Long userId);
-    
+
+    List<Object[]> getDetailByUserId(Long userId, int start, int limit);
+
+    OrderDetails getOrderDetailsByUserIdAndOrderId(Long userId, String orderId);
+
 }

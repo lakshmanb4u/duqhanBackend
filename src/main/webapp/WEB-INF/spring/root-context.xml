@@ -27,6 +27,7 @@
     <bean id="userAddressDao" class="com.weavers.duqhan.dao.jpa.UserAddressDaoJpa" />
     <bean id="vendorDao" class="com.weavers.duqhan.dao.jpa.VendorDaoJpa" />
     <bean id="shipmentTableDao" class="com.weavers.duqhan.dao.jpa.ShipmentTableDaoJpa" />
+    <bean id="userActivityDao" class="com.weavers.duqhan.dao.jpa.UserActivityDaoJpa" />
     <bean
         id="entityManagerFactory"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"

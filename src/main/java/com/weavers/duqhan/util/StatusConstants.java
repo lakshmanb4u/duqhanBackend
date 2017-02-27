@@ -30,4 +30,7 @@ public class StatusConstants {
 
 //******************************Application Response Status*****************************//
     public static final String ARS_RETRY = "retry";         // Requist not success.
+    public static final Boolean IS_SHIPMENT = false;
+    public static final String NEW_RAGISTRATION="registration";
+    public static final String LOGIN="login";
 }

@@ -18,13 +18,13 @@ public interface ProductDao extends BaseDao<Product> {
 
     List<Product> getAllAvailableProductByProductIds(List<Long> productIds);
 
-    List<Product> getAllAvailableProduct();
-    
-    List<Product> SearchProductByNameAndDescription(String searchName);
+    List<Product> getAllAvailableProduct(int start, int limit);
 
-    List<Product> getAllRecentViewProduct(Long userid);
+    List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit);
+
+    List<Product> getAllRecentViewProduct(Long userid, int start, int limit);
 
     List<Product> getProductsByCategory(Long categoryId);
-    
-    List<Product> getProductsByCategoryIncludeChild(Long categoryId);
+
+    List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit);
 }

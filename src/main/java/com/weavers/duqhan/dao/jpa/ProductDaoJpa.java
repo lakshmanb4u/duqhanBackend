@@ -60,36 +60,36 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
-    public List<Product> getAllRecentViewProduct(Long userid) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.id IN (SELECT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate)");
+    public List<Product> getAllRecentViewProduct(Long userid, int start, int limit) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.id IN (SELECT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
         return query.getResultList();
     }
 
     @Override
     public List<Product> getProductsByCategory(Long categoryId) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId ORDER BY p.lastUpdate");
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId ORDER BY p.lastUpdate DESC");
         query.setParameter("categoryId", categoryId);
         return query.getResultList();
     }
 
     @Override
-    public List<Product> getProductsByCategoryIncludeChild(Long categoryId) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate");
+    public List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("categoryId", categoryId);
         query.setParameter("parentPath", "%=" + categoryId + "=%");
         return query.getResultList();
     }
 
     @Override
-    public List<Product> getAllAvailableProduct() {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY p.lastUpdate");
+    public List<Product> getAllAvailableProduct(int start, int limit) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         return query.getResultList();
     }
 
     @Override
-    public List<Product> SearchProductByNameAndDescription(String searchName) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.name LIKE :searchName OR p.description LIKE :searchName ORDER BY p.lastUpdate");
+    public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.name LIKE :searchName OR p.description LIKE :searchName ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("searchName", "%" + searchName + "%");
         return query.getResultList();
     }

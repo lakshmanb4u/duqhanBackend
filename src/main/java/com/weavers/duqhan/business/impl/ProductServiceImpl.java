@@ -6,6 +6,7 @@
 package com.weavers.duqhan.business.impl;
 
 import com.easypost.model.Shipment;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
@@ -52,6 +53,7 @@ import com.weavers.duqhan.dto.SizeColorMapDto;
 import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.FileUploader;
+import com.weavers.duqhan.util.StatusConstants;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -96,7 +98,9 @@ public class ProductServiceImpl implements ProductService {
     ShippingService shippingService;
     @Autowired
     PaymentDetailDao paymentDetailDao;
-    
+    @Autowired
+    MailService mailService;
+
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
@@ -244,8 +248,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getProductsByCategory(Long categoryId) {
-        List<Product> products = productDao.getProductsByCategoryIncludeChild(categoryId);  // Find category wise product 
+    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit) {
+        List<Product> products = productDao.getProductsByCategoryIncludeChild(categoryId, start, limit);  // Find category wise product 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -257,8 +261,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getProductsByRecentView(Long userId) {
-        List<Product> products = productDao.getAllRecentViewProduct(userId);    // Find recent view product 
+    public ProductBeans getProductsByRecentView(Long userId, int start, int limit) {
+        List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit);    // Find recent view product 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -268,8 +272,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getAllProducts() {
-        List<Product> products = productDao.getAllAvailableProduct();   // Find all products 
+    public ProductBeans getAllProducts(int start, int limit) {
+        List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -280,7 +284,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans searchProducts(ProductRequistBean requistBean) {
-        List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName());   // Search products by name and Description
+        List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
         List<Long> productIds = new ArrayList<>();
         for (Product product : products) {
             productIds.add(product.getId());
@@ -523,8 +527,13 @@ public class ProductServiceImpl implements ProductService {
                 productBean.setDiscountPCT(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
                 productBean.setAvailable(Long.valueOf(sizeColorMap.getQuentity()).intValue());
                 productBean.setCartId(MapCart.get(sizeColorMap.getId()).getId());
-                productBean.setShippingRate(MapProduct.get(sizeColorMap.getProductId()).getShippingRate());
-                productBean.setShippingTime(MapProduct.get(sizeColorMap.getProductId()).getShippingTime());
+                if (StatusConstants.IS_SHIPMENT) {
+                    productBean.setShippingRate(MapProduct.get(sizeColorMap.getProductId()).getShippingRate());
+                    productBean.setShippingTime(MapProduct.get(sizeColorMap.getProductId()).getShippingTime());
+                } else {
+                    productBean.setShippingRate(0.0);
+                    productBean.setShippingTime("21");
+                }
                 productBean.setVendorId(MapProduct.get(sizeColorMap.getProductId()).getVendorId());
                 productBean.setProductHeight(sizeColorMap.getProductHeight());
                 productBean.setProductLength(sizeColorMap.getProductLength());
@@ -559,13 +568,19 @@ public class ProductServiceImpl implements ProductService {
             product.setLastUpdate(new Date());
             product.setVendorId(productBean.getVendorId());     //>>>>>>>>
             product.setParentPath(parentCategory.getParentPath());
-            Shipment shipment = shippingService.createDefaultShipmentDomestic();
-            if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
-                product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
-                product.setShippingRate(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null);
+            product.setExternalLink(productBean.getExternalLink());
+            if (StatusConstants.IS_SHIPMENT) {
+                Shipment shipment = shippingService.createDefaultShipmentDomestic();
+                if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
+                    product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
+                    product.setShippingRate(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null);
+                } else {
+                    product.setShippingTime(productBean.getShippingTime());
+                    product.setShippingRate(productBean.getShippingRate());
+                }
             } else {
-                product.setShippingTime(null);
-                product.setShippingRate(null);
+                product.setShippingTime(productBean.getShippingTime());
+                product.setShippingRate(productBean.getShippingRate());
             }
             Product product1 = productDao.save(product);
             if (product1 != null) {
@@ -705,10 +720,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public OrderDetailsBean getOrderDetails(Long userId) {
+    public OrderDetailsBean getOrderDetails(Long userId, int start, int limit) {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         List<OrderDetailsDto> orderdetailsDtos = new ArrayList<>();
-        List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId);
+        List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId, start, limit);
         if (!objects.isEmpty()) {
             Object[] od = objects.get(0);
             OrderDetails details = (OrderDetails) od[0];
@@ -758,7 +773,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setPrice(sizeColorMap.getPrice());
                 orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
-                ShipmentTable shipmentTable = shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId());
+                ShipmentTable shipmentTable = orderDetailse.getShipmentId() != null ? shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId()) : null;
                 orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable, orderDetailse.getStatus(), paymentDetail));
                 orderdetailsDtos.add(orderDetailsDto);
             }
@@ -766,7 +781,19 @@ public class ProductServiceImpl implements ProductService {
             orderDetailsBean.setStatus("success");
             orderDetailsBean.setStatusCode("200");
             return orderDetailsBean;
+        } else {
+            orderDetailsBean.setOrderDetailsDtos(orderdetailsDtos);
+            orderDetailsBean.setStatus("No order found.");
+            orderDetailsBean.setStatusCode("200");
+            return orderDetailsBean;
         }
-        return orderDetailsBean;
+    }
+
+    @Override
+    public void cancelOrder(String orderId, Long userId) {
+        OrderDetails orderDetails = orderDetailsDao.getOrderDetailsByUserIdAndOrderId(userId, orderId);
+        if (orderDetails != null) {
+            mailService.returnRequestToAdmin(orderDetails);
+        }
     }
 }

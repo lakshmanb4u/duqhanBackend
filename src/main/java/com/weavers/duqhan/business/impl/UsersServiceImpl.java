@@ -6,11 +6,14 @@
 package com.weavers.duqhan.business.impl;
 
 import com.weavers.duqhan.business.AouthService;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dao.OtpTableDao;
+import com.weavers.duqhan.dao.UserActivityDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.OtpTable;
+import com.weavers.duqhan.domain.UserActivity;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
@@ -23,6 +26,7 @@ import com.weavers.duqhan.util.Crypting;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.MailSender;
 import com.weavers.duqhan.util.RandomCodeGenerator;
+import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,6 +46,13 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     UserAddressDao userAddressDao;
+
+    @Autowired
+    MailService mailService;
+    
+    @Autowired
+    UserActivityDao userActivityDao;
+
     private final Logger logger = Logger.getLogger(UsersServiceImpl.class);
 
     private UserBean setUserBean(Users users) {
@@ -68,6 +79,13 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatusCode("403");
             userBean.setStatus("A user has already signed up with the supplied email");
         } else {
+            UserActivity activity = new UserActivity();
+            activity.setId(null);
+            activity.setUserId(null);
+            activity.setEmail(loginBean.getEmail());
+            activity.setActivity(StatusConstants.NEW_RAGISTRATION);
+            activity.setActivityTime(new Date());
+            userActivityDao.save(activity);
             String pass = Crypting.encrypt(loginBean.getPassword());    // password encription
             Users user2 = new Users();
             user2.setId(null);
@@ -93,7 +111,15 @@ public class UsersServiceImpl implements UsersService {
     public UserBean fbUserLogin(LoginBean loginBean) {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
         UserBean userBean = new UserBean();
+        Date newDate = new Date();
         if (user != null) { // if user already exist
+            UserActivity activity = new UserActivity();
+            activity.setId(null);
+            activity.setUserId(user.getId());
+            activity.setEmail(loginBean.getEmail());
+            activity.setActivity(StatusConstants.LOGIN);
+            activity.setActivityTime(newDate);
+            userActivityDao.save(activity);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
             userBean.setStatusCode("200");
@@ -106,7 +132,13 @@ public class UsersServiceImpl implements UsersService {
             userBean.setAuthtoken(aouthBean.getAouthToken());
         } else { // if user not exist
             Users user2 = new Users();
-            Date newDate = new Date();
+            UserActivity activity = new UserActivity();
+            activity.setId(null);
+            activity.setUserId(null);
+            activity.setEmail(loginBean.getEmail());
+            activity.setActivity(StatusConstants.NEW_RAGISTRATION);
+            activity.setActivityTime(newDate);
+            userActivityDao.save(activity);
             user2.setId(null);
             user2.setName(loginBean.getName());
             user2.setEmail(loginBean.getEmail());
@@ -135,7 +167,15 @@ public class UsersServiceImpl implements UsersService {
         String pass = Crypting.encrypt(loginBean.getPassword());
         Users user = usersDao.loadByEmailAndPass(loginBean.getEmail(), pass);
         UserBean userBean = new UserBean();
+        Date newDate = new Date();
         if (user != null) {
+            UserActivity activity = new UserActivity();
+            activity.setId(null);
+            activity.setUserId(user.getId());
+            activity.setEmail(loginBean.getEmail());
+            activity.setActivity(StatusConstants.LOGIN);
+            activity.setActivityTime(newDate);
+            userActivityDao.save(activity);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
             userBean.setDob(DateFormater.formate(user.getDob()));
@@ -143,7 +183,7 @@ public class UsersServiceImpl implements UsersService {
             userBean.setProfileImg(user.getProfileImg());
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
-            user.setLastloginDate(new Date());
+            user.setLastloginDate(newDate);
             user.setFcmToken(loginBean.getFcmToken());
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
@@ -168,7 +208,7 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         if (user != null) {
             String otp = RandomCodeGenerator.getNumericCode(6); // generate OTP
-            String status = MailSender.sendEmail(user.getEmail(), "OTP For Password Resset", "Your OTP is:  " + otp, "");// send mail to user with otp.
+            String status = mailService.sendOTPforPasswordReset(user.getEmail(), otp);// send mail to user with otp.
             if (status.equals("success")) { // if mail send...
                 OtpTable otpTable = otpTableDao.getOtpTableByUserId(user.getId());
                 if (null != otpTable) {

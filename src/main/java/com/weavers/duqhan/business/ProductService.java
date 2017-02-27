@@ -24,11 +24,11 @@ public interface ProductService {
 
     ColorAndSizeDto getColorSizeList();
 
-    ProductBeans getProductsByCategory(Long categoryId);
+    ProductBeans getProductsByCategory(Long categoryId, int start, int limit);
 
-    ProductBeans getProductsByRecentView(Long userId);
+    ProductBeans getProductsByRecentView(Long userId, int start, int limit);
 
-    ProductBeans getAllProducts();
+    ProductBeans getAllProducts(int start, int limit);
 
     ProductBeans searchProducts(ProductRequistBean requistBean);
 
@@ -56,5 +56,7 @@ public interface ProductService {
 
     CategorysBean getChildById(Long parentId);
 
-    OrderDetailsBean getOrderDetails(Long id);
+    OrderDetailsBean getOrderDetails(Long userId, int start, int limit);
+
+    void cancelOrder(String orderId, Long userId);
 }

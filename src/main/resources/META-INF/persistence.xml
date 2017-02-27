@@ -31,5 +31,6 @@
     <class>com.weavers.duqhan.domain.OtpTable</class>
     <class>com.weavers.duqhan.domain.Vendor</class>
     <class>com.weavers.duqhan.domain.ShipmentTable</class>
+    <class>com.weavers.duqhan.domain.UserActivity</class>
   </persistence-unit>
 </persistence>
