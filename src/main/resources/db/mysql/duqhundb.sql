@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 24, 2017 at 12:29 PM
+-- Generation Time: Mar 09, 2017 at 02:56 PM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 7.0.9
 
@@ -55,6 +55,20 @@ CREATE TABLE `color` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `duqhan_admin`
+--
+
+CREATE TABLE `duqhan_admin` (
+  `id` bigint(32) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `last_login` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `order_details`
 --
 
@@ -70,7 +84,8 @@ CREATE TABLE `order_details` (
   `quentity` bigint(32) NOT NULL,
   `address_id` bigint(32) NOT NULL,
   `delivery_date` datetime DEFAULT NULL,
-  `shipment_id` varchar(255) DEFAULT NULL
+  `shipment_id` varchar(255) DEFAULT NULL,
+  `return_status` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -116,13 +131,15 @@ CREATE TABLE `product` (
   `id` bigint(32) NOT NULL,
   `name` varchar(255) NOT NULL,
   `category_id` bigint(32) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` text,
   `imgurl` varchar(255) NOT NULL,
   `last_update` datetime NOT NULL,
   `vendor_id` bigint(32) NOT NULL,
   `shipping_time` varchar(20) DEFAULT NULL,
   `shipping_rate` double DEFAULT NULL,
-  `parent_path` varchar(255) NOT NULL
+  `parent_path` varchar(255) NOT NULL,
+  `external_link` text,
+  `specifications` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -218,6 +235,19 @@ CREATE TABLE `size_group` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `specification`
+--
+
+CREATE TABLE `specification` (
+  `id` bigint(20) NOT NULL,
+  `category_id` bigint(20) NOT NULL,
+  `features` varchar(255) NOT NULL,
+  `features_value` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -233,7 +263,10 @@ CREATE TABLE `users` (
   `password` varchar(255) DEFAULT NULL,
   `fbid` bigint(32) DEFAULT NULL,
   `profile_img` varchar(255) DEFAULT NULL,
-  `fcm_token` varchar(255) DEFAULT NULL
+  `fcm_token` varchar(255) DEFAULT NULL,
+  `latitude` varchar(255) DEFAULT NULL,
+  `longitude` varchar(255) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -247,7 +280,10 @@ CREATE TABLE `user_activity` (
   `user_id` bigint(32) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `activity` varchar(255) DEFAULT NULL,
-  `activity_time` datetime DEFAULT NULL
+  `activity_time` datetime DEFAULT NULL,
+  `latitude` varchar(255) DEFAULT NULL,
+  `longitude` varchar(255) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -327,6 +363,12 @@ ALTER TABLE `category`
 -- Indexes for table `color`
 --
 ALTER TABLE `color`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `duqhan_admin`
+--
+ALTER TABLE `duqhan_admin`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -410,6 +452,12 @@ ALTER TABLE `size_group`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `specification`
+--
+ALTER TABLE `specification`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -449,22 +497,27 @@ ALTER TABLE `vendor`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT for table `duqhan_admin`
+--
+ALTER TABLE `duqhan_admin`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `otp_table`
 --
@@ -474,42 +527,47 @@ ALTER TABLE `otp_table`
 -- AUTO_INCREMENT for table `payment_detail`
 --
 ALTER TABLE `payment_detail`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
 ALTER TABLE `product_img`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `recent_view`
 --
 ALTER TABLE `recent_view`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `shipment_table`
 --
 ALTER TABLE `shipment_table`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `sizee`
 --
 ALTER TABLE `sizee`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `size_group`
 --
 ALTER TABLE `size_group`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT for table `specification`
+--
+ALTER TABLE `specification`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `users`
 --
@@ -519,22 +577,22 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_activity`
 --
 ALTER TABLE `user_activity`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `user_address`
 --
 ALTER TABLE `user_address`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `user_aouth`
 --
 ALTER TABLE `user_aouth`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- AUTO_INCREMENT for table `vendor`
 --
 ALTER TABLE `vendor`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 --
 -- Constraints for dumped tables
 --

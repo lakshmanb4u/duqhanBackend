@@ -73,6 +73,7 @@ public class ProductBean {
     private Double productHeight;
     private Double productWeight;
     private String externalLink;
+    private String specifications;
 
     /**
      * @return the productId
@@ -464,6 +465,20 @@ public class ProductBean {
      */
     public void setExternalLink(String externalLink) {
         this.externalLink = externalLink;
+    }
+
+    /**
+     * @return the specifications
+     */
+    public String getSpecifications() {
+        return specifications;
+    }
+
+    /**
+     * @param specifications the specifications to set
+     */
+    public void setSpecifications(String specifications) {
+        this.specifications = specifications;
     }
 
 }

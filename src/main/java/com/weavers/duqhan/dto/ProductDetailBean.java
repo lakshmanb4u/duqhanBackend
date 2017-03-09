@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.dto;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ public class ProductDetailBean {
     private ProductBeans relatedProducts;
     private String statusCode;
     private String status;
+    private HashMap<String,String> specifications;
 
     /**
      * @return the productId
@@ -298,5 +300,19 @@ public class ProductDetailBean {
      */
     public void setShippingTime(String shippingTime) {
         this.shippingTime = shippingTime;
+    }
+
+    /**
+     * @return the specifications
+     */
+    public HashMap<String,String> getSpecifications() {
+        return specifications;
+    }
+
+    /**
+     * @param specifications the specifications to set
+     */
+    public void setSpecifications(HashMap<String,String> specifications) {
+        this.specifications = specifications;
     }
 }

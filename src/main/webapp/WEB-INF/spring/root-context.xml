@@ -28,6 +28,8 @@
     <bean id="vendorDao" class="com.weavers.duqhan.dao.jpa.VendorDaoJpa" />
     <bean id="shipmentTableDao" class="com.weavers.duqhan.dao.jpa.ShipmentTableDaoJpa" />
     <bean id="userActivityDao" class="com.weavers.duqhan.dao.jpa.UserActivityDaoJpa" />
+    <bean id="specificationDao" class="com.weavers.duqhan.dao.jpa.SpecificationDaoJpa" />
+    <bean id="duqhanAdminDao" class="com.weavers.duqhan.dao.jpa.DuqhanAdminDaoJpa" />
     <bean
         id="entityManagerFactory"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
@@ -59,13 +61,13 @@
         
         <!-- Local Configuration -->
     
-                <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
-        <property name="password" value="" />
+        <property name="password" value="" /> 
     
         <!-- Server Configuration -->
         
-<!--        <property name="url" value="jdbc:mysql://aajbapm6lmtvry.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+<!--        <property name="url" value="jdbc:mysql://aa168jeiyp7tfdz.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />-->
         

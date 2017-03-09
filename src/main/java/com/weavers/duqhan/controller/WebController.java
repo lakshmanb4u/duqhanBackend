@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.controller;
 
+import com.weavers.duqhan.business.AdminService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
@@ -13,13 +14,17 @@ import com.weavers.duqhan.business.VendorService;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.ColorAndSizeDto;
+import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.StatusBean;
+import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -49,77 +55,25 @@ public class WebController {
     ShippingService shippingService;
     @Autowired
     NotificationService notificationService;
-    
+    @Autowired
+    AdminService adminService;
+
     private final Logger logger = Logger.getLogger(WebController.class);
 
-    @RequestMapping(value = "/add-product", method = RequestMethod.GET) // open main view page
-    public String addProduct(ModelMap modelMap) {
-        ColorAndSizeDto colorAndSizeDto = productService.getColorSizeList();
-        modelMap.addAttribute("sizeAndColor", colorAndSizeDto);
-        return "addProduct";
+    @RequestMapping(value = "/home", method = RequestMethod.GET) // open home page
+    public String home() {
+        return "index";
     }
 
-    @RequestMapping(value = "/save-product", method = RequestMethod.POST)   // save a new product.
-    @ResponseBody
-    public StatusBean addingProduct(@RequestBody ProductBean productBean) {
-        StatusBean response = new StatusBean();
-        response.setStatus(productService.saveProduct(productBean));
-        return response;
+    @RequestMapping(value = "/adminlogin", method = RequestMethod.GET) // open admin login page
+    public String adminLogin() {
+        return "adminlogin";
     }
 
-    @RequestMapping(value = "/save-category", method = RequestMethod.POST)  // save a new category
-    @ResponseBody
-    public StatusBean saveCategory(@RequestBody CategoryDto categoryDto) {
-        StatusBean response = new StatusBean();
-        response.setStatus(productService.saveCategory(categoryDto));
-        return response;
-    }
-
-    @RequestMapping(value = "/save-size", method = RequestMethod.POST)  // save new size
-    @ResponseBody
-    public StatusBean saveSize(@RequestBody SizeDto sizeDto) {
-        StatusBean response = new StatusBean();
-        response.setStatus(productService.saveSize(sizeDto));
-        return response;
-    }
-
-    @RequestMapping(value = "/save-sizegroup", method = RequestMethod.POST) // save new sizegroup
-    @ResponseBody
-    public StatusBean saveSizeGroup(@RequestBody ProductRequistBean requistBean) {
-        StatusBean response = new StatusBean();
-        response.setStatus(productService.saveSizeGroup(requistBean.getName()));
-        return response;
-    }
-
-    @RequestMapping(value = "/save-color", method = RequestMethod.POST) // save new color
-    @ResponseBody
-    public StatusBean saveColor(@RequestBody ProductRequistBean requistBean) {
-        StatusBean response = new StatusBean();
-        response.setStatus(productService.saveColor(requistBean.getName()));
-        return response;
-    }
-
-    @RequestMapping(value = "/save-product-image", method = RequestMethod.POST)   // save product image.
-    @ResponseBody
-    public StatusBean addingProductImage(@ModelAttribute("productBean") ProductBean productBean) {
-        StatusBean response = new StatusBean();
-        response.setStatus("failure");
-        response.setStatus(productService.saveProductImage(productBean));
-        return response;
-    }
-
-    @RequestMapping(value = "/save-vendor", method = RequestMethod.POST)  // save a new category
-    @ResponseBody
-    public StatusBean saveVendor(@RequestBody AddressDto addressDto) {
-        StatusBean response = new StatusBean();
-        StatusBean statusBean = shippingService.verifyAddress(addressDto);
-        if (statusBean.getStatusCode().equals("200")) {
-            response.setStatus(vendorService.saveVendor(addressDto));
-        } else {
-            response.setStatusCode(statusBean.getStatusCode());
-            response.setStatus(statusBean.getStatus());
-        }
-        return response;
+    @RequestMapping(value = "/adminlogin-action", method = RequestMethod.POST) // admin login action
+    public ModelAndView adminLoginAction(LoginBean loginBean, HttpSession session, HttpServletResponse response) throws IOException {
+        String redirect = adminService.adminLogin(loginBean, session);
+        return new ModelAndView("redirect:/" + redirect);
     }
 
     @RequestMapping(value = "/to-be-redirected", method = RequestMethod.GET)

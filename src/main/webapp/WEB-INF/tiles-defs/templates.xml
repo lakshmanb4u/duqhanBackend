@@ -12,8 +12,18 @@
         <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
     </definition>
     
+    <definition name="mainTemplateSignin" template="/WEB-INF/layouts/classic.jsp">
+        <!--<put-attribute name="title" value="/WEB-INF/templates/title.jsp" />-->
+        <put-attribute name="header" value="/WEB-INF/layouts/signinheader.jsp" />
+        <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/layouts/footer.jsp" />
+    </definition>
     
-    
+    <definition name="adminmainTemplate" template="/WEB-INF/layouts/classic.jsp">
+        <put-attribute name="header" value="/WEB-INF/layouts/adminheader.jsp" />
+        <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/layouts/footer.jsp" />
+    </definition>
     
     
     <definition name="index" extends="common">
@@ -21,9 +31,14 @@
         <put-attribute name="body" value="/WEB-INF/views/index.jsp" />
     </definition>
     
-    <definition name="addProduct" extends="common">
+    <definition name="adminlogin" extends="mainTemplateSignin">
+        <put-attribute name="title" value="duqhan.com" />
+        <put-attribute name="body" value="/WEB-INF/views/admin/adminlogin.jsp" />
+    </definition>
+    
+    <definition name="addProduct" extends="adminmainTemplate">
         <put-attribute name="title" value="duqhan.com-add-product" />
-        <put-attribute name="body" value="/WEB-INF/views/addProduct.jsp" />
+        <put-attribute name="body" value="/WEB-INF/views/admin/addProduct.jsp" />
     </definition>
     
     <definition name="paymentStatus" extends="common">

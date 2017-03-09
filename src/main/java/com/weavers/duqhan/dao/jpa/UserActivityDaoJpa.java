@@ -12,10 +12,10 @@ import com.weavers.duqhan.domain.UserActivity;
  *
  * @author weaversAndroid
  */
-public class UserActivityDaoJpa extends BaseDaoJpa<UserActivity> implements UserActivityDao{
-    
+public class UserActivityDaoJpa extends BaseDaoJpa<UserActivity> implements UserActivityDao {
+
     public UserActivityDaoJpa() {
         super(UserActivity.class, "UserActivity");
     }
-    
+
 }

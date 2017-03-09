@@ -34,6 +34,15 @@ public class UserActivity extends BaseDomain {
     @Column(name = "activity_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date activityTime;
+    @Size(max = 255)
+    @Column(name = "latitude")
+    private String latitude;
+    @Size(max = 255)
+    @Column(name = "longitude")
+    private String longitude;
+    @Size(max = 255)
+    @Column(name = "user_agent")
+    private String userAgent;
 
     public Long getUserId() {
         return userId;
@@ -65,6 +74,30 @@ public class UserActivity extends BaseDomain {
 
     public void setActivityTime(Date activityTime) {
         this.activityTime = activityTime;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
 }

@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.dto;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,6 +19,7 @@ public class ColorAndSizeDto {
     private List<ColorDto> colorDtos;
     private List<CategoryDto> categoryDtos;
     private List<AddressDto> vendorDtos;
+    private List<SpecificationDto> specifications;
 
     /**
      * @return the sizeDtos
@@ -87,5 +89,19 @@ public class ColorAndSizeDto {
      */
     public void setVendorDtos(List<AddressDto> vendorDtos) {
         this.vendorDtos = vendorDtos;
+    }
+
+    /**
+     * @return the specifications
+     */
+    public List<SpecificationDto> getSpecifications() {
+        return specifications;
+    }
+
+    /**
+     * @param specifications the specifications to set
+     */
+    public void setSpecifications(List<SpecificationDto> specifications) {
+        this.specifications = specifications;
     }
 }

@@ -7,7 +7,7 @@ and open the template in the editor.
     Created on : Jan 20, 2017, 3:33:33 PM
     Author     : Android-3
 */
-.modal {
+.modal-loader {
     display:    none;
     position:   fixed;
     z-index:    1000;
@@ -29,6 +29,6 @@ body.loading {
 
 /* Anytime the body has the loading class, our
    modal element will be visible */
-body.loading .modal {
+body.loading .modal-loader {
     display: block;
 }

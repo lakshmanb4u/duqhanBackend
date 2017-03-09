@@ -438,4 +438,18 @@ public class UserController {
         }
         return statusBean;
     }
+
+    @RequestMapping(value = "/contact-us", method = RequestMethod.POST)   //send a mail to admin from user
+    public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody StatusBean statusBean) {
+        StatusBean status = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            status.setStatus(usersService.contactToAdmin(statusBean, users));
+            status.setStatusCode("200");
+        } else {
+            status.setStatusCode("401");
+            status.setStatus("Invalid Token.");
+        }
+        return status;
+    }
 }

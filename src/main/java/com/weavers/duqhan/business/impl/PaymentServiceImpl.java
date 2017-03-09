@@ -101,7 +101,7 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             PayPalResource.initConfig(is);
         } catch (PayPalRESTException ex) {
-            logger.error("(==E==)PayPalRESTException for PayPalResource.initConfig " , ex);
+            logger.error("(==E==)PayPalRESTException for PayPalResource.initConfig ", ex);
         }
 
         String accessToken = null;
@@ -116,11 +116,22 @@ public class PaymentServiceImpl implements PaymentService {
             List<Item> items = new ArrayList<>();
             Double totalItemCost = 0.0;
             String itemCost = "0";
+            String itemName = " ";
             Double inrRate = CurrencyConverter.convert("INR", "USD");//Return USD For 1 INR
             for (ProductBean productBean : productBeans) {
                 itemCost = "0";
                 Item item = new Item();
-                item.setName(productBean.getName() + " " + productBean.getSize() != null ? productBean.getSize() : "" + " " + productBean.getColor() != null ? productBean.getColor() : "");//***********************
+                itemName = productBean.getName();
+                if(itemName.length()>90){
+                    itemName = itemName.substring(0, 90).concat("...");
+                }
+                if (productBean.getSize() != null) {
+                    itemName = itemName.concat(" " + productBean.getSize());
+                }
+                if (productBean.getColor() != null) {
+                    itemName = itemName.concat(" " + productBean.getColor());
+                }
+                item.setName(itemName);//***********************
                 item.setCurrency(PayPalConstants.CURRENCY);
                 item.setQuantity(productBean.getQty());
                 itemCost = df2.format(inrRate * productBean.getDiscountedPrice());
@@ -148,7 +159,7 @@ public class PaymentServiceImpl implements PaymentService {
             payer.setPaymentMethod("paypal");
 //            PayerInfo payerInfo = new PayerInfo();
             Transaction transaction = new Transaction();
-            transaction.setDescription("creating a payment");
+            transaction.setDescription("Your Items");
             transaction.setAmount(amount);
             transaction.setItemList(itemList);
 
@@ -173,7 +184,7 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 createdPayment = payment.create(apiContext);
             } catch (PayPalRESTException ex) {
-                logger.error("(==E==)PayPal Payment Create Exception :" , ex);
+                logger.error("(==E==)PayPal Payment Create Exception :", ex);
                 return null;
             }
 
@@ -181,7 +192,7 @@ public class PaymentServiceImpl implements PaymentService {
             String[] parts = returnUrl.split("&token=");
             paypalToken = parts[1];
         } catch (Exception e) {
-            logger.error("(==E==)Multi Exceptions at the time of payment " , e);
+            logger.error("(==E==)Multi Exceptions at the time of payment ", e);
             return null;
         }
         if (createdPayment != null && createdPayment.getState().equalsIgnoreCase("created")) {
@@ -197,7 +208,7 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 paymentDetail.setPaymentDate(sdf.parse(createdPayment.getCreateTime()));
             } catch (ParseException ex) {
-                logger.error("(==E==)Date ParseException :" , ex);
+                logger.error("(==E==)Date ParseException :", ex);
             }
             paymentDetailDao.save(paymentDetail);
 
@@ -250,7 +261,7 @@ public class PaymentServiceImpl implements PaymentService {
                         return null;
                     }
                 } catch (EasyPostException ex) {
-                    logger.error("(==E==)EasyPostException :shipment.lowestRate().getRate() = null" , ex);
+                    logger.error("(==E==)EasyPostException :shipment.lowestRate().getRate() = null", ex);
                 }
             }
             Date date = new Date();
@@ -321,7 +332,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             status = createdPayment.getState();
         } catch (PayPalRESTException ex) {
-            logger.error("(==E==)PayPalRESTException :whene get payer information by success url" , ex);
+            logger.error("(==E==)PayPalRESTException :whene get payer information by success url", ex);
         }
         if (status != null) {
             if (status.equals("approved")) {
@@ -374,7 +385,7 @@ public class PaymentServiceImpl implements PaymentService {
             payment = Payment.get(apiContext, payKey);
             status = payment.getState();
         } catch (PayPalRESTException e) {
-            logger.error("(==E==)PayPalRESTException :getPaymentStatus by pay key" , e);
+            logger.error("(==E==)PayPalRESTException :getPaymentStatus by pay key", e);
         }
 
         if (payment.getState() != null && !status.equals(StatusConstants.ARS_RETRY)) {
@@ -397,7 +408,7 @@ public class PaymentServiceImpl implements PaymentService {
                     } catch (EasyPostException | NullPointerException ex) {
                         shipmentTable.setStatus(StatusConstants.ESS_FAILED);
                         shipmentTableDao.save(shipmentTable);
-                        logger.error("(==E==)PayPalRESTException : At buy shipment" , ex);
+                        logger.error("(==E==)PayPalRESTException : At buy shipment", ex);
                     }
                 }
 //                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);

@@ -11,7 +11,9 @@ import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
+import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,8 +38,9 @@ public class HomeController {
     private final Logger logger = Logger.getLogger(HomeController.class);
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String home() {
-        return "OK....";
+    public void home(HttpServletResponse response) throws IOException {
+//        return "OK....";
+        response.sendRedirect("web/home");
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST) // User registration by email id.

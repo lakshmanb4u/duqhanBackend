@@ -61,6 +61,15 @@ public class Users extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "fcm_token")
     private String fcmToken;
+    @Size(max = 255)
+    @Column(name = "latitude")
+    private String latitude;
+    @Size(max = 255)
+    @Column(name = "longitude")
+    private String longitude;
+    @Size(max = 255)
+    @Column(name = "user_agent")
+    private String userAgent;
 
     public String getName() {
         return name;
@@ -134,16 +143,10 @@ public class Users extends BaseDomain {
         this.fbid = fbid;
     }
 
-    /**
-     * @return the profileImg
-     */
     public String getProfileImg() {
         return profileImg;
     }
 
-    /**
-     * @param profileImg the profileImg to set
-     */
     public void setProfileImg(String profileImg) {
         this.profileImg = profileImg;
     }
@@ -155,4 +158,29 @@ public class Users extends BaseDomain {
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
     }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
 }

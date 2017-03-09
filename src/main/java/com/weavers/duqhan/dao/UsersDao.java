@@ -20,4 +20,6 @@ public interface UsersDao extends BaseDao<Users> {
     Users loadByEmailAndPass(String email, String pass);
 
     String GetFcmTokenByuserId(Long userId);
+    
+    Users getLastLoginOfUser(Long userId);
 }

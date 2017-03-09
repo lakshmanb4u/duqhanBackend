@@ -32,5 +32,8 @@
     <class>com.weavers.duqhan.domain.Vendor</class>
     <class>com.weavers.duqhan.domain.ShipmentTable</class>
     <class>com.weavers.duqhan.domain.UserActivity</class>
+    <class>com.weavers.duqhan.domain.SpecificationJewelry</class>
+    <class>com.weavers.duqhan.domain.DuqhanAdmin</class>
+    <class>com.weavers.duqhan.domain.Specification</class>
   </persistence-unit>
 </persistence>

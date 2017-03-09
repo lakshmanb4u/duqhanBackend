@@ -21,7 +21,7 @@ public class StatusConstants {
     public static final String ESS_CREATED = "created";     // when a shipment create but not buy.
     public static final String ESS_APPROVED = "approved";   // when created shipment successfully buy.
     public static final String ESS_FAILED = "failed";       // when created shipment can not buy successfully due to some exception.
-    
+
     public static final String ESS_UNKNOWN = "unknown";       //
     public static final String ESS_PRE_TRANSIT = "pre_transit";       //
     public static final String ESS_IN_TRANSIT = "in_transit";       //
@@ -31,6 +31,7 @@ public class StatusConstants {
 //******************************Application Response Status*****************************//
     public static final String ARS_RETRY = "retry";         // Requist not success.
     public static final Boolean IS_SHIPMENT = false;
-    public static final String NEW_RAGISTRATION="registration";
-    public static final String LOGIN="login";
+    public static final String NEW_RAGISTRATION = "registration";   //For new registration
+    public static final String LOGIN = "login";     //For login
+    public static final String REQUEST_FOR_RETURN = "requested";    // When user cancel a order
 }

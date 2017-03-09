@@ -7,6 +7,7 @@ package com.weavers.duqhan.interceptor;
 
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.dao.UserActivityDao;
+import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.UserActivity;
 import com.weavers.duqhan.domain.Users;
 import java.util.Date;
@@ -24,9 +25,10 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
 
     @Autowired
     AouthService aouthService;
-
     @Autowired
     UserActivityDao userActivityDao;
+    @Autowired
+    UsersDao usersDao;
 
     private final Logger logger = Logger.getLogger(UserInterceptor.class);
 
@@ -35,12 +37,16 @@ public class UserInterceptor extends HandlerInterceptorAdapter {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         String requesturl = request.getRequestURL().toString();
         if (users != null) {
+            Users lastLogin = usersDao.getLastLoginOfUser(users.getId());
             UserActivity activity = new UserActivity();
             activity.setId(null);
             activity.setUserId(users.getId());
             activity.setEmail(users.getEmail());
             activity.setActivity(requesturl);
             activity.setActivityTime(new Date());
+            activity.setLatitude(lastLogin.getLatitude());
+            activity.setLongitude(lastLogin.getLongitude());
+            activity.setUserAgent(lastLogin.getUserAgent());
             userActivityDao.save(activity);
 //            logger.info("\n(==I==)\n======================================USER ACTIVITY========================================\nUser Id = " + users.getId() + "\nRequist = " + requesturl + "\nTime = " + new Date());
         }

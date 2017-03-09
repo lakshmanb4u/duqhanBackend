@@ -20,6 +20,7 @@ import com.weavers.duqhan.dao.ProductSizeColorMapDao;
 import com.weavers.duqhan.dao.RecentViewDao;
 import com.weavers.duqhan.dao.SizeGroupDao;
 import com.weavers.duqhan.dao.SizeeDao;
+import com.weavers.duqhan.dao.SpecificationDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
@@ -34,6 +35,7 @@ import com.weavers.duqhan.domain.RecentView;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.SizeGroup;
 import com.weavers.duqhan.domain.Sizee;
+import com.weavers.duqhan.domain.Specification;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
@@ -51,16 +53,21 @@ import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.SizeColorMapDto;
 import com.weavers.duqhan.dto.SizeDto;
+import com.weavers.duqhan.dto.SpecificationDto;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.FileUploader;
 import com.weavers.duqhan.util.StatusConstants;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -100,6 +107,8 @@ public class ProductServiceImpl implements ProductService {
     PaymentDetailDao paymentDetailDao;
     @Autowired
     MailService mailService;
+    @Autowired
+    SpecificationDao specificationDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -244,6 +253,103 @@ public class ProductServiceImpl implements ProductService {
         colorAndSizeDto.setColorDtos(colorDtos);
         colorAndSizeDto.setCategoryDtos(categoryDtos);
         colorAndSizeDto.setVendorDtos(vendorsDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getCategories() {
+        List<Category> categorys = categoryDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        for (Category category : categorys) {   //=============get category.
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setCategoryId(category.getId());
+            categoryDto.setCategoryName(category.getName());
+            categoryDtos.add(categoryDto);
+        }
+        colorAndSizeDto.setCategoryDtos(categoryDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getSizes() {
+        List<Sizee> sizees = sizeeDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<SizeDto> sizeDtos = new ArrayList<>();
+        for (Sizee sizee : sizees) {    //=============get size.
+            SizeDto SizeDto = new SizeDto();
+            SizeDto.setSizeId(sizee.getId());
+            SizeDto.setSizeText(sizee.getValu());
+            sizeDtos.add(SizeDto);
+        }
+        colorAndSizeDto.setSizeDtos(sizeDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getSizeGroupe() {
+        List<SizeGroup> sizeGroups = sizeGroupDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<SizeDto> sizeGroupDtos = new ArrayList<>();
+        for (SizeGroup sizeGroup : sizeGroups) {    //=============get size groups.
+            SizeDto sizeGroupDto = new SizeDto();
+            sizeGroupDto.setSizeGroupId(sizeGroup.getId());
+            sizeGroupDto.setSizeText(sizeGroup.getName());
+            sizeGroupDtos.add(sizeGroupDto);
+        }
+        colorAndSizeDto.setSizeGroupDtos(sizeGroupDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getColors() {
+        List<Color> colors = colorDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<ColorDto> colorDtos = new ArrayList<>();
+        for (Color color : colors) {    //=============get colors.
+            ColorDto ColorDto = new ColorDto();
+            ColorDto.setColorId(color.getId());
+            ColorDto.setColorText(color.getName());
+            colorDtos.add(ColorDto);
+        }
+        colorAndSizeDto.setColorDtos(colorDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getVendors() {
+        List<Vendor> vendors = vendorDao.loadAll();
+
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        List<AddressDto> vendorsDtos = new ArrayList<>();
+        for (Vendor vendor : vendors) {    //=============get Vendor.
+            AddressDto vendorDto = new AddressDto();
+            vendorDto.setUserId(vendor.getId());
+            vendorDto.setContactName(vendor.getVendorName());
+            vendorsDtos.add(vendorDto);
+        }
+        colorAndSizeDto.setVendorDtos(vendorsDtos);
+        return colorAndSizeDto;
+    }
+
+    @Override
+    public ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId) {
+        List<Specification> specifications = specificationDao.getSpecificationsByCategoryId(categoryId);
+        List<SpecificationDto> specificationDtos = new ArrayList<>();
+        for (Specification specification : specifications) {
+            SpecificationDto specificationDto = new SpecificationDto();
+            String[] values = specification.getFeaturesValue().split(",");
+            specificationDto.setId(specification.getId());
+            specificationDto.setName(specification.getFeatures());
+            specificationDto.setValues(Arrays.asList(values));
+            specificationDtos.add(specificationDto);
+        }
+        ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
+        colorAndSizeDto.setSpecifications(specificationDtos);
         return colorAndSizeDto;
     }
 
@@ -413,6 +519,20 @@ public class ProductServiceImpl implements ProductService {
                 sizeDto2.setSizeColorMap(mapSizeColorMapDto.get(sizeDto1.getSizeId()));
                 sizeDtos2.add(sizeDto2);
             }
+//            ==========================load specification==================================//
+            String specifications = product.getSpecifications();
+            if (specifications != null && !specifications.equals("")) {
+                String[] fiturs = specifications.split(",");
+                HashMap<String, String> map = new HashMap<String, String>();
+                for (String fitur : fiturs) {
+                    map.put(fitur.split(":")[0], fitur.split(":")[1]);
+                }
+                productDetailBean.setSpecifications(map);
+
+            } else {
+                productDetailBean.setSpecifications(new HashMap<String, String>());
+            }
+
             productDetailBean.setSizes(sizeDtos2);
             productDetailBean.setColors(colorDtos);
             productDetailBean.setOrginalPrice(orginalPrice);
@@ -569,6 +689,7 @@ public class ProductServiceImpl implements ProductService {
             product.setVendorId(productBean.getVendorId());     //>>>>>>>>
             product.setParentPath(parentCategory.getParentPath());
             product.setExternalLink(productBean.getExternalLink());
+            product.setSpecifications(productBean.getSpecifications());
             if (StatusConstants.IS_SHIPMENT) {
                 Shipment shipment = shippingService.createDefaultShipmentDomestic();
                 if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
@@ -682,6 +803,39 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public String saveSpecification(SpecificationDto specificationDto) {
+        Specification specification = new Specification();
+        specification.setId(null);
+        specification.setCategoryId(specificationDto.getId());
+        specification.setFeatures(specificationDto.getName());
+        specification.setFeaturesValue(specificationDto.getValue()+",");
+        Specification specification2 = specificationDao.save(specification);   //save new specification
+        if (specification2 == null) {
+            return "ERROR: Specification can not be saved!!";
+        } else {
+            return "Color saved..";
+        }
+    }
+
+    @Override
+    public String saveSpecificationValue(SpecificationDto specificationDto) {
+        Specification specification = specificationDao.loadById(specificationDto.getId());
+        String featureValue = specification.getFeaturesValue();
+        if (featureValue != null) {
+            featureValue = featureValue + specificationDto.getValue() + ",";
+        } else {
+            featureValue = specificationDto.getValue() + ",";
+        }
+        specification.setFeaturesValue(featureValue);
+        Specification specification2 = specificationDao.save(specification);   //save new specification value
+        if (specification2 == null) {
+            return "ERROR: Specification value can not be saved!!";
+        } else {
+            return "Color saved..";
+        }
+    }
+
+    @Override
     public Long getCartCountFoAUser(Long userId) {
         return cartDao.getCartCountByUserId(userId);    //number of item in cart fo a user.
     }
@@ -773,6 +927,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setPrice(sizeColorMap.getPrice());
                 orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
+                orderDetailsDto.setReturnStatus(orderDetailse.getReturnStatus());
                 ShipmentTable shipmentTable = orderDetailse.getShipmentId() != null ? shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId()) : null;
                 orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable, orderDetailse.getStatus(), paymentDetail));
                 orderdetailsDtos.add(orderDetailsDto);
@@ -793,6 +948,8 @@ public class ProductServiceImpl implements ProductService {
     public void cancelOrder(String orderId, Long userId) {
         OrderDetails orderDetails = orderDetailsDao.getOrderDetailsByUserIdAndOrderId(userId, orderId);
         if (orderDetails != null) {
+            orderDetails.setReturnStatus(StatusConstants.REQUEST_FOR_RETURN);
+            orderDetailsDao.save(orderDetails);
             mailService.returnRequestToAdmin(orderDetails);
         }
     }

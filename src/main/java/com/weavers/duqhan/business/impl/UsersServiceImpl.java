@@ -49,7 +49,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     MailService mailService;
-    
+
     @Autowired
     UserActivityDao userActivityDao;
 
@@ -85,6 +85,9 @@ public class UsersServiceImpl implements UsersService {
             activity.setEmail(loginBean.getEmail());
             activity.setActivity(StatusConstants.NEW_RAGISTRATION);
             activity.setActivityTime(new Date());
+            activity.setLatitude(loginBean.getLatitude());
+            activity.setLongitude(loginBean.getLongitude());
+            activity.setUserAgent(loginBean.getUserAgent());
             userActivityDao.save(activity);
             String pass = Crypting.encrypt(loginBean.getPassword());    // password encription
             Users user2 = new Users();
@@ -93,6 +96,9 @@ public class UsersServiceImpl implements UsersService {
             user2.setPassword(pass);
             user2.setEmail(loginBean.getEmail());
             user2.setRegDate(new Date());
+            user2.setLatitude(loginBean.getLatitude());
+            user2.setLongitude(loginBean.getLongitude());
+            user2.setUserAgent(loginBean.getUserAgent());
             Users saveUser = usersDao.save(user2);  // new user registration.
             if (saveUser != null) {
                 userBean.setName(user2.getName());
@@ -112,14 +118,10 @@ public class UsersServiceImpl implements UsersService {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
         UserBean userBean = new UserBean();
         Date newDate = new Date();
+        UserActivity activity = new UserActivity();
         if (user != null) { // if user already exist
-            UserActivity activity = new UserActivity();
-            activity.setId(null);
             activity.setUserId(user.getId());
-            activity.setEmail(loginBean.getEmail());
             activity.setActivity(StatusConstants.LOGIN);
-            activity.setActivityTime(newDate);
-            userActivityDao.save(activity);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
             userBean.setStatusCode("200");
@@ -127,18 +129,16 @@ public class UsersServiceImpl implements UsersService {
             user.setLastloginDate(new Date());
             user.setFbid(loginBean.getFbid());
             user.setFcmToken(loginBean.getFcmToken());
+            user.setLatitude(loginBean.getLatitude());
+            user.setLongitude(loginBean.getLongitude());
+            user.setUserAgent(loginBean.getUserAgent());
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
         } else { // if user not exist
             Users user2 = new Users();
-            UserActivity activity = new UserActivity();
-            activity.setId(null);
             activity.setUserId(null);
-            activity.setEmail(loginBean.getEmail());
             activity.setActivity(StatusConstants.NEW_RAGISTRATION);
-            activity.setActivityTime(newDate);
-            userActivityDao.save(activity);
             user2.setId(null);
             user2.setName(loginBean.getName());
             user2.setEmail(loginBean.getEmail());
@@ -146,6 +146,9 @@ public class UsersServiceImpl implements UsersService {
             user2.setLastloginDate(newDate);
             user2.setFbid(loginBean.getFbid());
             user2.setFcmToken(loginBean.getFcmToken());
+            user2.setLatitude(loginBean.getLatitude());
+            user2.setLongitude(loginBean.getLongitude());
+            user2.setUserAgent(loginBean.getUserAgent());
             Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
                 AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
@@ -159,6 +162,13 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setStatus("Server side exception");
             }
         }
+        activity.setId(null);
+        activity.setEmail(loginBean.getEmail());
+        activity.setActivityTime(newDate);
+        activity.setLatitude(loginBean.getLatitude());
+        activity.setLongitude(loginBean.getLongitude());
+        activity.setUserAgent(loginBean.getUserAgent());
+        userActivityDao.save(activity);
         return userBean;
     }
 
@@ -175,6 +185,9 @@ public class UsersServiceImpl implements UsersService {
             activity.setEmail(loginBean.getEmail());
             activity.setActivity(StatusConstants.LOGIN);
             activity.setActivityTime(newDate);
+            activity.setLatitude(loginBean.getLatitude());
+            activity.setLongitude(loginBean.getLongitude());
+            activity.setUserAgent(loginBean.getUserAgent());
             userActivityDao.save(activity);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
@@ -185,6 +198,9 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatus("Success");
             user.setLastloginDate(newDate);
             user.setFcmToken(loginBean.getFcmToken());
+            user.setLatitude(loginBean.getLatitude());
+            user.setLongitude(loginBean.getLongitude());
+            user.setUserAgent(loginBean.getUserAgent());
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             userBean.setAuthtoken(aouthBean.getAouthToken());
@@ -500,6 +516,11 @@ public class UsersServiceImpl implements UsersService {
             statusBean.setStatus("password did not match");
         }
         return statusBean;
+    }
+
+    @Override
+    public String contactToAdmin(StatusBean contactBean, Users users) {
+        return mailService.sendMailToAdminByUser(contactBean,users);
     }
 
 }

@@ -6,6 +6,8 @@
 package com.weavers.duqhan.business;
 
 import com.weavers.duqhan.domain.OrderDetails;
+import com.weavers.duqhan.domain.Users;
+import com.weavers.duqhan.dto.StatusBean;
 
 /**
  *
@@ -16,4 +18,6 @@ public interface MailService {
     String sendOTPforPasswordReset(String email, String otp);
     
     String returnRequestToAdmin(OrderDetails orderDetails);
+    
+    String sendMailToAdminByUser(StatusBean contactBean, Users users);
 }

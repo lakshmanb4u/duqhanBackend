@@ -1,3 +1,9 @@
+<%-- 
+    Document   : adminheader
+    Created on : Mar 7, 2017, 1:56:27 PM
+    Author     : weaversAndroid
+--%>
+
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
@@ -17,6 +23,10 @@
 <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
 <link href="/resources/style/themestyle.css" rel="stylesheet">
 
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -29,18 +39,24 @@
         </div>
         <div class="collapse navbar-collapse" id="myNavbar">
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/web/home">HOME</a></li>
-                <li><a href="/web/adminlogin">ADMIN</a></li>
-<!--                <li class="dropdown">
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">PRODUCT
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="#">Merchandise</a></li>
-                        <li><a href="#">Extras</a></li>
-                        <li><a href="#">Media</a></li> 
+                        <li><a href="#">Add Product</a></li>
+                        <li><a href="#">View Product</a></li>
+                        <li><a href="#">Update Product</a></li> 
                     </ul>
                 </li>
-                <li><a href="#"><span class="glyphicon glyphicon-search"></span></a></li>-->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">INVENTORY
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">Update Inventory</a></li>
+                    </ul>
+                </li>
+                <li><a href="/admin/logout">LOGOUT</a></li>
+                <!--<li><a href="#"><span class="glyphicon glyphicon-search"></span></a></li>-->
             </ul>
         </div>
     </div>

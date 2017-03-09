@@ -47,5 +47,7 @@ public interface UsersService {
     AddressBean deactivateUserAddress(Long userId, Long addressId);
 
     StatusBean changePassword(LoginBean loginBean, Users users);
+    
+    String contactToAdmin(StatusBean contactBean, Users users);
 
 }

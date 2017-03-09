@@ -24,6 +24,9 @@ public class LoginBean {
     private String newPassword;
     private Long fbid;
     private String fcmToken;
+    private String latitude;
+    private String longitude;
+    private String userAgent;
 
     /**
      * @return the fbid
@@ -205,6 +208,48 @@ public class LoginBean {
      */
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    /**
+     * @return the latitude
+     */
+    public String getLatitude() {
+        return latitude;
+    }
+
+    /**
+     * @param latitude the latitude to set
+     */
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    /**
+     * @return the longitude
+     */
+    public String getLongitude() {
+        return longitude;
+    }
+
+    /**
+     * @param longitude the longitude to set
+     */
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
+    /**
+     * @return the userAgent
+     */
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     * @param userAgent the userAgent to set
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
 }

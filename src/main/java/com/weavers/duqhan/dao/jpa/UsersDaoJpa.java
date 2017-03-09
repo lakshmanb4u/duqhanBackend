@@ -57,4 +57,15 @@ public class UsersDaoJpa extends BaseDaoJpa<Users> implements UsersDao {
         }
     }
 
+    @Override
+    public Users getLastLoginOfUser(Long userId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT u FROM Users AS u WHERE u.id=:userId");
+            query.setParameter("userId", userId);
+            return (Users) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return new Users();
+        }
+    }
+
 }

@@ -15,6 +15,7 @@ import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.SizeDto;
+import com.weavers.duqhan.dto.SpecificationDto;
 
 /**
  *
@@ -23,6 +24,18 @@ import com.weavers.duqhan.dto.SizeDto;
 public interface ProductService {
 
     ColorAndSizeDto getColorSizeList();
+    
+    ColorAndSizeDto getCategories();
+    
+    ColorAndSizeDto getSizes();
+    
+    ColorAndSizeDto getSizeGroupe();
+    
+    ColorAndSizeDto getColors();
+    
+    ColorAndSizeDto getVendors();
+    
+    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
     ProductBeans getProductsByCategory(Long categoryId, int start, int limit);
 
@@ -53,6 +66,10 @@ public interface ProductService {
     String saveSizeGroup(String sizeGroup);
 
     String saveColor(String color);
+    
+    String saveSpecification(SpecificationDto specificationDto);
+    
+    String saveSpecificationValue(SpecificationDto specificationDto);
 
     CategorysBean getChildById(Long parentId);
 

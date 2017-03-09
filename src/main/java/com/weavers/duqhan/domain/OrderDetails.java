@@ -70,6 +70,9 @@ public class OrderDetails extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "shipment_id")
     private String shipmentId;
+    @Size(max = 255)
+    @Column(name = "return_status")
+    private String returnStatus;
 
     public long getUserId() {
         return userId;
@@ -159,4 +162,11 @@ public class OrderDetails extends BaseDomain {
         this.shipmentId = shipmentId;
     }
 
+    public String getReturnStatus() {
+        return returnStatus;
+    }
+
+    public void setReturnStatus(String returnStatus) {
+        this.returnStatus = returnStatus;
+    }
 }

@@ -30,6 +30,7 @@ public class OrderDetailsDto {
     private Long quty;
     private AddressDto addressDto;
     private TrackerBean trackerBean;
+    private String returnStatus;
 
     /**
      * @return the userId
@@ -295,6 +296,20 @@ public class OrderDetailsDto {
      */
     public void setTrackerBean(TrackerBean trackerBean) {
         this.trackerBean = trackerBean;
+    }
+
+    /**
+     * @return the returnStatus
+     */
+    public String getReturnStatus() {
+        return returnStatus;
+    }
+
+    /**
+     * @param returnStatus the returnStatus to set
+     */
+    public void setReturnStatus(String returnStatus) {
+        this.returnStatus = returnStatus;
     }
 
 }
