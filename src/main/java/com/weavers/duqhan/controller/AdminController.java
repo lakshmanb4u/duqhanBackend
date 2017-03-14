@@ -18,6 +18,7 @@ import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.SpecificationDto;
 import com.weavers.duqhan.dto.StatusBean;
+import com.weavers.duqhan.util.StatusConstants;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,6 @@ public class AdminController {
 //        modelMap.addAttribute("sizeAndColor", colorAndSizeDto);
 //        return "addProduct";
 //    }
-
     @RequestMapping(value = "/get-category", method = RequestMethod.GET) // have to remove when admin palen is ready.
     @ResponseBody
     public ColorAndSizeDto getCategory() {
@@ -105,7 +105,7 @@ public class AdminController {
         ColorAndSizeDto colorAndSizeDto = productService.getVendors();
         return colorAndSizeDto;
     }
-    
+
     @RequestMapping(value = "/get-specifications", method = RequestMethod.GET) // have to remove when admin palen is ready.
     @ResponseBody
     public ColorAndSizeDto getSpecifications(@RequestParam Long categoryId) {
@@ -166,16 +166,20 @@ public class AdminController {
     @ResponseBody
     public StatusBean saveVendor(@RequestBody AddressDto addressDto) {
         StatusBean response = new StatusBean();
-        StatusBean statusBean = shippingService.verifyAddress(addressDto);
-        if (statusBean.getStatusCode().equals("200")) {
-            response.setStatus(vendorService.saveVendor(addressDto));
+        if (StatusConstants.IS_SHIPMENT) {
+            StatusBean statusBean = shippingService.verifyAddress(addressDto);
+            if (statusBean.getStatusCode().equals("200")) {
+                response.setStatus(vendorService.saveVendor(addressDto));
+            } else {
+                response.setStatusCode(statusBean.getStatusCode());
+                response.setStatus(statusBean.getStatus());
+            }
         } else {
-            response.setStatusCode(statusBean.getStatusCode());
-            response.setStatus(statusBean.getStatus());
+            response.setStatus(vendorService.saveVendor(addressDto));
         }
         return response;
     }
-    
+
     @RequestMapping(value = "/save-specification", method = RequestMethod.POST)  // save a new Specification
     @ResponseBody
     public StatusBean saveSpecification(@RequestBody SpecificationDto specificationDto) {
@@ -183,7 +187,7 @@ public class AdminController {
         response.setStatus(productService.saveSpecification(specificationDto));
         return response;
     }
-    
+
     @RequestMapping(value = "/save-specification-value", method = RequestMethod.POST)  // save a new Specification
     @ResponseBody
     public StatusBean saveSpecificationValue(@RequestBody SpecificationDto specificationDto) {
