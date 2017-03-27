@@ -45,6 +45,12 @@ public class DuqhanAdmin extends BaseDomain {
     @Column(name = "last_login")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastLogin;
+    @Size(min = 1, max = 255)
+    @Column(name = "aouth_token")
+    private String aouthToken;
+    @Column(name = "valid_till")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date validTill;
 
     public String getName() {
         return name;
@@ -76,6 +82,22 @@ public class DuqhanAdmin extends BaseDomain {
 
     public void setLastLogin(Date lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public String getAouthToken() {
+        return aouthToken;
+    }
+
+    public void setAouthToken(String aouthToken) {
+        this.aouthToken = aouthToken;
+    }
+
+    public Date getValidTill() {
+        return validTill;
+    }
+
+    public void setValidTill(Date validTill) {
+        this.validTill = validTill;
     }
 
 }

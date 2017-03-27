@@ -6,6 +6,7 @@
 package com.weavers.duqhan.dto;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -74,6 +75,9 @@ public class ProductBean {
     private Double productWeight;
     private String externalLink;
     private String specifications;
+    private HashMap<String,String> specificationsMap;
+    private String statusCode;
+    private String status;
 
     /**
      * @return the productId
@@ -479,6 +483,48 @@ public class ProductBean {
      */
     public void setSpecifications(String specifications) {
         this.specifications = specifications;
+    }
+
+    /**
+     * @return the specificationsMap
+     */
+    public HashMap<String,String> getSpecificationsMap() {
+        return specificationsMap;
+    }
+
+    /**
+     * @param specificationsMap the specificationsMap to set
+     */
+    public void setSpecificationsMap(HashMap<String,String> specificationsMap) {
+        this.specificationsMap = specificationsMap;
+    }
+
+    /**
+     * @return the statusCode
+     */
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * @param statusCode the statusCode to set
+     */
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }

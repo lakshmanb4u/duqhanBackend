@@ -14,4 +14,12 @@ import com.weavers.duqhan.domain.DuqhanAdmin;
 public interface DuqhanAdminDao extends BaseDao<DuqhanAdmin> {
 
     DuqhanAdmin getAdminByEmailAndPassword(String email, String password);
+    
+    DuqhanAdmin getTokenByMail(String mail);
+
+    DuqhanAdmin getTokenByMailAndUserId(String mail, Long userId);
+
+    DuqhanAdmin getTokenByEmailAndToken(String email, String token);
+
+    DuqhanAdmin getUserIdByTokenIfValid(String token);
 }

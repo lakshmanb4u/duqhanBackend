@@ -20,6 +20,8 @@ public class ColorAndSizeDto {
     private List<CategoryDto> categoryDtos;
     private List<AddressDto> vendorDtos;
     private List<SpecificationDto> specifications;
+    private String statusCode;
+    private String status;
 
     /**
      * @return the sizeDtos
@@ -103,5 +105,33 @@ public class ColorAndSizeDto {
      */
     public void setSpecifications(List<SpecificationDto> specifications) {
         this.specifications = specifications;
+    }
+
+    /**
+     * @return the statusCode
+     */
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * @param statusCode the statusCode to set
+     */
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

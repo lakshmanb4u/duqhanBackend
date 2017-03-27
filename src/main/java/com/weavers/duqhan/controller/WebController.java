@@ -12,6 +12,7 @@ import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.VendorService;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.AouthBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.ColorAndSizeDto;
 import com.weavers.duqhan.dto.LoginBean;
@@ -65,9 +66,17 @@ public class WebController {
         return "index";
     }
 
-    @RequestMapping(value = "/adminlogin", method = RequestMethod.GET) // open admin login page
-    public String adminLogin() {
-        return "adminlogin";
+//    @RequestMapping(value = "/adminlogin", method = RequestMethod.GET) // open admin login page
+//    public String adminLogin() {
+//        return "adminlogin";
+//    }
+    
+    @RequestMapping(value = "/admin-login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
+    @ResponseBody
+    public AouthBean trainerLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
+        AouthBean userBean = adminService.generatAccessToken(loginBean);
+//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        return userBean;
     }
 
     @RequestMapping(value = "/adminlogin-action", method = RequestMethod.POST) // admin login action

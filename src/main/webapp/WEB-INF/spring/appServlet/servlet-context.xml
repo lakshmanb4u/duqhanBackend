@@ -63,11 +63,11 @@
             <beans:bean class="com.weavers.duqhan.interceptor.UserInterceptor" />
         </mvc:interceptor>
     </mvc:interceptors>
-    <mvc:interceptors>
+<!--    <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/admin/**"/>
             <beans:bean class="com.weavers.duqhan.interceptor.AdminInterceptor" />
         </mvc:interceptor>
-    </mvc:interceptors>
+    </mvc:interceptors>-->
 
 </beans:beans>

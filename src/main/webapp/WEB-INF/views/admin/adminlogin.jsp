@@ -6,7 +6,7 @@
 
 <div id="contact" class="container well">
     <h3 class="text-center">Login</h3>
-    <form class="form-horizontal" method="POST" name="loginBean" action="web/adminlogin-action">
+    <form class="form-horizontal" method="POST" name="loginBean" action="/web/adminlogin-action">
         <div class="form-group">
             <label class="control-label col-sm-2" for="email">Email:</label>
             <div class="col-sm-10">

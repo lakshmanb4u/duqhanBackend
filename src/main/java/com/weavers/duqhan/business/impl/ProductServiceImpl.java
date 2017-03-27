@@ -57,8 +57,6 @@ import com.weavers.duqhan.dto.SpecificationDto;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.FileUploader;
 import com.weavers.duqhan.util.StatusConstants;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,7 +65,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -180,7 +177,21 @@ public class ProductServiceImpl implements ProductService {
                 bean.setVendorId(product.getVendorId());
                 bean.setShippingRate(product.getShippingRate());
                 bean.setShippingTime(product.getShippingTime());
+                bean.setExternalLink(product.getExternalLink());
                 i = i + qunty.intValue();   // count total product
+//            ==========================load specification==================================//
+                String specifications = product.getSpecifications();
+                bean.setSpecifications(specifications);
+                if (specifications != null && !specifications.equals("")) {
+                    String[] fiturs = specifications.split(",");
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    for (String fitur : fiturs) {
+                        map.put(fitur.split(":")[0], fitur.split(":")[1]);
+                    }
+                    bean.setSpecificationsMap(map);
+                } else {
+                    bean.setSpecificationsMap(new HashMap<String, String>());
+                }
                 beans.add(bean);
             }
         }
@@ -542,12 +553,14 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setShippingCost(null);
             productDetailBean.setRelatedProducts(new ProductBeans());
             //==========================Save in recent view table===========================//
-            RecentView recentView = new RecentView();
-            recentView.setId(null);
-            recentView.setProductId(product.getId());
-            recentView.setUserId(userId);
-            recentView.setViewDate(new Date());
-            recentViewDao.save(recentView);
+            if (userId != null) {
+                RecentView recentView = new RecentView();
+                recentView.setId(null);
+                recentView.setProductId(product.getId());
+                recentView.setUserId(userId);
+                recentView.setViewDate(new Date());
+                recentViewDao.save(recentView);
+            }
         } else {
             productDetailBean.setStatus("No Product Found");
         }
@@ -808,7 +821,7 @@ public class ProductServiceImpl implements ProductService {
         specification.setId(null);
         specification.setCategoryId(specificationDto.getId());
         specification.setFeatures(specificationDto.getName());
-        specification.setFeaturesValue(specificationDto.getValue()+",");
+        specification.setFeaturesValue(specificationDto.getValue() + ",");
         Specification specification2 = specificationDao.save(specification);   //save new specification
         if (specification2 == null) {
             return "ERROR: Specification can not be saved!!";
@@ -952,5 +965,143 @@ public class ProductServiceImpl implements ProductService {
             orderDetailsDao.save(orderDetails);
             mailService.returnRequestToAdmin(orderDetails);
         }
+    }
+
+    @Override
+    public String updateProduct(ProductBean productBean) {
+        String status = "ERROR: Product can not be update!!";
+        Product product = productDao.loadById(productBean.getProductId());
+        if (product != null) {
+            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());
+            product.setName(productBean.getName());
+            product.setImgurl(productBean.getImgurl());
+            product.setCategoryId(productBean.getCategoryId());
+            product.setDescription(productBean.getDescription());
+            product.setLastUpdate(new Date());
+            product.setVendorId(productBean.getVendorId());     //>>>>>>>>
+            product.setParentPath(parentCategory.getParentPath());
+            product.setExternalLink(productBean.getExternalLink());
+            product.setSpecifications(productBean.getSpecifications());
+
+            product.setShippingTime(productBean.getShippingTime());
+            product.setShippingRate(productBean.getShippingRate());
+
+            Product product1 = productDao.save(product);
+            /*if (product1 != null) {
+                //===========multiple image add==========//
+                List<ImageDto> imageDtos = productBean.getImageDtos();
+                if (!imageDtos.isEmpty()) {
+                    for (ImageDto imageDto : imageDtos) {
+                        ProductImg productImg = new ProductImg();
+                        productImg.setId(null);
+                        productImg.setImgUrl(imageDto.getImgUrl());
+                        productImg.setProductId(product1.getId());
+                        productImgDao.save(productImg);
+                    }
+                    status = "Product saved.";
+                }
+            }*/
+        }
+        return status;
+    }
+
+    @Override
+    public ProductBean getProductInventoryById(Long productId) {
+        List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
+        ProductBean productBean = new ProductBean();
+        productBean.setProductId(productId);
+        List<ProductSizeColorMap> sizeColorMaps = productSizeColorMapDao.getSizeColorMapByProductId(productId);
+        List<Sizee> sizees = sizeeDao.loadAll();
+        HashMap<Long, Sizee> mapSize = new HashMap<>();
+        for (Sizee sizee : sizees) {
+            mapSize.put(sizee.getId(), sizee);
+        }
+        List<Color> colors = colorDao.loadAll();
+        HashMap<Long, Color> mapColor = new HashMap<>();
+        for (Color color : colors) {
+            mapColor.put(color.getId(), color);
+        }
+        for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
+            SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
+            if (mapSize.get(sizeColorMap.getSizeId()) != null) {
+                sizeColorMapDto.setSizeId(sizeColorMap.getSizeId());
+                sizeColorMapDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
+            }
+            if (mapColor.get(sizeColorMap.getColorId()) != null) {
+                sizeColorMapDto.setColorId(sizeColorMap.getColorId());
+                sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+            }
+            sizeColorMapDto.setMapId(sizeColorMap.getId());
+            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+            sizeColorMapDto.setDiscount(sizeColorMap.getDiscount());
+            sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
+            sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
+            sizeColorMapDto.setCount(sizeColorMap.getQuentity());
+            sizeColorMapDto.setProductLength(sizeColorMap.getProductLength());
+            sizeColorMapDto.setProductHeight(sizeColorMap.getProductHeight());
+            sizeColorMapDto.setProductWidth(sizeColorMap.getProductWidth());
+            sizeColorMapDto.setProductWeight(sizeColorMap.getProductWeight());
+            sizeColorMapDtos.add(sizeColorMapDto);
+        }
+        productBean.setSizeColorMaps(sizeColorMapDtos);
+        return productBean;
+    }
+
+    @Override
+    public String updateProductInventory(ProductBean productBean) {
+        String status = "ERROR: Product Inventory can not be update!!";
+        Product product = productDao.loadById(productBean.getProductId());
+        if (product != null) {
+            //====multiple ProductSizeColorMap added=======//
+            List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
+            if (!sizeColorMapDtos.isEmpty()) {
+                for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
+                    ProductSizeColorMap sizeColorMap;
+                    if (sizeColorMapDto.getMapId() != null) {
+                        sizeColorMap = productSizeColorMapDao.loadById(sizeColorMapDto.getMapId());
+                    } else {
+                        sizeColorMap = new ProductSizeColorMap();
+                        sizeColorMap.setId(null);
+                    }
+                    sizeColorMap.setColorId(sizeColorMapDto.getColorId());
+                    sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
+                    sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
+                    sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
+                    sizeColorMap.setQuentity(sizeColorMapDto.getCount());
+                    sizeColorMap.setProductId(product.getId());
+                    sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
+                    sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
+                    sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
+                    sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
+                    ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
+                }
+            }
+            status = "Product Inventory update.";
+        }
+        return status;
+    }
+
+    @Override
+    public ProductDetailBean getProductSpecifications(Long categoryId) {
+        ProductDetailBean detailBean = new ProductDetailBean();
+        List<Specification> specifications = specificationDao.getSpecificationsByCategoryId(categoryId);
+        HashMap<String, String> specificationMap = new HashMap();
+        for (Specification specification : specifications) {
+            specificationMap.put(specification.getId().toString(), specification.getFeatures());
+        }
+        detailBean.setSpecifications(specificationMap);
+        return detailBean;
+    }
+
+    @Override
+    public SpecificationDto getProductSpecificationValue(Long specificationId) {
+        Specification specification = specificationDao.loadById(specificationId);
+        SpecificationDto specificationDto = new SpecificationDto();
+        String[] values = specification.getFeaturesValue().split(",");
+        specificationDto.setId(specification.getId());
+        specificationDto.setName(specification.getFeatures());
+        specificationDto.setValues(Arrays.asList(values));
+        return specificationDto;
     }
 }

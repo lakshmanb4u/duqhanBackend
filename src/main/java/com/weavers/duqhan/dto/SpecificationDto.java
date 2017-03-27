@@ -17,6 +17,9 @@ public class SpecificationDto {
     private String value;
     private Long id;
     private List<String> values;
+    private String statusCode;
+    private String status;
+    
 
     /**
      * @return the name
@@ -72,5 +75,33 @@ public class SpecificationDto {
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+    /**
+     * @return the statusCode
+     */
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    /**
+     * @param statusCode the statusCode to set
+     */
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    /**
+     * @return the status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

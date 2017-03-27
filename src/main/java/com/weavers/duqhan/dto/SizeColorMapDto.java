@@ -19,6 +19,7 @@ public class SizeColorMapDto {
     private Double salesPrice;
     private Double discount;
     private Long sizeId;
+    private String sizeText;
     private Double productLength;
     private Double productWidth;
     private Double productHeight;
@@ -190,5 +191,19 @@ public class SizeColorMapDto {
      */
     public void setProductWeight(Double productWeight) {
         this.productWeight = productWeight;
+    }
+
+    /**
+     * @return the sizeText
+     */
+    public String getSizeText() {
+        return sizeText;
+    }
+
+    /**
+     * @param sizeText the sizeText to set
+     */
+    public void setSizeText(String sizeText) {
+        this.sizeText = sizeText;
     }
 }
