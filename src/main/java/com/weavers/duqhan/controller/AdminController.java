@@ -311,7 +311,7 @@ public class AdminController {
         DuqhanAdmin admin = adminService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductBeans productBeans;
         if (admin != null) {
-            productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit());
+            productBeans = productService.getAllProductsIncloudeZeroAvailable(requistBean.getStart(), requistBean.getLimit());
         } else {
             productBeans = new ProductBeans();
             productBeans.setStatusCode("401");

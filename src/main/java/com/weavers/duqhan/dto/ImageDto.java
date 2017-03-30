@@ -12,6 +12,7 @@ package com.weavers.duqhan.dto;
 public class ImageDto {
 
     private String imgUrl;
+    private Long id;
 
     /**
      * @return the imgUrl
@@ -25,6 +26,20 @@ public class ImageDto {
      */
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
     }
 
 }

@@ -400,6 +400,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit) {
+        List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
+        List<Long> productIds = new ArrayList<>();
+        for (Product product : products) {
+            productIds.add(product.getId());
+        }
+        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapByProductIds(productIds);
+        return this.setProductBeans(products, mapSizeColorMaps);
+    }
+
+    @Override
     public ProductBeans searchProducts(ProductRequistBean requistBean) {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
         List<Long> productIds = new ArrayList<>();
@@ -1045,6 +1056,15 @@ public class ProductServiceImpl implements ProductService {
             sizeColorMapDtos.add(sizeColorMapDto);
         }
         productBean.setSizeColorMaps(sizeColorMapDtos);
+        List<ImageDto> imageDtos = new ArrayList<>();
+        List<ProductImg> productImgs = productImgDao.getProductImgsByProductId(productId);
+        for (ProductImg productImg : productImgs) {
+            ImageDto imageDto = new ImageDto();
+            imageDto.setId(productImg.getId());
+            imageDto.setImgUrl(productImg.getImgUrl());
+            imageDtos.add(imageDto);
+        }
+        productBean.setImageDtos(imageDtos);
         return productBean;
     }
 
@@ -1075,6 +1095,20 @@ public class ProductServiceImpl implements ProductService {
                     sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
                     sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
                     ProductSizeColorMap sizeColorMap1 = productSizeColorMapDao.save(sizeColorMap);
+                }
+            }
+            List<ImageDto> imageDtos = productBean.getImageDtos();
+            if (imageDtos != null) {
+                for (ImageDto imageDto : imageDtos) {
+                    ProductImg productImg;
+                    if (imageDto.getId() != null) {
+                        productImg = productImgDao.loadById(imageDto.getId());
+                    } else {
+                        productImg = new ProductImg();
+                        productImg.setId(null);
+                    }
+                    productImg.setImgUrl(imageDto.getImgUrl());
+                    productImgDao.save(productImg);
                 }
             }
             status = "Product Inventory update.";

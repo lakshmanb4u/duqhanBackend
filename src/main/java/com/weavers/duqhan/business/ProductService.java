@@ -42,6 +42,8 @@ public interface ProductService {
     ProductBeans getProductsByRecentView(Long userId, int start, int limit);
 
     ProductBeans getAllProducts(int start, int limit);
+    
+    ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
     ProductBeans searchProducts(ProductRequistBean requistBean);
 
