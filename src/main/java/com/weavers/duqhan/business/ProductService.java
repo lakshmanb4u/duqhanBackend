@@ -16,6 +16,8 @@ import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.SpecificationDto;
+import com.weavers.duqhan.dto.StatusBean;
+import java.util.List;
 
 /**
  *
@@ -42,7 +44,7 @@ public interface ProductService {
     ProductBeans getProductsByRecentView(Long userId, int start, int limit);
 
     ProductBeans getAllProducts(int start, int limit);
-    
+
     ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
     ProductBeans searchProducts(ProductRequistBean requistBean);
@@ -84,8 +86,24 @@ public interface ProductService {
     ProductBean getProductInventoryById(Long productId);
 
     String updateProductInventory(ProductBean productBean);
-    
+
     ProductDetailBean getProductSpecifications(Long categoryId);
-    
+
     SpecificationDto getProductSpecificationValue(Long specificationId);
+
+    List<StatusBean> getTempProducts(String link);
+
+    List<StatusBean> getTempProductList(int start, int limit);
+
+    String loadTempProducts(List<StatusBean> statusBeans);
+
+    ProductBeans getAllTempProductsIncloudeZeroAvailable(int start, int limit);
+
+    ProductBean getTempProductInventoryById(Long productId);
+
+    String updateTempProduct(ProductBean productBean);
+
+    String updateTempProductInventory(ProductBean productBean);
+
+    String moveTempProductToProduct(Long tempProductId);
 }

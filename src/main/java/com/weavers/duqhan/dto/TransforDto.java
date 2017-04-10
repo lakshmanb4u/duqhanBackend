@@ -5,15 +5,30 @@
  */
 package com.weavers.duqhan.dto;
 
+import java.util.List;
+
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
-public class StatusBean {
-
+public class TransforDto {
+    private List<StatusBean> statusBeans;
     private String statusCode;
     private String status;
-    private Long id;
+
+    /**
+     * @return the statusBeans
+     */
+    public List<StatusBean> getStatusBeans() {
+        return statusBeans;
+    }
+
+    /**
+     * @param statusBeans the statusBeans to set
+     */
+    public void setStatusBeans(List<StatusBean> statusBeans) {
+        this.statusBeans = statusBeans;
+    }
 
     /**
      * @return the statusCode
@@ -41,19 +56,5 @@ public class StatusBean {
      */
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    /**
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * @param id the id to set
-     */
-    public void setId(Long id) {
-        this.id = id;
     }
 }

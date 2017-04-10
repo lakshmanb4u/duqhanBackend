@@ -6,6 +6,7 @@
 package com.weavers.duqhan.business.impl;
 
 import com.easypost.model.Shipment;
+import com.google.gson.Gson;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
@@ -21,6 +22,10 @@ import com.weavers.duqhan.dao.RecentViewDao;
 import com.weavers.duqhan.dao.SizeGroupDao;
 import com.weavers.duqhan.dao.SizeeDao;
 import com.weavers.duqhan.dao.SpecificationDao;
+import com.weavers.duqhan.dao.TempProductDao;
+import com.weavers.duqhan.dao.TempProductImgDao;
+import com.weavers.duqhan.dao.TempProductSizeColorMapDao;
+import com.weavers.duqhan.dao.TemtproductlinklistDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
@@ -36,9 +41,14 @@ import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.SizeGroup;
 import com.weavers.duqhan.domain.Sizee;
 import com.weavers.duqhan.domain.Specification;
+import com.weavers.duqhan.domain.TempProduct;
+import com.weavers.duqhan.domain.TempProductImg;
+import com.weavers.duqhan.domain.TempProductSizeColorMap;
+import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.AxpProductDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
@@ -53,20 +63,41 @@ import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.SizeColorMapDto;
 import com.weavers.duqhan.dto.SizeDto;
+import com.weavers.duqhan.dto.SkuVal;
 import com.weavers.duqhan.dto.SpecificationDto;
+import com.weavers.duqhan.dto.StatusBean;
+import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.FileUploader;
 import com.weavers.duqhan.util.StatusConstants;
+import java.awt.Image;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import javax.imageio.ImageIO;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -106,6 +137,14 @@ public class ProductServiceImpl implements ProductService {
     MailService mailService;
     @Autowired
     SpecificationDao specificationDao;
+    @Autowired
+    TemtproductlinklistDao temtproductlinklistDao;
+    @Autowired
+    TempProductDao tempProductDao;
+    @Autowired
+    TempProductSizeColorMapDao tempProductSizeColorMapDao;
+    @Autowired
+    TempProductImgDao tempProductImgDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -202,6 +241,78 @@ public class ProductServiceImpl implements ProductService {
     }
 // </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="setTempProductBeans">
+    private ProductBeans setTempProductBeans(List<TempProduct> products, HashMap<Long, TempProductSizeColorMap> mapSizeColorMap) {
+        ProductBeans productBeans = new ProductBeans();
+        List<String> allImages = new ArrayList<>();
+        List<ProductBean> beans = new ArrayList<>();
+        List<Sizee> sizees = sizeeDao.loadAll();
+        HashMap<Long, Sizee> mapSize = new HashMap<>();
+        for (Sizee sizee : sizees) {
+            mapSize.put(sizee.getId(), sizee);
+        }
+        List<Color> colors = colorDao.loadAll();
+        HashMap<Long, Color> mapColor = new HashMap<>();
+        for (Color color : colors) {
+            mapColor.put(color.getId(), color);
+        }
+        List<Category> categorys = categoryDao.loadAll();
+        HashMap<Long, String> mapCategory = new HashMap<>();
+        for (Category category : categorys) {
+            mapCategory.put(category.getId(), category.getName());
+        }
+        int i = 0;
+        for (TempProduct product : products) {
+            if (mapSizeColorMap.containsKey(product.getId())) {
+                ProductBean bean = new ProductBean();
+                bean.setProductId(product.getId());
+                bean.setName(product.getName());
+                bean.setImgurl(product.getImgurl());
+                allImages.add(product.getImgurl());
+                bean.setDescription(product.getDescription());
+                bean.setCategoryId(product.getCategoryId());
+                bean.setCategoryName(mapCategory.get(product.getCategoryId()));
+                bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
+                bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
+                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {     // if this product have any size
+                    bean.setSize(mapSize.get(mapSizeColorMap.get(product.getId()).getSizeId()).getValu());
+                }
+                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {    // if this product have any color
+                    bean.setColor(mapColor.get(mapSizeColorMap.get(product.getId()).getColorId()).getName());
+                }
+                bean.setPrice(mapSizeColorMap.get(product.getId()).getPrice());
+                bean.setDiscountedPrice(mapSizeColorMap.get(product.getId()).getDiscount());
+                bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
+                Long qunty = mapSizeColorMap.get(product.getId()).getQuantity();
+                bean.setAvailable(qunty.intValue());
+                bean.setVendorId(product.getVendorId());
+                bean.setShippingRate(product.getShippingRate());
+                bean.setShippingTime(product.getShippingTime());
+                bean.setExternalLink(product.getExternalLink());
+                i = i + qunty.intValue();   // count total product
+//            ==========================load specification==================================//
+                String specifications = product.getSpecifications();
+                bean.setSpecifications(specifications);
+                if (specifications != null && !specifications.equals("")) {
+                    String[] fiturs = specifications.split(",");
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    for (String fitur : fiturs) {
+                        map.put(fitur.split(":")[0], fitur.split(":")[1]);
+                    }
+                    bean.setSpecificationsMap(map);
+                } else {
+                    bean.setSpecificationsMap(new HashMap<String, String>());
+                }
+                beans.add(bean);
+            }
+        }
+        productBeans.setTotalProducts(i);
+        productBeans.setProducts(beans);
+        productBeans.setAllImages(allImages);
+        return productBeans;
+    }
+// </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="getPercentage">
     private Double getPercentage(Double original, Double discounted) {
         Double discountPct = 0.00;
@@ -214,6 +325,62 @@ public class ProductServiceImpl implements ProductService {
         return discountPct;
     }
     // </editor-fold>
+
+    private String saveTempProduct(ProductBean productBean) {
+        String status = "ERROR: Product can not be saved!!";
+        if (productBean != null) {
+            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());//>>>>>>>>>>>>>>
+            TempProduct product = new TempProduct();
+            product.setId(null);
+            product.setName(productBean.getName());//>>>>>>>>>>>>>>>>>
+            product.setImgurl(productBean.getImgurl());//>>>>>>>>>>>>>>>>
+            product.setCategoryId(productBean.getCategoryId());//>>>>>>>>>>>
+            product.setDescription(productBean.getDescription());//>>>>>>>>>>>>>>>>
+            product.setLastUpdate(new Date());
+            product.setVendorId(productBean.getVendorId());     //>>>>>>>>>>>>>>>>>
+            product.setParentPath(parentCategory.getParentPath());
+            product.setExternalLink(productBean.getExternalLink()); //>>>>>>>>>>>>>>
+            product.setSpecifications(productBean.getSpecifications());//>>>>>>>>>>>>
+            product.setShippingTime(productBean.getShippingTime());
+            product.setShippingRate(productBean.getShippingRate());
+            TempProduct product1 = tempProductDao.save(product);
+            if (product1 != null) {
+                //====multiple ProductSizeColorMap added=======//
+                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();//>>>>>>>>>>>>>>
+                if (!sizeColorMapDtos.isEmpty()) {
+                    for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
+                        TempProductSizeColorMap sizeColorMap = new TempProductSizeColorMap();
+                        sizeColorMap.setId(null);
+                        sizeColorMap.setColorId(sizeColorMapDto.getColorId());
+                        sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
+                        sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
+                        sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
+                        sizeColorMap.setQuantity(sizeColorMapDto.getCount());
+                        sizeColorMap.setProductId(product1.getId());
+                        sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
+                        sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
+                        sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
+                        sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
+                        TempProductSizeColorMap sizeColorMap1 = tempProductSizeColorMapDao.save(sizeColorMap);
+                    }
+                }
+
+                //===========multiple image add==========//
+                List<ImageDto> imageDtos = productBean.getImageDtos();//>>>>>>>>>>>>
+                if (!imageDtos.isEmpty()) {
+                    for (ImageDto imageDto : imageDtos) {
+                        TempProductImg productImg = new TempProductImg();
+                        productImg.setId(null);
+                        productImg.setImgUrl(imageDto.getImgUrl());
+                        productImg.setProductId(product1.getId());
+                        tempProductImgDao.save(productImg);
+                    }
+                }
+                status = "success";
+            }
+        }
+        return status;
+    }
 
     @Override
     public ColorAndSizeDto getColorSizeList() { // get color size category from database for add produc page on load.
@@ -702,26 +869,26 @@ public class ProductServiceImpl implements ProductService {
     public String saveProduct(ProductBean productBean) {
         String status = "ERROR: Product can not be saved!!";
         if (productBean != null) {
-            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());
+            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());//>>>>>>>>>>>>>>
             Product product = new Product();
             product.setId(null);
-            product.setName(productBean.getName());
-            product.setImgurl(productBean.getImgurl());
-            product.setCategoryId(productBean.getCategoryId());
-            product.setDescription(productBean.getDescription());
+            product.setName(productBean.getName());//>>>>>>>>>>>>>>>>>
+            product.setImgurl(productBean.getImgurl());//>>>>>>>>>>>>>>>>
+            product.setCategoryId(productBean.getCategoryId());//>>>>>>>>>>>
+            product.setDescription(productBean.getDescription());//>>>>>>>>>>>>>>>>
             product.setLastUpdate(new Date());
-            product.setVendorId(productBean.getVendorId());     //>>>>>>>>
+            product.setVendorId(productBean.getVendorId());     //>>>>>>>>>>>>>>>>>
             product.setParentPath(parentCategory.getParentPath());
-            product.setExternalLink(productBean.getExternalLink());
-            product.setSpecifications(productBean.getSpecifications());
+            product.setExternalLink(productBean.getExternalLink()); //>>>>>>>>>>>>>>
+            product.setSpecifications(productBean.getSpecifications());//>>>>>>>>>>>>
             if (StatusConstants.IS_SHIPMENT) {
                 Shipment shipment = shippingService.createDefaultShipmentDomestic();
                 if (shipment != null && shipment.getRates() != null && !shipment.getRates().isEmpty()) {
                     product.setShippingTime(shipment.getRates().get(0).getDeliveryDays() != null ? shipment.getRates().get(0).getDeliveryDays().toString() : null);
                     product.setShippingRate(shipment.getRates().get(0).getRate() != null ? shipment.getRates().get(0).getRate().doubleValue() : null);
                 } else {
-                    product.setShippingTime(productBean.getShippingTime());
-                    product.setShippingRate(productBean.getShippingRate());
+                    product.setShippingTime(productBean.getShippingTime());//>>>>>>>>>>>>>>
+                    product.setShippingRate(productBean.getShippingRate());//>>>>>>>>>>>>>>
                 }
             } else {
                 product.setShippingTime(productBean.getShippingTime());
@@ -730,7 +897,7 @@ public class ProductServiceImpl implements ProductService {
             Product product1 = productDao.save(product);
             if (product1 != null) {
                 //====multiple ProductSizeColorMap added=======//
-                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
+                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();//>>>>>>>>>>>>>>
                 if (!sizeColorMapDtos.isEmpty()) {
                     for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
                         ProductSizeColorMap sizeColorMap = new ProductSizeColorMap();
@@ -750,7 +917,7 @@ public class ProductServiceImpl implements ProductService {
                 }
 
                 //===========multiple image add==========//
-                List<ImageDto> imageDtos = productBean.getImageDtos();
+                List<ImageDto> imageDtos = productBean.getImageDtos();//>>>>>>>>>>>>
                 if (!imageDtos.isEmpty()) {
                     for (ImageDto imageDto : imageDtos) {
                         ProductImg productImg = new ProductImg();
@@ -759,8 +926,8 @@ public class ProductServiceImpl implements ProductService {
                         productImg.setProductId(product1.getId());
                         productImgDao.save(productImg);
                     }
-                    status = "Product saved.";
                 }
+                status = "Product saved.";
             }
         }
         return status;
@@ -1107,6 +1274,7 @@ public class ProductServiceImpl implements ProductService {
                         productImg = new ProductImg();
                         productImg.setId(null);
                     }
+                    productImg.setProductId(product.getId());
                     productImg.setImgUrl(imageDto.getImgUrl());
                     productImgDao.save(productImg);
                 }
@@ -1138,4 +1306,517 @@ public class ProductServiceImpl implements ProductService {
         specificationDto.setValues(Arrays.asList(values));
         return specificationDto;
     }
+
+    @Override
+    public List<StatusBean> getTempProducts(String link) {
+        Elements productUrlList = null;
+//        Elements productInfo = null;
+        List<StatusBean> statusBeans = new ArrayList<>();
+
+        Elements nexturl = null;
+        boolean contd = true;
+        String productList = link /*"https://www.aliexpress.com/wholesale?minPrice=&maxPrice=&isBigSale=n&isFreeShip=y&isFavorite=all&isMobileExclusive=n&isLocalReturn=n&shipFromCountry=&shipCompanies=&SearchText=jwelry+for+women&CatId=1509&g=y&initiative_id=SB_20170330225112&needQuery=n&isrefine=y"*/;
+        Temtproductlinklist temtproductlinklist;
+        Temtproductlinklist savedTemtproductlinklist;
+        try {
+
+            while (contd) {
+                Document doc = Jsoup.connect(productList).get();
+//                productUrlList = doc.select("#hs-below-list-items .list-item .pic a[href]");//for search page
+                productUrlList = doc.select(".son-list .list-item .pic a[href]");
+//                productInfo = doc.select("#hs-below-list-items .list-item .info");
+                for (Element element : productUrlList) {
+                    StatusBean statusBean = new StatusBean();
+                    temtproductlinklist = new Temtproductlinklist();
+                    temtproductlinklist.setLink(element.attr("abs:href"));
+                    temtproductlinklist.setStatus(0);
+//                    System.out.println("element.toString()" + element.attr("abs:href"));
+                    savedTemtproductlinklist = temtproductlinklistDao.save(temtproductlinklist);
+                    statusBean.setStatus(String.valueOf(savedTemtproductlinklist.getStatus()));
+                    statusBean.setStatusCode(savedTemtproductlinklist.getLink());
+                    statusBean.setId(savedTemtproductlinklist.getId());
+                    statusBeans.add(statusBean);
+                }
+                nexturl = doc.select(".ui-pagination-next");
+//                System.out.println("nexturl" + nexturl.toString());
+                if (nexturl.get(0).hasClass("page-next")) {
+                    productList = nexturl.attr("abs:href");
+//                    System.out.println("productList == " + productList);
+                } else if (nexturl.get(0).hasClass("page-end")) {
+//                    System.out.println("productList ==== ");
+                    contd = false;
+                }
+            }
+        } catch (IOException ex) {
+
+        }
+        return statusBeans;
+    }
+
+    @Override
+    public List<StatusBean> getTempProductList(int start, int limit) {
+//        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getUnprocessedTempProduct();
+        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getAllTempProduct(start, limit);
+        List<StatusBean> statusBeans = new ArrayList<>();
+        for (Temtproductlinklist temtproductlinklist : temtproductlinklists) {
+            StatusBean statusBean = new StatusBean();
+            statusBean.setStatus(String.valueOf(temtproductlinklist.getStatus()));
+            statusBean.setStatusCode(temtproductlinklist.getLink());
+            statusBean.setId(temtproductlinklist.getId());
+            statusBeans.add(statusBean);
+        }
+        return statusBeans;
+    }
+
+    @Override
+    public String loadTempProducts(List<StatusBean> statusBeans) {
+//        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getUnprocessedTempProduct();
+        String status = "failure";
+        for (StatusBean statusBean : statusBeans) {
+            Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
+            if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
+                TempProduct tempProduct = tempProductDao.getProductByExternelLink(temtproductlinklist.getLink());
+                if (tempProduct == null) {
+                    ProductBean productBean = null;
+                    String value = "";
+                    Elements detailMain;
+                    Elements detailSub;
+                    Elements specifics;
+                    String url = temtproductlinklist.getLink();
+//                url = "https://www.aliexpress.com/item/Width-1-6mm-2mm-2-4mm-3mm-4mm-5mm-Stainless-Steel-Rolo-Chain-High-Quality-Link/32722172843.html?spm=2114.01010108.3.19.D0IPot&ws_ab_test=searchweb0_0,searchweb201602_5_10065_10068_10136_10137_10138_10060_10062_10141_10056_126_10055_10054_10059_10099_10103_10102_10096_10148_10052_10053_10050_10107_10142_10051_10143_10084_10083_10119_10080_10082_10081_10110_10111_10112_10113_10114_10078_10079_10073_10070_10123_10120_10124-10050_10120,searchweb201603_4,afswitch_1_afChannel,ppcSwitch_7,single_sort_0_default&btsid=26ccfbae-d19b-4b9c-9038-f60eb3d8aae0&algo_expid=c09e2edf-9cd6-4ed0-8e72-7bc9ffcc3f57-2&algo_pvid=c09e2edf-9cd6-4ed0-8e72-7bc9ffcc3f57";
+//        for (Temtproductlinklist temtproductlinklist : temtproductlinklists) {
+                    try {
+                        productBean = new ProductBean();
+//                url = temtproductlinklist.getLink();
+                        Document doc = Jsoup.connect(url).get();
+
+                        detailMain = doc.select(".detail-wrap .product-name");
+                        productBean.setName(detailMain.text());
+
+                        detailMain = doc.select(".detail-wrap .product-name");
+                        productBean.setDescription(detailMain.text());
+
+                        detailMain = doc.select(".detail-wrap .product-name");
+                        productBean.setDescription(detailMain.text());
+
+                        productBean.setVendorId(3l);//??????????????????????
+                        detailMain = doc.select("div.ui-breadcrumb div.container a");
+                        String newCategory = detailMain.last().text();
+                        System.out.println("newCategory == " + newCategory);
+                        Category category = categoryDao.getCategoryByName(newCategory);
+                        if (category != null) {
+                            productBean.setCategoryId(category.getId());//??????????????????????
+                        } else {
+                            Category parentCategory = categoryDao.getCategoryByName("Jewellery");
+                            category = new Category();
+                            category.setId(null);
+                            category.setName(newCategory);
+                            category.setParentId(parentCategory.getId());
+                            category.setParentPath(parentCategory.getParentPath() + parentCategory.getId() + "=");
+                            Category category2 = categoryDao.save(category);
+                            productBean.setCategoryId(category2.getId());//??????????????????????
+                        }
+
+                        productBean.setExternalLink(url);
+
+                        detailMain = doc.select(".product-property-list .property-item");
+                        String specifications = "";
+                        for (Element element : detailMain) {
+                            specifications = specifications + element.select(".propery-title").get(0).text() + element.select(".propery-des").get(0).text().replace(",", "/") + ",";//TODO:, check
+                        }
+                        productBean.setSpecifications(specifications);
+
+                        detailMain = doc.select(".shipping-days[data-role='delivery-days']");
+                        System.out.println("value detailMain" + detailMain.toString());
+                        value = detailMain.text();
+//            productBean.setShippingTime(value);
+                        productBean.setShippingTime("45");
+
+                        detailMain = doc.select(".logistics-cost");
+                        value = detailMain.text();
+                        Double f = 0.0;
+                        if (!value.equalsIgnoreCase("Free Shipping")) {
+//                f = Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1"));
+                        }
+                        productBean.setShippingRate(f);
+
+                        //====multiple ProductSizeColorMap added=======//
+                        //---------------------
+                        int flag = 0;
+                        specifics = doc.select("#j-product-info-sku dl.p-property-item");
+                        List<String> arrPropIds = new ArrayList<>();
+                        List<String> arrPropIds2 = new ArrayList<>();
+                        HashMap<String, AxpProductDto> AxpProductMap = new HashMap();
+                        String id = "";
+                        for (Element specific : specifics) {
+                            detailSub = specific.select("dd ul li");
+                            System.out.println("head  ==== " + specific.select("dt").text());
+                            for (Element element : detailSub) {
+                                if (flag > 0) {
+                                    id = element.select("a[data-sku-id]").attr("data-sku-id").trim();
+
+                                    Iterator<String> iter = arrPropIds.iterator();
+                                    while (iter.hasNext()) {
+                                        String arrPropId = iter.next();
+                                        iter.remove();
+                                        arrPropId = arrPropId + "," + id;
+                                        arrPropIds2.add(arrPropId);
+                                    }
+                                    arrPropIds.addAll(arrPropIds2);
+                                    arrPropIds2.removeAll(arrPropIds);
+                                    break;
+                                } else {
+//                        System.out.println("a[data-sku-id] == " + element.select("a[data-sku-id]").attr("data-sku-id"));
+                                    arrPropIds.add(element.select("a[data-sku-id]").attr("data-sku-id").trim());
+                                    if (element.hasClass("item-sku-image")) {
+//                            System.out.println("img== " + element.select("a img").attr("title"));
+                                    } else {
+//                            System.out.println("span== " + element.select("a span").toString());
+                                    }
+                                }
+                            }
+                            flag++;
+                        }
+//            for (String arrPropId : arrPropIds) {
+//                System.out.println("arrPropId == " + arrPropId);
+//            }
+//                    try {
+                        List<AxpProductDto> axpProductDtos = new ArrayList<>();
+//                Document doc = Jsoup.connect(url).get();
+                        Elements scripts = doc.select("script"); // Get the script part
+                        for (Element script : scripts) {
+                            if (script.html().contains("var skuProducts=")) {
+                                String jsonData = "";
+                                jsonData = script.html().split("var skuProducts=")[1].split("var GaData")[0].trim();
+                                jsonData = jsonData.substring(0, jsonData.length() - 1);
+                                //System.out.println("script ======= " + jsonData);
+                                Gson gsonObj = new Gson();
+                                axpProductDtos = Arrays.asList(gsonObj.fromJson(jsonData, AxpProductDto[].class));
+//                        HashMap<String, AxpProductDto> AxpProductMap = new HashMap();
+                                for (AxpProductDto axpProductDto : axpProductDtos) {
+                                    if (arrPropIds.contains(axpProductDto.getSkuPropIds())) {//if prisent in id list
+                                        AxpProductMap.put(axpProductDto.getSkuPropIds(), axpProductDto);
+                                    }
+                                }
+                            }
+                        }
+                        System.out.println("size === " + AxpProductMap.size());
+//                    } catch (Exception ex) {
+//                        java.util.logging.Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+//                    }
+                        //---------------------
+                        List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
+                        for (HashMap.Entry<String, AxpProductDto> entry : AxpProductMap.entrySet()) {
+                            String thisId = entry.getKey();
+                            AxpProductDto thisAxpProductDto = entry.getValue();
+                            SkuVal skuVal = thisAxpProductDto.getSkuVal();
+                            if (skuVal.getActSkuCalPrice() != null) {
+                                value = skuVal.getActSkuCalPrice().trim();
+                            } else {
+                                value = skuVal.getSkuCalPrice().trim();
+                            }
+
+                            SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
+
+                            if (thisAxpProductDto.getSkuAttr().split("#").length > 1) {
+                                Color color = new Color();
+                                color.setName(thisAxpProductDto.getSkuAttr().split("#")[1].split(";")[0]);
+                                color.setCode(" ");
+                                sizeColorMapDto.setColorId(colorDao.save(color).getId()/*null*/);//?????????????????????
+                            } else {
+                                sizeColorMapDto.setColorId(null);//?????????????????????
+                            }
+                            sizeColorMapDto.setSizeId(null);//??????????????????????
+//            TimeUnit.SECONDS.sleep(10);
+                            detailMain = doc.select("#j-sku-price");
+                            System.out.println("value2 detailMain" + detailMain.text());
+                            /*value = detailMain.text();/////??????????????????????*/
+//                value = "0.25";
+                            f = 0.0;
+                            f = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+
+                            sizeColorMapDto.setSalesPrice(f + f * 0.2);
+                            sizeColorMapDto.setOrginalPrice(f + 100);
+                            sizeColorMapDto.setCount(1l);
+                            sizeColorMapDto.setProductWidth(1.0);
+                            sizeColorMapDto.setProductLength(1.0);
+                            sizeColorMapDto.setProductWeight(1.0);
+                            sizeColorMapDto.setProductHeight(1.0);
+                            sizeColorMapDtos.add(sizeColorMapDto);
+                        }
+                        productBean.setSizeColorMaps(sizeColorMapDtos);
+
+                        //===========multiple image add==========//
+                        List<ImageDto> imageDtos = new ArrayList<>();//loop
+                        detailMain = doc.select("ul.image-thumb-list span.img-thumb-item img[src]");
+                        int flg = 0;
+                        for (Element element : detailMain) {
+                            if (flg == 0) {
+                                flg++;
+                                productBean.setImgurl(element.absUrl("src").split(".jpg")[0] + ".jpg");
+                            } else {
+//                System.out.println("get(0) " + element.absUrl("src").split(".jpg")[0] + ".jpg");
+                                ImageDto imageDto = new ImageDto();
+                                imageDto.setImgUrl(element.absUrl("src").split(".jpg")[0] + ".jpg");///cloudinery
+                                imageDtos.add(imageDto);
+                            }
+                        }
+                        productBean.setImageDtos(imageDtos);
+                        if (this.saveTempProduct(productBean).equals("success")) {
+                            temtproductlinklist.setStatus(1);//
+                            temtproductlinklistDao.save(temtproductlinklist);
+                            status = "success";
+                        }
+                    } catch (Exception ex) {
+                        System.out.println("Exception === " + ex);
+                        java.util.logging.Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        return status;
+    }
+
+    @Override
+    public ProductBeans getAllTempProductsIncloudeZeroAvailable(int start, int limit) {
+        List<TempProduct> products = tempProductDao.getAllAvailableProduct(start, limit);   // Find all products 
+        List<Long> productIds = new ArrayList<>();
+        for (TempProduct product : products) {
+            productIds.add(product.getId());
+        }
+        HashMap<Long, TempProductSizeColorMap> mapSizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductIds(productIds);
+        return this.setTempProductBeans(products, mapSizeColorMaps);
+    }
+
+    @Override
+    public ProductBean getTempProductInventoryById(Long productId) {
+        List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
+        ProductBean productBean = new ProductBean();
+        productBean.setProductId(productId);
+        List<TempProductSizeColorMap> sizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductId(productId);
+        List<Sizee> sizees = sizeeDao.loadAll();
+        HashMap<Long, Sizee> mapSize = new HashMap<>();
+        for (Sizee sizee : sizees) {
+            mapSize.put(sizee.getId(), sizee);
+        }
+        List<Color> colors = colorDao.loadAll();
+        HashMap<Long, Color> mapColor = new HashMap<>();
+        for (Color color : colors) {
+            mapColor.put(color.getId(), color);
+        }
+        for (TempProductSizeColorMap sizeColorMap : sizeColorMaps) {
+            SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
+            if (mapSize.get(sizeColorMap.getSizeId()) != null) {
+                sizeColorMapDto.setSizeId(sizeColorMap.getSizeId());
+                sizeColorMapDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
+            }
+            if (mapColor.get(sizeColorMap.getColorId()) != null) {
+                sizeColorMapDto.setColorId(sizeColorMap.getColorId());
+                sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
+            }
+            sizeColorMapDto.setMapId(sizeColorMap.getId());
+            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+            sizeColorMapDto.setDiscount(sizeColorMap.getDiscount());
+            sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
+            sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
+            sizeColorMapDto.setCount(sizeColorMap.getQuantity());
+            sizeColorMapDto.setProductLength(sizeColorMap.getProductLength());
+            sizeColorMapDto.setProductHeight(sizeColorMap.getProductHeight());
+            sizeColorMapDto.setProductWidth(sizeColorMap.getProductWidth());
+            sizeColorMapDto.setProductWeight(sizeColorMap.getProductWeight());
+            sizeColorMapDtos.add(sizeColorMapDto);
+        }
+        productBean.setSizeColorMaps(sizeColorMapDtos);
+        List<ImageDto> imageDtos = new ArrayList<>();
+        List<TempProductImg> productImgs = tempProductImgDao.getProductImgsByProductId(productId);
+        for (TempProductImg productImg : productImgs) {
+            ImageDto imageDto = new ImageDto();
+            imageDto.setId(productImg.getId());
+            imageDto.setImgUrl(productImg.getImgUrl());
+            imageDtos.add(imageDto);
+        }
+        productBean.setImageDtos(imageDtos);
+        return productBean;
+    }
+
+    @Override
+    public String updateTempProduct(ProductBean productBean) {
+        String status = "ERROR: Product can not be update!!";
+        TempProduct product = tempProductDao.loadById(productBean.getProductId());
+        if (product != null) {
+            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());
+            product.setName(productBean.getName());
+            product.setImgurl(productBean.getImgurl());
+            product.setCategoryId(productBean.getCategoryId());
+            product.setDescription(productBean.getDescription());
+            product.setLastUpdate(new Date());
+            product.setVendorId(productBean.getVendorId());     //>>>>>>>>
+            product.setParentPath(parentCategory.getParentPath());
+            product.setExternalLink(productBean.getExternalLink());
+            product.setSpecifications(productBean.getSpecifications());
+
+            product.setShippingTime(productBean.getShippingTime());
+            product.setShippingRate(productBean.getShippingRate());
+
+            TempProduct product1 = tempProductDao.save(product);
+            /*if (product1 != null) {
+                //===========multiple image add==========//
+                List<ImageDto> imageDtos = productBean.getImageDtos();
+                if (!imageDtos.isEmpty()) {
+                    for (ImageDto imageDto : imageDtos) {
+                        ProductImg productImg = new ProductImg();
+                        productImg.setId(null);
+                        productImg.setImgUrl(imageDto.getImgUrl());
+                        productImg.setProductId(product1.getId());
+                        productImgDao.save(productImg);
+                    }
+                    status = "Product saved.";
+                }
+            }*/
+        }
+        return status;
+    }
+
+    @Override
+    public String updateTempProductInventory(ProductBean productBean) {
+        String status = "ERROR: Product Inventory can not be update!!";
+        TempProduct product = tempProductDao.loadById(productBean.getProductId());
+        if (product != null) {
+            //====multiple ProductSizeColorMap added=======//
+            List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
+            if (!sizeColorMapDtos.isEmpty()) {
+                for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
+                    TempProductSizeColorMap sizeColorMap;
+                    if (sizeColorMapDto.getMapId() != null) {
+                        sizeColorMap = tempProductSizeColorMapDao.loadById(sizeColorMapDto.getMapId());
+                    } else {
+                        sizeColorMap = new TempProductSizeColorMap();
+                        sizeColorMap.setId(null);
+                    }
+                    sizeColorMap.setColorId(sizeColorMapDto.getColorId());
+                    sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
+                    sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
+                    sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
+                    sizeColorMap.setQuantity(sizeColorMapDto.getCount());
+                    sizeColorMap.setProductId(product.getId());
+                    sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
+                    sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
+                    sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
+                    sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
+                    TempProductSizeColorMap sizeColorMap1 = tempProductSizeColorMapDao.save(sizeColorMap);
+                }
+            }
+            List<ImageDto> imageDtos = productBean.getImageDtos();
+            if (imageDtos != null) {
+                for (ImageDto imageDto : imageDtos) {
+                    TempProductImg productImg;
+                    if (imageDto.getId() != null) {
+                        productImg = tempProductImgDao.loadById(imageDto.getId());
+                    } else {
+                        productImg = new TempProductImg();
+                        productImg.setId(null);
+                    }
+                    productImg.setProductId(product.getId());
+                    productImg.setImgUrl(imageDto.getImgUrl());
+                    tempProductImgDao.save(productImg);
+                }
+            }
+            status = "Product Inventory update.";
+        }
+        return status;
+    }
+
+    @Override
+    public String moveTempProductToProduct(Long tempProductId) {
+        String status = "failure";
+        try {
+            TempProduct product = tempProductDao.loadById(tempProductId);
+            List<TempProductSizeColorMap> productSizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductId(tempProductId);
+            if (product != null && !productSizeColorMaps.isEmpty()) {
+                Product hasProduct = productDao.getProductByExternelLink(product.getExternalLink());
+                if (hasProduct == null) {
+                    List<TempProductImg> productImgs = tempProductImgDao.getProductImgsByProductId(tempProductId);
+                    ProductBean productBean = new ProductBean();
+                    productBean.setCategoryId(product.getCategoryId());
+                    productBean.setName(product.getName());
+                    productBean.setImgurl(product.getImgurl());
+                    productBean.setDescription(product.getDescription());
+                    productBean.setVendorId(product.getVendorId());
+                    productBean.setExternalLink(product.getExternalLink());
+                    productBean.setSpecifications(product.getSpecifications());
+                    productBean.setShippingTime(product.getShippingTime());
+                    productBean.setShippingRate(product.getShippingRate());
+                    //====multiple ProductSizeColorMap added=======//
+                    List<SizeColorMapDto> sizeColorMapDtos = new ArrayList();
+                    for (TempProductSizeColorMap sizeColorMap : productSizeColorMaps) {
+                        SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
+                        sizeColorMapDto.setColorId(sizeColorMap.getColorId());
+                        sizeColorMapDto.setSizeId(sizeColorMap.getSizeId());
+                        sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
+                        sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
+                        sizeColorMapDto.setCount(sizeColorMap.getQuantity());
+                        sizeColorMapDto.setProductHeight(sizeColorMap.getProductHeight());
+                        sizeColorMapDto.setProductLength(sizeColorMap.getProductLength());
+                        sizeColorMapDto.setProductWeight(sizeColorMap.getProductWeight());
+                        sizeColorMapDto.setProductWidth(sizeColorMap.getProductWidth());
+                        sizeColorMapDtos.add(sizeColorMapDto);
+                    }
+                    productBean.setSizeColorMaps(sizeColorMapDtos);
+                    //===========multiple image add==========//
+                    List<ImageDto> imageDtos = new ArrayList();
+                    String imgUrl = "";
+                    for (TempProductImg productImg : productImgs) {
+                        ImageDto imageDto = new ImageDto();
+                        if (productImg.getImgUrl().contains("cloudinary.com/duqhan")) {
+                            imgUrl = productImg.getImgUrl();
+                        } else {
+                            imgUrl = FileUploader.uploadImage(productImg.getImgUrl()).getUrl();
+                        }
+                        imageDto.setImgUrl(imgUrl);
+                        imageDtos.add(imageDto);
+                    }
+                    productBean.setImageDtos(imageDtos);
+                    status = this.saveProduct(productBean);
+                    if (status.equals("Product saved.")) {
+                        status = "success";
+                        for (TempProductSizeColorMap sizeColorMap : productSizeColorMaps) {
+                            tempProductSizeColorMapDao.delete(sizeColorMap);
+                        }
+                        for (TempProductImg productImg : productImgs) {
+                            tempProductImgDao.delete(productImg);
+                        }
+                        tempProductDao.delete(product);
+                    }
+
+                } else {
+                    status = "product already present";
+                }
+            }
+        } catch (Exception e) {
+
+        }
+        return status;
+    }
+
+    public static void main(String[] args) {
+//        InputStream inputStream = null;
+//        try {
+//            inputStream = new URL("https://ae01.alicdn.com/kf/HTB1UjEAJFXXXXasaXXXq6xXFXXXf/10pcs-Handmade-Ox-Pendant-cute-women-Lovely-Ox-Pendant-Anniversary-Birthday-Christmas-jwelry-Gift.jpg").openStream();
+//            URL url = new URL("http://www.mkyong.com/image/mypic.jpg");
+//            Image image = ImageIO.read(url);
+//            FileInputStream input = new FileInputStream(image);
+//            MultipartFile multipartFile = new MultipartFile("fileItem",fileItem.getName(), "image/png", IOUtils.toByteArray(input));
+//            FileUploader.uploadImage(image).getUrl();
+//        } catch (Exception ex) {
+//            java.util.logging.Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+//        } finally {
+//            try {
+//                inputStream.close();
+//            } catch (IOException ex) {
+//                java.util.logging.Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+    }
+
 }

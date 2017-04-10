@@ -9,6 +9,8 @@ import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.domain.Product;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
 /**
@@ -94,4 +96,14 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         return query.getResultList();
     }
 
+    @Override
+    public Product getProductByExternelLink(String externalLink) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.externalLink=:externalLink");
+            query.setParameter("externalLink", externalLink);
+            return (Product) query.getSingleResult();
+        } catch (NonUniqueResultException | NoResultException nre) {
+            return null;
+        }
+    }
 }

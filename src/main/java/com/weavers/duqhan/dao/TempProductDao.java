@@ -5,16 +5,16 @@
  */
 package com.weavers.duqhan.dao;
 
-import com.weavers.duqhan.domain.Category;
+import com.weavers.duqhan.domain.TempProduct;
 import java.util.List;
 
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
-public interface CategoryDao extends BaseDao<Category> {
+public interface TempProductDao extends BaseDao<TempProduct> {
 
-    List<Category> getChildByParentId(Long parentId);
-    
-    Category getCategoryByName(String name);
+    List<TempProduct> getAllAvailableProduct(int start, int limit);
+
+    TempProduct getProductByExternelLink(String link);
 }

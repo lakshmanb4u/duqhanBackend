@@ -9,6 +9,7 @@ import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.dto.CategoryDto;
 import java.util.List;
+import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 /**
@@ -26,6 +27,17 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
         Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId");
         query.setParameter("parentId", parentId);
         return query.getResultList();
+    }
+
+    @Override
+    public Category getCategoryByName(String name) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.name=:name");
+            query.setParameter("name", name);
+            return (Category) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
     }
 
 }

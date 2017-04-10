@@ -30,6 +30,10 @@
     <bean id="userActivityDao" class="com.weavers.duqhan.dao.jpa.UserActivityDaoJpa" />
     <bean id="specificationDao" class="com.weavers.duqhan.dao.jpa.SpecificationDaoJpa" />
     <bean id="duqhanAdminDao" class="com.weavers.duqhan.dao.jpa.DuqhanAdminDaoJpa" />
+    <bean id="temtproductlinklistDao" class="com.weavers.duqhan.dao.jpa.TemtproductlinklistDaoJpa" />
+    <bean id="tempProductDao" class="com.weavers.duqhan.dao.jpa.TempProductDaoJpa" />
+    <bean id="tempProductImgDao" class="com.weavers.duqhan.dao.jpa.TempProductImgDaoJpa" />
+    <bean id="tempProductSizeColorMapDao" class="com.weavers.duqhan.dao.jpa.TempProductSizeColorMapDaoJpa" />
     <bean
         id="entityManagerFactory"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
@@ -61,15 +65,21 @@
         
         <!-- Local Configuration -->
     
-        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+<!--        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
-        <property name="password" value="" /> 
+        <property name="password" value="" /> -->
     
         <!-- Server Configuration -->
         
 <!--        <property name="url" value="jdbc:mysql://aa168jeiyp7tfdz.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />-->
+        
+        <!-- Temp Server Configuration -->
+        
+        <property name="url" value="jdbc:mysql://aa1lbd3ije5doho.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+        <property name="username" value="duqhunDbAdmin" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />
         
     </bean>
 
