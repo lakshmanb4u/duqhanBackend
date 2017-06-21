@@ -460,19 +460,19 @@ public class AdminController {
         return transforDto;
     }
 
-    @RequestMapping(value = "/save-temp-products", method = RequestMethod.POST)  // 
+    @RequestMapping(value = "/save-temp-products", method = RequestMethod.POST)  // crall list of ali express link, store in tempproduct and reletave tables
     @ResponseBody
-    public StatusBean saveTempProducts(@RequestBody TransforDto transforDto, HttpServletRequest request, HttpServletResponse response1) {
+    public TransforDto saveTempProducts(@RequestBody TransforDto transforDto, HttpServletRequest request, HttpServletResponse response1) {
         DuqhanAdmin admin = adminService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        StatusBean statusBean = new StatusBean();
+        TransforDto transforDto1 = new TransforDto();
         if (admin != null && transforDto.getStatusBeans() != null && !transforDto.getStatusBeans().isEmpty()) {
-            statusBean.setStatus(productService.loadTempProducts(transforDto.getStatusBeans()));
+            transforDto1.setStatusBeans(productService.loadTempProducts(transforDto.getStatusBeans()));
         } else {
             response1.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
+            transforDto1.setStatusCode("401");
+            transforDto1.setStatus("Invalid Token.");
         }
-        return statusBean;
+        return transforDto1;
     }
 
     //********
@@ -542,23 +542,22 @@ public class AdminController {
 
     @RequestMapping(value = "/commit-product", method = RequestMethod.POST)  // move temp product to main product table
     @ResponseBody
-    public StatusBean commitProduct(@RequestBody ProductRequistBean requistBean, HttpServletRequest request, HttpServletResponse response1) {
+    public TransforDto commitProduct(@RequestBody TransforDto transforDto, HttpServletRequest request, HttpServletResponse response1) {
         DuqhanAdmin admin = adminService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        StatusBean statusBean = new StatusBean();
+        TransforDto transforDto1 = new TransforDto();
         if (admin != null) {
-            statusBean.setStatus(productService.moveTempProductToProduct(requistBean.getProductId()));
+            transforDto1.setStatusBeans(productService.moveTempProductToProduct(transforDto.getStatusBeans()));
         } else {
             response1.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
+            transforDto1.setStatusCode("401");
+            transforDto1.setStatus("Invalid Token.");
         }
-        return statusBean;
+        return transforDto1;
     }
 
     @RequestMapping(value = "/test", method = RequestMethod.GET)  // 
     @ResponseBody
-    public String test() {
-        ProductBean productBean = new ProductBean();
+    public List<StatusBean> test() {
 //        return productService.loadTempProducts();
 //        WebDriver driver = new ChromeDriver();
 //
@@ -569,7 +568,10 @@ public class AdminController {
 //        productBean.setStatus(element.getText());
         List<StatusBean> beans = new ArrayList();
         StatusBean bean = new StatusBean();
-        bean.setId(234l);
+        bean.setId(12l);
+        beans.add(bean);
+        bean = new StatusBean();
+        bean.setId(13l);
         beans.add(bean);
         return productService.loadTempProducts(beans);
 //        return productBean;

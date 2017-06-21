@@ -12,6 +12,7 @@ import java.util.List;
  * @author Android-3
  */
 public class CategorysBean {
+
     private List<CategoryDto> categoryDtos;
     private int childCount;
     private int productCount;

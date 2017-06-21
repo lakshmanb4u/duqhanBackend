@@ -8,7 +8,6 @@ package com.weavers.duqhan.business.impl;
 import com.weavers.duqhan.business.AdminService;
 import com.weavers.duqhan.dao.DuqhanAdminDao;
 import com.weavers.duqhan.domain.DuqhanAdmin;
-import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.dto.AouthBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.util.RandomCodeGenerator;
@@ -57,21 +56,16 @@ public class AdminServiceImpl implements AdminService {
         AouthBean aouthBean = new AouthBean();
         DuqhanAdmin duqhanAdmin = duqhanAdminDao.getAdminByEmailAndPassword(loginBean.getEmail(), loginBean.getPassword());
         String token = "";
+        String email = "";
         if (duqhanAdmin != null) {    // for existing user update token
             token = this.createToken(duqhanAdmin.getId());
             duqhanAdmin.setAouthToken(token);
             duqhanAdmin.setValidTill(nextUpdate());
-            duqhanAdminDao.save(duqhanAdmin);
-        }/* else {                    // for new user create new token
-            DuqhanAdmin duqhanAdmin1 = new DuqhanAdmin();
-            duqhanAdmin1.setId(null);
-            duqhanAdmin1.setEmail(email);
-            duqhanAdmin1.setUserId(userId);
-            duqhanAdmin1.setAouthToken(token);
-            duqhanAdmin1.setValidTill(nextUpdate());
-            duqhanAdminDao.save(duqhanAdmin1);
-        }*/
+            DuqhanAdmin duqhanAdmin2 = duqhanAdminDao.save(duqhanAdmin);
+            email = duqhanAdmin2.getEmail();
+        }
         aouthBean.setAouthToken(token);
+        aouthBean.setStatus(email);
         return aouthBean;
     }
 

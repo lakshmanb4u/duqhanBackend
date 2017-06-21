@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user/**")
 public class UserController {
 
+    //<editor-fold defaultstate="collapsed" desc="Autowired">
     @Autowired
     UsersService usersService;
     @Autowired
@@ -57,7 +58,9 @@ public class UserController {
     ShippingService shippingService;
 
     private final Logger logger = Logger.getLogger(UserController.class);
+//</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="User Profile Module">
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
         StatusBean statusBean = new StatusBean();
@@ -115,210 +118,21 @@ public class UserController {
         return userBean1;
     }
 
-    @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        ProductBeans productBeans = new ProductBeans();
-        if (users != null) {
-            Long categoryId = null;
-            Boolean isRecent = null;
-            categoryId = requistBean.getCategoryId();
-            isRecent = requistBean.getIsRecent();
-            if (isRecent == null) {
-                isRecent = Boolean.FALSE;
-            }
-
-            if (categoryId != null && !isRecent) {
-                //**********by category id***************//
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit());
-            } else if (categoryId == null && isRecent) {
-                //**********recent viewed****************//
-                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit());
-            } else if (categoryId == null && !isRecent) {
-                //******************all******************//
-                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit());
-            }
-        } else {
-            response.setStatus(401);
-            productBeans.setStatusCode("401");
-            productBeans.setStatus("Invalid Token.");
-        }
-        return productBeans;
-    }
-
-    @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
-    public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        ProductBeans productBeans = new ProductBeans();
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            productBeans = productService.searchProducts(requistBean);
-        } else {
-            response.setStatus(401);
-            productBeans.setStatusCode("401");
-            productBeans.setStatus("Invalid Token.");
-        }
-        return productBeans;
-    }
-
-    @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
-    public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        ProductDetailBean productDetailBean = new ProductDetailBean();
-        if (users != null) {
-            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users.getId());
-        } else {
-            response.setStatus(401);
-            productDetailBean.setStatusCode("401");
-            productDetailBean.setStatus("Invalid Token.");
-        }
-        return productDetailBean;
-    }
-
-    @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.
-    public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    @RequestMapping(value = "/change-password", method = RequestMethod.POST)
+    public StatusBean changePassword(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            requistBean.setUserId(users.getId());
-            statusBean.setStatus(productService.addProductToCart(requistBean));
+            statusBean = usersService.changePassword(loginBean, users);
         } else {
-            response.setStatus(401);
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
         return statusBean;
     }
+//</editor-fold>
 
-    @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
-    public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
-        CartBean cartBean = new CartBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            cartBean = productService.getCartForUser(users.getId());
-        } else {
-            response.setStatus(401);
-            cartBean.setStatusCode("401");
-            cartBean.setStatus("Invalid Token.");
-        }
-        return cartBean;
-    }
-
-    @RequestMapping(value = "/get-cart-count", method = RequestMethod.POST) // number of item added in cart by user.
-    public UserBean getCartCount(HttpServletResponse response, HttpServletRequest request) {
-        UserBean userBean = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            userBean.setCartCount(productService.getCartCountFoAUser(users.getId()));
-            userBean.setStatusCode("200");
-            userBean.setStatus("Success..");
-        } else {
-            response.setStatus(401);
-            userBean.setStatusCode("401");
-            userBean.setStatus("Invalid Token.");
-        }
-        return userBean;
-    }
-
-    @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)   // product remove from cart.
-    public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            statusBean.setStatus(productService.removeProductFromCart(requistBean));
-        } else {
-            response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
-        return statusBean;
-    }
-
-    @RequestMapping(value = "/get-shipment", method = RequestMethod.POST)   // .
-    public CartBean getShipment(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
-        CartBean cartBean1 = new CartBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            cartBean.setUserId(users.getId());
-            cartBean1 = shippingService.getCartAfterShipment(cartBean);
-        } else {
-            response.setStatus(401);
-            cartBean1.setStatusCode("401");
-            cartBean1.setStatus("Invalid Token.");
-        }
-        return cartBean1;
-    }
-
-    @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
-    public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
-        StatusBean statusBean = new StatusBean();
-        String[] stringStr = new String[2];
-        Double shippingCost = 0.0;
-        List<Shipment> shipments = new ArrayList<>();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            cartBean.setUserId(users.getId());
-            if (StatusConstants.IS_SHIPMENT) {
-                Object[] objects = shippingService.createShipments(cartBean);
-                if (null != objects) {
-                    shippingCost = (Double) objects[0];
-                    shipments = (List<Shipment>) objects[1];
-                    if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
-                        stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
-                        if (stringStr != null) {
-                            statusBean.setStatusCode(stringStr[1]); // pay key
-                            statusBean.setStatus(stringStr[0]); // Paypal url
-                        } else {
-                            response.setStatus(500);
-                            statusBean.setStatusCode("500");
-                            statusBean.setStatus("Payment not done. Please try again.");
-                        }
-                    } else {
-                        response.setStatus(500);
-                        statusBean.setStatusCode("500");
-                        statusBean.setStatus("Shipment can not create. Please try again.");
-                    }
-                } else {
-                    response.setStatus(500);
-                    statusBean.setStatusCode("500");
-                    statusBean.setStatus("Shipment can not create. Please try again2.");
-                }
-            } else {
-                stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
-                if (stringStr != null) {
-                    statusBean.setStatusCode(stringStr[1]); // pay key
-                    statusBean.setStatus(stringStr[0]); // Paypal url
-                } else {
-                    response.setStatus(500);
-                    statusBean.setStatusCode("500");
-                    statusBean.setStatus("Payment not done. Please try again.");
-                }
-            }
-        } else {
-            response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
-        return statusBean;
-    }
-
-    @RequestMapping(value = "/check-payment-status", method = RequestMethod.POST)   // .
-    public StatusBean checkPaymentStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody ProductRequistBean requistBean) {
-        StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            statusBean.setStatusCode("200");
-            statusBean.setStatus(paymentService.getPaymentStatus(users.getId(), requistBean.getName()));
-        } else {
-            response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
-        return statusBean;
-    }
-
+    //<editor-fold defaultstate="collapsed" desc="User address module">
     @RequestMapping(value = "/get-addresses", method = RequestMethod.POST)   // get Addresses.
     public AddressBean getUserAddresses(HttpServletResponse response, HttpServletRequest request) {
         AddressBean addressBean = new AddressBean();
@@ -396,6 +210,226 @@ public class UserController {
         }
         return addressBean;
     }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Find Product">
+    @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
+    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductBeans productBeans = new ProductBeans();
+        if (users != null) {
+            Long categoryId = null;
+            Boolean isRecent = null;
+            categoryId = requistBean.getCategoryId();
+            isRecent = requistBean.getIsRecent();
+            if (isRecent == null) {
+                isRecent = Boolean.FALSE;
+            }
+
+            if (categoryId != null && !isRecent) {
+                //**********by category id***************//
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit());
+            } else if (categoryId == null && isRecent) {
+                //**********recent viewed****************//
+                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit());
+            } else if (categoryId == null && !isRecent) {
+                //******************all******************//
+                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit());
+            }
+        } else {
+            response.setStatus(401);
+            productBeans.setStatusCode("401");
+            productBeans.setStatus("Invalid Token.");
+        }
+        return productBeans;
+    }
+
+    @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
+    public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductBeans productBeans = new ProductBeans();
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            productBeans = productService.searchProducts(requistBean);
+        } else {
+            response.setStatus(401);
+            productBeans.setStatusCode("401");
+            productBeans.setStatus("Invalid Token.");
+        }
+        return productBeans;
+    }
+
+    @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
+    public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        if (users != null) {
+            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users.getId());
+        } else {
+            response.setStatus(401);
+            productDetailBean.setStatusCode("401");
+            productDetailBean.setStatus("Invalid Token.");
+        }
+        return productDetailBean;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Cart Module">
+    @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.
+    public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatus(productService.addProductToCart(requistBean));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+
+    @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
+    public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
+        CartBean cartBean = new CartBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            cartBean = productService.getCartForUser(users.getId());
+        } else {
+            response.setStatus(401);
+            cartBean.setStatusCode("401");
+            cartBean.setStatus("Invalid Token.");
+        }
+        return cartBean;
+    }
+
+    @RequestMapping(value = "/get-cart-count", method = RequestMethod.POST) // number of item added in cart by user.
+    public UserBean getCartCount(HttpServletResponse response, HttpServletRequest request) {
+        UserBean userBean = new UserBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            userBean.setCartCount(productService.getCartCountFoAUser(users.getId()));
+            userBean.setStatusCode("200");
+            userBean.setStatus("Success..");
+        } else {
+            response.setStatus(401);
+            userBean.setStatusCode("401");
+            userBean.setStatus("Invalid Token.");
+        }
+        return userBean;
+    }
+
+    @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)   // product remove from cart.
+    public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatus(productService.removeProductFromCart(requistBean));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Shipping Module">
+    @RequestMapping(value = "/get-shipment", method = RequestMethod.POST)   // .
+    public CartBean getShipment(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        CartBean cartBean1 = new CartBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            cartBean.setUserId(users.getId());
+            cartBean1 = shippingService.getCartAfterShipment(cartBean);
+        } else {
+            response.setStatus(401);
+            cartBean1.setStatusCode("401");
+            cartBean1.setStatus("Invalid Token.");
+        }
+        return cartBean1;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Checkout, Payment, Order">
+    @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
+    public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        StatusBean statusBean = new StatusBean();
+        String[] stringStr = new String[2];
+        Double shippingCost = 0.0;
+        List<Shipment> shipments = new ArrayList<>();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            try {
+                cartBean.setUserId(users.getId());
+                if (StatusConstants.IS_SHIPMENT) {
+                    Object[] objects = shippingService.createShipments(cartBean);
+                    if (null != objects) {
+                        shippingCost = (Double) objects[0];
+                        shipments = (List<Shipment>) objects[1];
+                        if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
+                            stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                            if (stringStr != null) {
+                                statusBean.setStatusCode(stringStr[1]); // pay key
+                                statusBean.setStatus(stringStr[0]); // Paypal url
+                            } else {
+                                response.setStatus(500);
+                                statusBean.setStatusCode("500");
+                                statusBean.setStatus("Payment not done. Please try again.");
+                            }
+                        } else {
+                            response.setStatus(500);
+                            statusBean.setStatusCode("500");
+                            statusBean.setStatus("Shipment can not create. Please try again.");
+                        }
+                    } else {
+                        response.setStatus(500);
+                        statusBean.setStatusCode("500");
+                        statusBean.setStatus("Shipment can not create. Please try again2.");
+                    }
+                } else {
+                    stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                    if (stringStr != null) {
+                        statusBean.setStatusCode(stringStr[1]); // pay key
+                        statusBean.setStatus(stringStr[0]); // Paypal url
+                    } else {
+                        response.setStatus(500);
+                        statusBean.setStatusCode("500");
+                        statusBean.setStatus("Payment not done. Please try again.");
+                        logger.error("(==E==)Payment not done. Please try again. ");
+                    }
+                }
+            } catch (Exception e) {
+                response.setStatus(500);
+                statusBean.setStatusCode("500");
+                logger.error("(==E==)payPayPal() in controller. " + e);
+            }
+        } else {
+            logger.error("(==E==)Invalid Token. ");
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
+
+    @RequestMapping(value = "/check-payment-status", method = RequestMethod.POST)   // .
+    public StatusBean checkPaymentStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody ProductRequistBean requistBean) {
+        StatusBean statusBean = new StatusBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            requistBean.setUserId(users.getId());
+            statusBean.setStatusCode("200");
+            statusBean.setStatus(paymentService.getPaymentStatus(users.getId(), requistBean.getName()));
+        } else {
+            response.setStatus(401);
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+        return statusBean;
+    }
 
     @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // List of order
     public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
@@ -409,19 +443,6 @@ public class UserController {
             orderDetailsBean.setStatus("Invalid Token.");
         }
         return orderDetailsBean;
-    }
-
-    @RequestMapping(value = "/change-password", method = RequestMethod.POST)
-    public StatusBean changePassword(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
-        StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            statusBean = usersService.changePassword(loginBean, users);
-        } else {
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
-        return statusBean;
     }
 
     @RequestMapping(value = "/cancel-order", method = RequestMethod.POST)   //cancel order
@@ -438,7 +459,9 @@ public class UserController {
         }
         return statusBean;
     }
+//</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Contact to admin">
     @RequestMapping(value = "/contact-us", method = RequestMethod.POST)   //send a mail to admin from user
     public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody StatusBean statusBean) {
         StatusBean status = new StatusBean();
@@ -452,4 +475,12 @@ public class UserController {
         }
         return status;
     }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Test">
+//    @RequestMapping(value = "/test", method = RequestMethod.GET)
+//    public void test() {
+//        productService.test();
+//    }
+//</editor-fold>
 }

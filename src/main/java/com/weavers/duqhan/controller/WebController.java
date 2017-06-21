@@ -72,12 +72,10 @@ public class WebController {
 //    public String adminLogin() {
 //        return "adminlogin";
 //    }
-    
     @RequestMapping(value = "/admin-login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
     @ResponseBody
     public AouthBean trainerLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
         AouthBean userBean = adminService.generatAccessToken(loginBean);
-//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
 
@@ -90,6 +88,8 @@ public class WebController {
     @RequestMapping(value = "/to-be-redirected", method = RequestMethod.GET)
     public String redirected(@RequestParam String paymentId, @RequestParam String token, @RequestParam String PayerID, HttpServletRequest request, ModelMap modelMap) {
         String status = paymentService.getPayerInformation(PayerID, paymentId, token);
+        int appType = paymentService.getApplicationType(token);
+        modelMap.addAttribute("appType", appType);
         String msg = null;
         String altclass = null;
         if (status.equals("approved")) {
@@ -106,9 +106,11 @@ public class WebController {
 
     @RequestMapping(value = "/to-be-canceled", method = RequestMethod.GET)
     public String canceled(ModelMap modelMap, @RequestParam String token) {
+        int appType = paymentService.getApplicationType(token);
+        modelMap.addAttribute("appType", appType);
         modelMap.addAttribute("msg", "Payment canceled!");
         modelMap.addAttribute("altclass", "text-danger");
-        notificationService.sendPaymentNotification(token);
+        /*notificationService.sendPaymentNotification(token);*///fcm token not useed
         return "paymentStatus";
     }
 

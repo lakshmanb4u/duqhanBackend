@@ -22,4 +22,6 @@ public interface ProductSizeColorMapDao extends BaseDao<ProductSizeColorMap>{
     List<ProductSizeColorMap> getSizeColorMapByProductId(Long productId);
     
     HashMap<Long, ProductSizeColorMap> getSizeColorMapByProductIds(List<Long> productIds);
+    
+    List<ProductSizeColorMap> test();   // to remove product with same name by putting 0 in quantity.
 }

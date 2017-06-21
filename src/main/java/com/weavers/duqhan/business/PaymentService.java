@@ -22,4 +22,6 @@ public interface PaymentService {
     String getPayerInformation(String payer, String payment, String accessToken);
 
     String getPaymentStatus(Long userId, String payKey);
+    
+    int getApplicationType(String token);
 }

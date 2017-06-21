@@ -14,6 +14,7 @@ public class CategoryDto {
     private Long categoryId;
     private String categoryName;
     private Long patentId;
+    private boolean isLeaf;
 
     /**
      * @return the categoryId
@@ -55,5 +56,19 @@ public class CategoryDto {
      */
     public void setPatentId(Long patentId) {
         this.patentId = patentId;
+    }
+
+    /**
+     * @return the isLeaf
+     */
+    public boolean isIsLeaf() {
+        return isLeaf;
+    }
+
+    /**
+     * @param isLeaf the isLeaf to set
+     */
+    public void setIsLeaf(boolean isLeaf) {
+        this.isLeaf = isLeaf;
     }
 }

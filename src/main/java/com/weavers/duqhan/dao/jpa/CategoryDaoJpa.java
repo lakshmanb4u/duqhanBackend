@@ -7,7 +7,7 @@ package com.weavers.duqhan.dao.jpa;
 
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.domain.Category;
-import com.weavers.duqhan.dto.CategoryDto;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -20,6 +20,25 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
 
     public CategoryDaoJpa() {
         super(Category.class, "Category");
+    }
+
+    @Override
+    public List<Category> loadByIds(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String q = "SELECT c FROM Category AS c WHERE c.id IN (";
+        int i = 0;
+        String s = "";
+        for (Long categoryId : ids) {
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
+        }
+        Query query = getEntityManager().createQuery(q + s + ")");
+        i = 0;
+        for (Long categoryId : ids) {
+            query.setParameter("id" + i++, categoryId);
+        }
+        return query.getResultList();
     }
 
     @Override
@@ -39,5 +58,4 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
             return null;
         }
     }
-
 }

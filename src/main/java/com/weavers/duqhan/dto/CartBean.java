@@ -24,6 +24,7 @@ public class CartBean {
     private List<ProductBean> products;
     private Long userId;
     private AddressDto addressDto;
+    private int appType;
 
     /**
      * @return the itemTotal
@@ -177,5 +178,19 @@ public class CartBean {
      */
     public void setAddressDto(AddressDto addressDto) {
         this.addressDto = addressDto;
+    }
+
+    /**
+     * @return the appType
+     */
+    public int getAppType() {
+        return appType;
+    }
+
+    /**
+     * @param appType the appType to set
+     */
+    public void setAppType(int appType) {
+        this.appType = appType;
     }
 }

@@ -63,6 +63,10 @@ public class PaymentDetail extends BaseDomain {
     @Size(max = 255)
     @Column(name = "access_token")
     private String accessToken;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "app_type")
+    private int appType;
 
     public long getUserId() {
         return userId;
@@ -134,6 +138,14 @@ public class PaymentDetail extends BaseDomain {
 
     public void setPaypalToken(String paypalToken) {
         this.paypalToken = paypalToken;
+    }
+
+    public int getAppType() {
+        return appType;
+    }
+
+    public void setAppType(int appType) {
+        this.appType = appType;
     }
 
 }

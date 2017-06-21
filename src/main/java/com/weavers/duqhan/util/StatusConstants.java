@@ -34,4 +34,11 @@ public class StatusConstants {
     public static final String NEW_RAGISTRATION = "registration";   //For new registration
     public static final String LOGIN = "login";     //For login
     public static final String REQUEST_FOR_RETURN = "requested";    // When user cancel a order
+
+//******************************Application Type*****************************//
+    public static final int MOBILE_APP = 1;
+    public static final int WEB_APP = 2;
+
+//******************************PRICE FILTER*****************************//
+    public static final double PRICE_FILTER = 300.0;
 }

@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.util;
 
+import com.cloudinary.Api;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -126,5 +128,20 @@ public class FileUploader {
 
 //    public static void main(String[] args) {
 //        uploadImage("https://ae01.alicdn.com/kf/HTB1UjEAJFXXXXasaXXXq6xXFXXXf/10pcs-Handmade-Ox-Pendant-cute-women-Lovely-Ox-Pendant-Anniversary-Birthday-Christmas-jwelry-Gift.jpg");
+//    }
+//    public static void main(String[] args) {
+//        try {
+//            Map config = ObjectUtils.asMap(
+//                    "cloud_name", CLOUD_NAME,
+//                    "api_key", API_KEY,
+//                    "api_secret", API_SECRET);
+//            
+//            Cloudinary cloudinary = new Cloudinary(config);
+//            Api api = cloudinary.api();
+//            
+//            api.resources(ObjectUtils.emptyMap());
+//        } catch (Exception ex) {
+//            Logger.getLogger(FileUploader.class.getName()).log(Level.SEVERE, null, ex);
+//        }
 //    }
 }

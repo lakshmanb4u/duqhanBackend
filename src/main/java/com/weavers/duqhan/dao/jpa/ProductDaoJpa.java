@@ -77,7 +77,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     @Override
     public List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY RAND()").setMaxResults(limit);
         query.setParameter("categoryId", categoryId);
         query.setParameter("parentPath", "%=" + categoryId + "=%");
         return query.getResultList();
@@ -85,7 +85,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     @Override
     public List<Product> getAllAvailableProduct(int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY RAND()").setMaxResults(limit);
         return query.getResultList();
     }
 
@@ -102,8 +102,10 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
             Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.externalLink=:externalLink");
             query.setParameter("externalLink", externalLink);
             return (Product) query.getSingleResult();
-        } catch (NonUniqueResultException | NoResultException nre) {
+        } catch (NoResultException nre) {
             return null;
+        }catch (NonUniqueResultException nre) {
+            return new Product();
         }
     }
 }

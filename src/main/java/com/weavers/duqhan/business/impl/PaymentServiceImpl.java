@@ -122,7 +122,7 @@ public class PaymentServiceImpl implements PaymentService {
                 itemCost = "0";
                 Item item = new Item();
                 itemName = productBean.getName();
-                if(itemName.length()>90){
+                if (itemName.length() > 90) {
                     itemName = itemName.substring(0, 90).concat("...");
                 }
                 if (productBean.getSize() != null) {
@@ -205,6 +205,11 @@ public class PaymentServiceImpl implements PaymentService {
             paymentDetail.setPaymentStatus(createdPayment.getState());
             paymentDetail.setAccessToken(accessToken);
             paymentDetail.setPaypalToken(paypalToken);
+            if (cartBean.getAppType() != 1) {
+                paymentDetail.setAppType(StatusConstants.WEB_APP);
+            } else {
+                paymentDetail.setAppType(cartBean.getAppType());
+            }
             try {
                 paymentDetail.setPaymentDate(sdf.parse(createdPayment.getCreateTime()));
             } catch (ParseException ex) {
@@ -368,7 +373,7 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
         //========================send notification to user=====================//
-        notificationService.sendPaymentNotification(paymentDetail.getUserId(), status);
+        /*notificationService.sendPaymentNotification(paymentDetail.getUserId(), status);*///fcm token not useed
         return status;
     }
 
@@ -430,6 +435,12 @@ public class PaymentServiceImpl implements PaymentService {
             }
         }
         return status;
+    }
+
+    @Override
+    public int getApplicationType(String token) {
+        PaymentDetail paymentDetail = paymentDetailDao.getPaymentDetailByPaypalToken(token);
+        return paymentDetail.getAppType();
     }
 
 }

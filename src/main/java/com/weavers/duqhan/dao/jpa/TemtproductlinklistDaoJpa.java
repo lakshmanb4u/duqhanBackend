@@ -28,7 +28,7 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
 
     @Override
     public List<Temtproductlinklist> getAllTempProduct(int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status IN(0, 1, 2)").setFirstResult(start).setMaxResults(limit);
         return query.getResultList();
     }
 
