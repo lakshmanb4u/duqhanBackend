@@ -2,6 +2,7 @@
 <beans:beans xmlns="http://www.springframework.org/schema/mvc"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:p="http://www.springframework.org/schema/p"
+             xmlns:mvc="http://www.springframework.org/schema/mvc"
              xmlns:context="http://www.springframework.org/schema/context"
              xmlns:task="http://www.springframework.org/schema/task"
              xsi:schemaLocation="http://www.springframework.org/schema/mvc
@@ -25,13 +26,18 @@
     </beans:bean>
     
     
-    <beans:bean id="usersService" class="com.weavers.duqhun.business.impl.UsersServiceImpl"/>    
-    <beans:bean id="aouthService" class="com.weavers.duqhun.business.impl.AouthServiceImpl"/>
-    <beans:bean id="productService" class="com.weavers.duqhun.business.impl.ProductServiceImpl"/>  
-    <beans:bean id="webService" class="com.weavers.duqhun.business.impl.WebServiceImpl"/>
+    <beans:bean id="usersService" class="com.weavers.duqhan.business.impl.UsersServiceImpl"/>    
+    <beans:bean id="aouthService" class="com.weavers.duqhan.business.impl.AouthServiceImpl"/>
+    <beans:bean id="productService" class="com.weavers.duqhan.business.impl.ProductServiceImpl"/>  
+    <beans:bean id="vendorService" class="com.weavers.duqhan.business.impl.VendorServiceImpl"/>
+    <beans:bean id="paymentService" class="com.weavers.duqhan.business.impl.PaymentServiceImpl"/>
+    <beans:bean id="shippingService" class="com.weavers.duqhan.business.impl.ShippingServiceImpl"/>
+    <beans:bean id="notificationService" class="com.weavers.duqhan.business.impl.NotificationServiceImpl"/>
+    <beans:bean id="mailService" class="com.weavers.duqhan.business.impl.MailServiceImpl"/>
+    <beans:bean id="adminService" class="com.weavers.duqhan.business.impl.AdminServiceImpl"/>
     
     <!-- Root Context: defines shared resources visible to all other web components -->
-    <context:component-scan base-package="com.weavers.duqhun" />
+    <context:component-scan base-package="com.weavers.duqhan" />
     
     
     
@@ -50,5 +56,18 @@
         <beans:property name="prefix" value="/WEB-INF/views/" />
         <beans:property name="suffix" value=".jsp" />
     </beans:bean>
+    
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/user/**"/>
+            <beans:bean class="com.weavers.duqhan.interceptor.UserInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>
+<!--    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**"/>
+            <beans:bean class="com.weavers.duqhan.interceptor.AdminInterceptor" />
+        </mvc:interceptor>
+    </mvc:interceptors>-->
 
 </beans:beans>
