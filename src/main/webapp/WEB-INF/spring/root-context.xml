@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/data/jpa
+    http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-4.2.xsd">
+    
+    <bean id="usersDao" class="com.weavers.duqhan.dao.jpa.UsersDaoJpa" />
+    <bean id="otpTableDao" class="com.weavers.duqhan.dao.jpa.OtpTableDaoJpa" />
+    <bean id="userAouthDao" class="com.weavers.duqhan.dao.jpa.UserAouthDaoJpa" />
+    <bean id="categoryDao" class="com.weavers.duqhan.dao.jpa.CategoryDaoJpa" />
+    <bean id="cartDao" class="com.weavers.duqhan.dao.jpa.CartDaoJpa" />
+    <bean id="recentViewDao" class="com.weavers.duqhan.dao.jpa.RecentViewDaoJpa" />
+    <bean id="productSizeColorMapDao" class="com.weavers.duqhan.dao.jpa.ProductSizeColorMapDaoJpa" />
+    <bean id="productDao" class="com.weavers.duqhan.dao.jpa.ProductDaoJpa" />
+    <bean id="productImgDao" class="com.weavers.duqhan.dao.jpa.ProductImgDaoJpa" />
+    <bean id="colorDao" class="com.weavers.duqhan.dao.jpa.ColorDaoJpa" />
+    <bean id="sizeeDao" class="com.weavers.duqhan.dao.jpa.SizeeDaoJpa" />
+    <bean id="sizeGroupDao" class="com.weavers.duqhan.dao.jpa.SizeGroupDaoJpa" />
+    <bean id="paymentDetailDao" class="com.weavers.duqhan.dao.jpa.PaymentDetailDaoJpa" />
+    <bean id="orderDetailsDao" class="com.weavers.duqhan.dao.jpa.OrderDetailsDaoJpa" />
+    <bean id="userAddressDao" class="com.weavers.duqhan.dao.jpa.UserAddressDaoJpa" />
+    <bean id="vendorDao" class="com.weavers.duqhan.dao.jpa.VendorDaoJpa" />
+    <bean id="shipmentTableDao" class="com.weavers.duqhan.dao.jpa.ShipmentTableDaoJpa" />
+    <bean id="userActivityDao" class="com.weavers.duqhan.dao.jpa.UserActivityDaoJpa" />
+    <bean id="specificationDao" class="com.weavers.duqhan.dao.jpa.SpecificationDaoJpa" />
+    <bean id="duqhanAdminDao" class="com.weavers.duqhan.dao.jpa.DuqhanAdminDaoJpa" />
+    <bean id="temtproductlinklistDao" class="com.weavers.duqhan.dao.jpa.TemtproductlinklistDaoJpa" />
+    <bean id="tempProductDao" class="com.weavers.duqhan.dao.jpa.TempProductDaoJpa" />
+    <bean id="tempProductImgDao" class="com.weavers.duqhan.dao.jpa.TempProductImgDaoJpa" />
+    <bean id="tempProductSizeColorMapDao" class="com.weavers.duqhan.dao.jpa.TempProductSizeColorMapDaoJpa" />
+    <bean
+        id="entityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+        p:dataSource-ref="dataSource"
+        p:persistenceXmlLocation="classpath:/META-INF/persistence.xml"
+        p:persistenceUnitName="duqhan-db" />
+    
+    <!-- bean post-processor for JPA annotations -->
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor" />
+  
+    <!-- Transaction Config -->
+    <bean
+        id="transactionManager"
+        class="org.springframework.orm.jpa.JpaTransactionManager"
+        p:entityManagerFactory-ref="entityManagerFactory" />
+
+    <!--use declarative transaction management-->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+    <bean
+        id="messageSource"
+        class="org.springframework.context.support.ResourceBundleMessageSource"
+        p:basename="message" />
+    
+    
+    
+    <!--DataSource-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        
+        <!-- Local Configuration -->
+    
+<!--        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+        <property name="username" value="root" />
+        <property name="password" value="" /> -->
+    
+        <!-- Server Configuration -->
+        
+<!--        <property name="url" value="jdbc:mysql://aa168jeiyp7tfdz.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+        <property name="username" value="duqhunDbAdmin" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />-->
+        
+        <!-- Server Configuration mumbai -->
+        
+<!--        <property name="url" value="jdbc:mysql://duqhandb.c0eru4lceosm.ap-south-1.rds.amazonaws.com:3306/duqhandb" />
+        <property name="username" value="duqhunDbAdmin" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />-->
+        
+        <!-- Server Configuration virginia -->
+        
+        <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />
+        <property name="username" value="duqhunDbAdmin" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />
+        
+        <!-- Temp Server Configuration -->
+        
+<!--        <property name="url" value="jdbc:mysql://aa1d8rtrwk2568x.chrj0eff2nnw.us-west-2.rds.amazonaws.com:3306/duqhandb" />
+        <property name="username" value="duqhunDbAdmin" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />-->
+        
+    </bean>
+
+</beans>
