@@ -157,6 +157,13 @@
             <type>jar</type>
         </dependency>
         
+        <!--@google storage-->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud</artifactId>
+            <version>0.20.0-alpha</version>
+        </dependency>
+        
         <!-- Logging -->
         <dependency>
             <groupId>log4j</groupId>
@@ -203,23 +210,13 @@
             <artifactId>jackson-core-asl</artifactId>
             <version>1.8.5</version>
         </dependency>
-        
-        <!-- jsoup HTML parser library @ http://jsoup.org/ -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.10.2</version>
         </dependency>
-        
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud</artifactId>
-            <version>0.20.0-alpha</version>
-        </dependency>
     </dependencies>
-
     <build>
         <finalName>duqhan</finalName>
     </build>
-
 </project>

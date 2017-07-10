@@ -11,6 +11,7 @@ import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -18,6 +19,8 @@ import com.weavers.duqhan.dto.UserBean;
  */
 public interface UsersService {
 
+    Users getUserById(Long userId);
+    
     Users getAllUser();
 
     UserBean userRegistration(LoginBean loginBean);
@@ -34,7 +37,7 @@ public interface UsersService {
 
     UserBean updateUserProfile(Users users, UserBean userBean);
 
-    UserBean updateUserProfileImage(Users users, UserBean userBean);
+    String updateUserProfileImage(Users users, MultipartFile file);
 
     AddressBean saveUserAddress(AddressDto addressDto);
 

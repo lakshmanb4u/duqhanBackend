@@ -148,4 +148,4 @@ public class ProductSizeColorMapDaoJpa extends BaseDaoJpa<ProductSizeColorMap> i
         Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap AS map where map.productId in (SELECT p.id FROM Product as p group by p.name having count(p.name)>1)");
         return query.getResultList();
     }
-}
+        }

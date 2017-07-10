@@ -834,7 +834,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String addProductToCart(ProductRequistBean requistBean) {
         String status = "failure";
-        boolean flag = true;
+        /*boolean flag = true;
         ProductSizeColorMap productSizeColorMap = productSizeColorMapDao.loadById(requistBean.getMapId());
         if (productSizeColorMap != null) {
             if (productSizeColorMap.getQuentity() != 0L) {
@@ -858,24 +858,24 @@ public class ProductServiceImpl implements ProductService {
         } else {
             flag = false;
         }
-        if (flag) {
-            Cart cart2 = cartDao.loadByUserIdAndMapId(requistBean.getUserId(), requistBean.getMapId());
-            if (cart2 != null) {
-                status = "Product already added";
-            } else {
-                Cart cart = new Cart();
-                cart.setId(null);
-                cart.setLoadDate(new Date());
-                cart.setSizecolormapId(requistBean.getMapId());
-                cart.setUserId(requistBean.getUserId());
-                Cart cart1 = cartDao.save(cart);    // add product to cart.
-                if (cart1 != null) {
-                    status = "success";
-                }
-            }
+        if (flag) {*/
+        Cart cart2 = cartDao.loadByUserIdAndMapId(requistBean.getUserId(), requistBean.getMapId());
+        if (cart2 != null) {
+            status = "Product already added";
         } else {
-            status = "Product not exsist.";
+            Cart cart = new Cart();
+            cart.setId(null);
+            cart.setLoadDate(new Date());
+            cart.setSizecolormapId(requistBean.getMapId());
+            cart.setUserId(requistBean.getUserId());
+            Cart cart1 = cartDao.save(cart);    // add product to cart.
+            if (cart1 != null) {
+                status = "success";
+            }
         }
+        /*} else {
+            status = "Product not exsist.";
+        }*/
         return status;
     }
 
@@ -967,7 +967,7 @@ public class ProductServiceImpl implements ProductService {
                 productBean.setProductWeight(sizeColorMap.getProductWeight());
                 productBean.setProductWidth(sizeColorMap.getProductWidth());
                 //<editor-fold defaultstate="collapsed" desc="Check product availability in aliexpress.com">
-                if (Long.valueOf(sizeColorMap.getQuentity()).intValue() != 0) {
+                /*if (Long.valueOf(sizeColorMap.getQuentity()).intValue() != 0) {
                     try {
                         Document doc = Jsoup.connect(product.getExternalLink()).get();
                         Elements detailMain = doc.select("#j-detail-page");
@@ -982,7 +982,7 @@ public class ProductServiceImpl implements ProductService {
                         productBean.setAvailable(0);
                         productSizeColorMapDao.save(sizeColorMap);
                     }
-                }
+                }*/
 //</editor-fold>
                 productBeans.add(productBean);
             }
@@ -1188,7 +1188,9 @@ public class ProductServiceImpl implements ProductService {
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
                 }
+//                if (productDao.isAnyProductInCategoryId(category.getId())) {
                 categoryDtos.add(categoryDto);
+//                }
             }
 
             categorysBean.setCategoryDtos(categoryDtos);

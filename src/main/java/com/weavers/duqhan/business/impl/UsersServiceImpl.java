@@ -24,6 +24,7 @@ import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.Crypting;
 import com.weavers.duqhan.util.DateFormater;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 import com.weavers.duqhan.util.MailSender;
 import com.weavers.duqhan.util.RandomCodeGenerator;
 import com.weavers.duqhan.util.StatusConstants;
@@ -32,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UsersServiceImpl implements UsersService {
 
@@ -62,6 +64,12 @@ public class UsersServiceImpl implements UsersService {
             userBean.setEmail(userBean.getEmail());
         }
         return userBean;
+    }
+
+    @Override
+    public Users getUserById(Long userId) {
+        Users users = usersDao.loadById(userId);
+        return users;
     }
 
     @Override
@@ -124,6 +132,7 @@ public class UsersServiceImpl implements UsersService {
             activity.setActivity(StatusConstants.LOGIN);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
+            userBean.setProfileImg(user.getProfileImg());
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
@@ -155,6 +164,7 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setAuthtoken(aouthBean.getAouthToken());
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
+                userBean.setProfileImg(user2.getProfileImg());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
             } else {
@@ -303,18 +313,26 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UserBean updateUserProfileImage(Users user, UserBean userBean1) {
+    public String updateUserProfileImage(Users user, MultipartFile file) {
         UserBean userBean = new UserBean();
         userBean.setStatusCode("403");
         userBean.setStatus("Profile image can not be update..");
-        user.setProfileImg(userBean1.getProfileImg());
-        Users users = usersDao.save(user);  // update user profile image.
-        if (users != null) {
-            userBean.setProfileImg(users.getProfileImg());
-            userBean.setStatusCode("200");
-            userBean.setStatus("Profile image update successfully");
+        String oldImgUrl = user.getProfileImg();
+        if(oldImgUrl != null && oldImgUrl.contains("duqhan-users/")){
+            String imgName = oldImgUrl.split("duqhan-users/")[1];
+            GoogleBucketFileUploader.deleteProfileImg(imgName);
         }
-        return userBean;
+        String imgUrl = GoogleBucketFileUploader.uploadProfileImage(file, user.getId());
+        if (!imgUrl.equals("failure")) {
+            user.setProfileImg(imgUrl);
+            Users users = usersDao.save(user);  // update user profile image.
+            if (users != null) {
+                userBean.setProfileImg(users.getProfileImg());
+                userBean.setStatusCode("200");
+                userBean.setStatus("Profile image update successfully");
+            }
+        }
+        return imgUrl;
     }
 //===========================================Address module start========================================//
 // <editor-fold defaultstate="collapsed" desc="Address moduses">
@@ -520,7 +538,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public String contactToAdmin(StatusBean contactBean, Users users) {
-        return mailService.sendMailToAdminByUser(contactBean,users);
+        return mailService.sendMailToAdminByUser(contactBean, users);
     }
 
 }

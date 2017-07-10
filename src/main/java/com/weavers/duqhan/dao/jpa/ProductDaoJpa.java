@@ -104,8 +104,19 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
             return (Product) query.getSingleResult();
         } catch (NoResultException nre) {
             return null;
-        }catch (NonUniqueResultException nre) {
+        } catch (NonUniqueResultException nre) {
             return new Product();
+        }
+    }
+
+    @Override
+    public boolean isAnyProductInCategoryId(Long categoryId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId").setMaxResults(1);
+            query.setParameter("categoryId", categoryId);
+            return !query.getResultList().isEmpty();
+        } catch (NoResultException nre) {
+            return false;
         }
     }
 }
