@@ -934,7 +934,7 @@ public class ProductServiceImpl implements ProductService {
                 boolean flag = true;
                 Product product = MapProduct.get(sizeColorMap.getProductId());
                 ProductBean productBean = new ProductBean();
-                productBean.setQty("1");
+                productBean.setQty(sizeColorMap.getQuentity() == 0L ? "0" : "1");
                 productBean.setSizeColorMapId(sizeColorMap.getId());
                 productBean.setProductId(sizeColorMap.getProductId());
                 productBean.setName(product.getName());

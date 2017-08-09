@@ -35,5 +35,9 @@
     <class>com.weavers.duqhan.domain.SpecificationJewelry</class>
     <class>com.weavers.duqhan.domain.DuqhanAdmin</class>
     <class>com.weavers.duqhan.domain.Specification</class>
+    <class>com.weavers.duqhan.domain.Temtproductlinklist</class>
+    <class>com.weavers.duqhan.domain.TempProductImg</class>
+    <class>com.weavers.duqhan.domain.TempProduct</class>
+    <class>com.weavers.duqhan.domain.TempProductSizeColorMap</class>
   </persistence-unit>
 </persistence>

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 14, 2017 at 06:57 AM
+-- Generation Time: Aug 09, 2017 at 03:55 PM
 -- Server version: 10.1.16-MariaDB
 -- PHP Version: 7.0.9
 
@@ -17,7 +17,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `cart` use for users' cart
+-- Table structure for table `cart`
 --
 
 CREATE TABLE `cart` (
@@ -30,7 +30,7 @@ CREATE TABLE `cart` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `category` use for product category
+-- Table structure for table `category`
 --
 
 CREATE TABLE `category` (
@@ -43,7 +43,7 @@ CREATE TABLE `category` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `color` use for product color
+-- Table structure for table `color`
 --
 
 CREATE TABLE `color` (
@@ -55,7 +55,7 @@ CREATE TABLE `color` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `duqhan_admin` for admin credentials. 
+-- Table structure for table `duqhan_admin`
 --
 
 CREATE TABLE `duqhan_admin` (
@@ -63,13 +63,15 @@ CREATE TABLE `duqhan_admin` (
   `name` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `last_login` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `last_login` datetime NOT NULL,
+  `aouth_token` varchar(255) DEFAULT NULL,
+  `valid_till` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `order_details` for store orders of product by user
+-- Table structure for table `order_details`
 --
 
 CREATE TABLE `order_details` (
@@ -91,7 +93,7 @@ CREATE TABLE `order_details` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `otp_table` for one time password, generated on forgot password request by user.
+-- Table structure for table `otp_table`
 --
 
 CREATE TABLE `otp_table` (
@@ -105,7 +107,7 @@ CREATE TABLE `otp_table` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `payment_detail`  for payment details of order products made by user.
+-- Table structure for table `payment_detail`
 --
 
 CREATE TABLE `payment_detail` (
@@ -118,18 +120,22 @@ CREATE TABLE `payment_detail` (
   `payment_date` date NOT NULL,
   `payment_status` varchar(10) NOT NULL,
   `paypal_token` varchar(255) DEFAULT NULL,
-  `access_token` varchar(255) NOT NULL
+  `access_token` varchar(255) NOT NULL,
+  `app_type` int(11) NOT NULL,
+  `paytm_txn_id` varchar(255) NOT NULL,
+  `gateway_type` int(11) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product` for store product details.
+-- Table structure for table `product`
 --
 
 CREATE TABLE `product` (
   `id` bigint(32) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` text NOT NULL,
   `category_id` bigint(32) NOT NULL,
   `description` text,
   `imgurl` varchar(255) NOT NULL,
@@ -145,7 +151,7 @@ CREATE TABLE `product` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_img` for store product image.
+-- Table structure for table `product_img`
 --
 
 CREATE TABLE `product_img` (
@@ -157,7 +163,7 @@ CREATE TABLE `product_img` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_size_color_map` for inventory and size color specification of product.
+-- Table structure for table `product_size_color_map`
 --
 
 CREATE TABLE `product_size_color_map` (
@@ -177,7 +183,7 @@ CREATE TABLE `product_size_color_map` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `recent_view` for store users' recent view product
+-- Table structure for table `recent_view`
 --
 
 CREATE TABLE `recent_view` (
@@ -190,7 +196,7 @@ CREATE TABLE `recent_view` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `shipment_table` for shipment details of users' order
+-- Table structure for table `shipment_table`
 --
 
 CREATE TABLE `shipment_table` (
@@ -211,7 +217,7 @@ CREATE TABLE `shipment_table` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `sizee` for different size of product
+-- Table structure for table `sizee`
 --
 
 CREATE TABLE `sizee` (
@@ -224,7 +230,7 @@ CREATE TABLE `sizee` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `size_group` for group of a size.
+-- Table structure for table `size_group`
 --
 
 CREATE TABLE `size_group` (
@@ -235,7 +241,7 @@ CREATE TABLE `size_group` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `specification` for specification of product
+-- Table structure for table `specification`
 --
 
 CREATE TABLE `specification` (
@@ -248,7 +254,76 @@ CREATE TABLE `specification` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users` for user details.
+-- Table structure for table `temp_product`
+--
+
+CREATE TABLE `temp_product` (
+  `id` bigint(32) NOT NULL,
+  `name` text NOT NULL,
+  `category_id` bigint(32) NOT NULL,
+  `description` text,
+  `imgurl` varchar(255) NOT NULL,
+  `last_update` datetime NOT NULL,
+  `vendor_id` bigint(32) NOT NULL,
+  `shipping_time` varchar(20) DEFAULT NULL,
+  `shipping_rate` double DEFAULT NULL,
+  `parent_path` varchar(255) NOT NULL,
+  `external_link` text,
+  `specifications` text,
+  `votes` double DEFAULT NULL,
+  `stars` double DEFAULT NULL,
+  `feedback` double DEFAULT NULL,
+  `status` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temp_product_img`
+--
+
+CREATE TABLE `temp_product_img` (
+  `id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `img_url` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temp_product_size_color_map`
+--
+
+CREATE TABLE `temp_product_size_color_map` (
+  `id` bigint(20) NOT NULL,
+  `product_id` bigint(20) NOT NULL,
+  `size_id` bigint(20) DEFAULT NULL,
+  `color_id` bigint(20) DEFAULT NULL,
+  `price` double NOT NULL,
+  `discount` double DEFAULT NULL,
+  `quantity` bigint(32) NOT NULL,
+  `product_length` double DEFAULT NULL,
+  `product_width` double DEFAULT NULL,
+  `product_height` double DEFAULT NULL,
+  `product_weight` double NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `temtproductlinklist`
+--
+
+CREATE TABLE `temtproductlinklist` (
+  `id` bigint(32) NOT NULL,
+  `link` text NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
@@ -272,7 +347,7 @@ CREATE TABLE `users` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_activity` for users' activity
+-- Table structure for table `user_activity`
 --
 
 CREATE TABLE `user_activity` (
@@ -289,7 +364,7 @@ CREATE TABLE `user_activity` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_address` for address of a user
+-- Table structure for table `user_address`
 --
 
 CREATE TABLE `user_address` (
@@ -312,7 +387,7 @@ CREATE TABLE `user_address` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user_aouth` for auth token for user
+-- Table structure for table `user_aouth`
 --
 
 CREATE TABLE `user_aouth` (
@@ -326,7 +401,7 @@ CREATE TABLE `user_aouth` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `vendor` for vendor who provide the product
+-- Table structure for table `vendor`
 --
 
 CREATE TABLE `vendor` (
@@ -458,6 +533,36 @@ ALTER TABLE `specification`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `temp_product`
+--
+ALTER TABLE `temp_product`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `vendor_id` (`vendor_id`);
+
+--
+-- Indexes for table `temp_product_img`
+--
+ALTER TABLE `temp_product_img`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `temp_product_size_color_map`
+--
+ALTER TABLE `temp_product_size_color_map`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`,`size_id`,`color_id`),
+  ADD KEY `product_size_color_map_ibfk_2` (`size_id`),
+  ADD KEY `product_size_color_map_ibfk_3` (`color_id`);
+
+--
+-- Indexes for table `temtproductlinklist`
+--
+ALTER TABLE `temtproductlinklist`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -497,27 +602,27 @@ ALTER TABLE `vendor`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 --
 -- AUTO_INCREMENT for table `category`
 --
 ALTER TABLE `category`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 --
 -- AUTO_INCREMENT for table `color`
 --
 ALTER TABLE `color`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=865;
 --
 -- AUTO_INCREMENT for table `duqhan_admin`
 --
 ALTER TABLE `duqhan_admin`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 --
 -- AUTO_INCREMENT for table `otp_table`
 --
@@ -527,27 +632,27 @@ ALTER TABLE `otp_table`
 -- AUTO_INCREMENT for table `payment_detail`
 --
 ALTER TABLE `payment_detail`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 --
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=177;
 --
 -- AUTO_INCREMENT for table `product_img`
 --
 ALTER TABLE `product_img`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=230;
 --
 -- AUTO_INCREMENT for table `product_size_color_map`
 --
 ALTER TABLE `product_size_color_map`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 --
 -- AUTO_INCREMENT for table `recent_view`
 --
 ALTER TABLE `recent_view`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=293;
 --
 -- AUTO_INCREMENT for table `shipment_table`
 --
@@ -557,42 +662,62 @@ ALTER TABLE `shipment_table`
 -- AUTO_INCREMENT for table `sizee`
 --
 ALTER TABLE `sizee`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT for table `size_group`
 --
 ALTER TABLE `size_group`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT for table `specification`
 --
 ALTER TABLE `specification`
-  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+--
+-- AUTO_INCREMENT for table `temp_product`
+--
+ALTER TABLE `temp_product`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=332;
+--
+-- AUTO_INCREMENT for table `temp_product_img`
+--
+ALTER TABLE `temp_product_img`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1323;
+--
+-- AUTO_INCREMENT for table `temp_product_size_color_map`
+--
+ALTER TABLE `temp_product_size_color_map`
+  MODIFY `id` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1237;
+--
+-- AUTO_INCREMENT for table `temtproductlinklist`
+--
+ALTER TABLE `temtproductlinklist`
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2005;
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 --
 -- AUTO_INCREMENT for table `user_activity`
 --
 ALTER TABLE `user_activity`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3839;
 --
 -- AUTO_INCREMENT for table `user_address`
 --
 ALTER TABLE `user_address`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 --
 -- AUTO_INCREMENT for table `user_aouth`
 --
 ALTER TABLE `user_aouth`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 --
 -- AUTO_INCREMENT for table `vendor`
 --
 ALTER TABLE `vendor`
-  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(32) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 --
 -- Constraints for dumped tables
 --

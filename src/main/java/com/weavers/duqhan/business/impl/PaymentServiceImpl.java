@@ -7,11 +7,11 @@ package com.weavers.duqhan.business.impl;
 
 import com.easypost.exception.EasyPostException;
 import com.easypost.model.Shipment;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Item;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payer;
-import com.paypal.api.payments.PayerInfo;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RedirectUrls;
@@ -20,6 +20,7 @@ import com.paypal.core.rest.APIContext;
 import com.paypal.core.rest.PayPalRESTException;
 import com.paypal.core.rest.PayPalResource;
 import com.paytm.merchant.CheckSumServiceHelper;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ShippingService;
@@ -41,6 +42,7 @@ import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
+import com.weavers.duqhan.dto.PaytmStatusJSONReader;
 import com.weavers.duqhan.util.GenerateAccessToken;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.util.CurrencyConverter;
@@ -48,12 +50,12 @@ import com.weavers.duqhan.util.PayPalConstants;
 import com.weavers.duqhan.util.PaytmConstants;
 import com.weavers.duqhan.util.StatusConstants;
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -69,6 +71,7 @@ import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -97,6 +100,8 @@ public class PaymentServiceImpl implements PaymentService {
     UsersService usersService;
     @Autowired
     NotificationService notificationService;
+    @Autowired
+    MailService mailService;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
@@ -502,10 +507,53 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             }
         } else if (gateway == StatusConstants.PAYTM_GATEWAY) {
-            if (paymentDetail.getPaymentStatus().equals(StatusConstants.PPS_APPROVED)) {
-                status = StatusConstants.PPS_APPROVED;
-                flag = true;
-            } else if (paymentDetail.getPaymentStatus().equals(StatusConstants.PPS_CREATED)) {
+            PaytmStatusJSONReader jSONReader = null;
+            TreeMap<String, String> parameters = new TreeMap<>();
+            parameters.put("MID", PaytmConstants.MID);
+            parameters.put("ORDER_ID", payKey);
+            String checkSum = this.genrateCheckSum(parameters);
+            parameters.put("CHECKSUMHASH", checkSum);
+            HttpURLConnection connection = null;
+            StringBuilder response = new StringBuilder();
+            try {
+                JSONObject obj = new JSONObject(parameters);
+                String urlParameters = obj.toString();
+                urlParameters = URLEncoder.encode(urlParameters);
+
+                URL url = new URL(PaytmConstants.PAYTM_BASE_URL + "/oltp/HANDLER_INTERNAL/getTxnStatus?");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("contentType", "application/json");
+
+                connection.setUseCaches(false);
+                connection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                wr.writeBytes("JsonData=");
+                wr.writeBytes(urlParameters);
+                wr.close();
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+
+                //print result
+                String jsonData = response.toString();
+                ObjectMapper mapper = new ObjectMapper();
+                jSONReader = mapper.readValue(jsonData, PaytmStatusJSONReader.class);
+            } catch (Exception e) {
+                status = StatusConstants.PPS_FAILED;
+            }
+            if (jSONReader != null && jSONReader.getRESPCODE() != null) {
+                if (status != null && jSONReader.getRESPCODE().equals("01")) {
+                    status = StatusConstants.PPS_APPROVED;
+                    flag = true;
+                } else {
+                    paymentDetail.setRemarks("Payment process not completed");
+                    status = StatusConstants.PPS_FAILED;
+                }
+            } else {
                 paymentDetail.setRemarks("Payment process not completed");
                 status = StatusConstants.PPS_FAILED;
             }
@@ -534,6 +582,7 @@ public class PaymentServiceImpl implements PaymentService {
                 }
             }
 //                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
+            mailService.sendPurchaseMailToAdmin(orderDetails);
         } else {
             paymentDetail.setPaymentStatus(status);
             paymentDetailDao.save(paymentDetail);

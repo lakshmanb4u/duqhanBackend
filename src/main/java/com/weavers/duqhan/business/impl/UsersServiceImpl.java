@@ -113,6 +113,7 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setEmail(user2.getEmail());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
+                mailService.sendNewRegistrationToAdmin(saveUser);
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
@@ -167,6 +168,7 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setProfileImg(user2.getProfileImg());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
+                mailService.sendNewRegistrationToAdmin(saveUser);
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
