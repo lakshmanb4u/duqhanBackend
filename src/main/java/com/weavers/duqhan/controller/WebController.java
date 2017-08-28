@@ -127,7 +127,6 @@ public class WebController {
     @RequestMapping(value = "/paytmpayment", method = RequestMethod.GET)
     public String paytmpayment(ModelMap modelMap, @RequestParam(required = false) String CALLBACK_URL, @RequestParam(required = false) String CHANNEL_ID, @RequestParam(required = false) String CHECKSUMHASH, @RequestParam(required = false) String CUST_ID, @RequestParam(required = false) String EMAIL, @RequestParam(required = false) String INDUSTRY_TYPE_ID, @RequestParam(required = false) String MID, @RequestParam(required = false) String MOBILE_NO, @RequestParam(required = false) String ORDER_ID, @RequestParam(required = false) String TXN_AMOUNT, @RequestParam(required = false) String WEBSITE, @RequestParam(required = false) Integer APPTYPE) {
         modelMap.addAttribute("paymenturl", PaytmConstants.PAYTM_TRANSACTION_REQUEST_URL);
-        System.out.println("CHECKSUMHASH -- " + CHECKSUMHASH + " --");
         modelMap.addAttribute("CALLBACK_URL", CALLBACK_URL);
         modelMap.addAttribute("CHANNEL_ID", CHANNEL_ID);
         modelMap.addAttribute("CHECKSUMHASH", CHECKSUMHASH);

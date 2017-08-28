@@ -416,10 +416,8 @@ public class PaymentServiceImpl implements PaymentService {
             String paramName = (String) paramNames.nextElement();
             if (paramName.equals("CHECKSUMHASH")) {
                 paytmChecksum = mapData.get(paramName)[0];
-                System.out.println("in if " + mapData.get(paramName)[0]);
             } else {
                 parameters.put(paramName, mapData.get(paramName)[0]);
-                System.out.println("else " + mapData.get(paramName)[0]);
             }
         }
         boolean isValideChecksum = false;
@@ -542,6 +540,8 @@ public class PaymentServiceImpl implements PaymentService {
                 String jsonData = response.toString();
                 ObjectMapper mapper = new ObjectMapper();
                 jSONReader = mapper.readValue(jsonData, PaytmStatusJSONReader.class);
+                System.out.println("getPaymentStatus response...........................................................");
+                System.out.println(jsonData);
             } catch (Exception e) {
                 status = StatusConstants.PPS_FAILED;
             }

@@ -42,7 +42,8 @@ public class MailServiceImpl implements MailService {
     ColorDao colorDao;
     @Autowired
     OrderDetailsDao orderDetailsDao;
-    private String adminMail = "admin@duqhan.com";//duqhanapp@gmail.com
+    private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
+    private static final String BCC = "krisanu.nandi@pkweb.in";
 
     @Override
     public String sendOTPforPasswordReset(String email, String otp) {
@@ -55,21 +56,21 @@ public class MailServiceImpl implements MailService {
         String body = "";
         ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetails.getMapId());
         body = "<table><tr><td>User ID </td><td> : " + orderDetails.getUserId() + "</td></tr><tr><td>User Name</td><td> : " + usersDao.loadById(orderDetails.getUserId()).getName() + "</td></tr><tr><td>Order ID</td><td> : " + orderDetails.getOrderId() + "</td></tr><tr><td>Product</td><td> : " + productDao.loadById(sizeColorMap.getProductId()).getName() + "</td></tr><tr><td>Product Size Color Map ID</td><td> : " + sizeColorMap.getId() + "</td></tr><tr><td>Quantity</td><td> : " + orderDetails.getQuentity() + "</td></tr><tr><td>Order Date</td><td> : " + DateFormater.formate(orderDetails.getOrderDate()) + "</td></tr></table>";
-        String status = MailSender.sendEmail(adminMail, "Return Request", body, "");// send mail to Admin if user return a order.
+        String status = MailSender.sendEmail(ADMIN_MAIL, "Return Request", body, BCC);// send mail to Admin if user return a order.
         return status;
     }
 
     @Override
     public String sendMailToAdminByUser(StatusBean contactBean, Users users) {
         String body = "<div><div>Hi Admin,<br><br><span>Subject : " + contactBean.getStatusCode() + ".</span><br><br>" + contactBean.getStatus() + "<br><br>Name: " + users.getName() + " [" + users.getId() + "]<br>Email: " + users.getEmail() + "<br>Phone:" + users.getMobile() + "</div></div>";
-        String status = MailSender.sendEmail(adminMail, "Customer support", body, "");// send mail to Admin from user.
+        String status = MailSender.sendEmail(ADMIN_MAIL, "Customer support", body, BCC);// send mail to Admin from user.
         return status;
     }
 
     @Override
     public String sendNewRegistrationToAdmin(Users users) {
         String body = "A new user is registered.<br>Name: " + users.getName() + "<br>Email: " + users.getEmail() + "<br>Phone: " + users.getMobile();
-        String status = MailSender.sendEmail(adminMail, "New user registration", body, "");// send mail to Admin at new registration.
+        String status = MailSender.sendEmail(ADMIN_MAIL, "New user registration", body, BCC);// send mail to Admin at new registration.
         return status;
     }
 
@@ -102,7 +103,7 @@ public class MailServiceImpl implements MailService {
                 }
                 body += order;
             }
-            String status = MailSender.sendEmail(adminMail, "Product purchase", body, "");// send mail to Admin at purchase.
+            String status = MailSender.sendEmail(ADMIN_MAIL, "Product purchase", body, BCC);// send mail to Admin at purchase.
             return status;
         } else {
             return "fail";
