@@ -178,6 +178,7 @@ public class UserBean {
     private String status;
     private Long cartCount;
     private Long id;
+    private boolean isFirstLogin;
 
     /**
      * @return the profileImg
@@ -219,6 +220,20 @@ public class UserBean {
      */
     public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * @return the isFirstLogin
+     */
+    public boolean isIsFirstLogin() {
+        return isFirstLogin;
+    }
+
+    /**
+     * @param isFirstLogin the isFirstLogin to set
+     */
+    public void setIsFirstLogin(boolean isFirstLogin) {
+        this.isFirstLogin = isFirstLogin;
     }
 
 }

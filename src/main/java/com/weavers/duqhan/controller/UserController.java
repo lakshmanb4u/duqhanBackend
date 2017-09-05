@@ -147,6 +147,45 @@ public class UserController {
         }
         return statusBean;
     }
+
+    @RequestMapping(value = "/get-user-email", method = RequestMethod.POST)    // viewe user's profile.
+    public UserBean getUserEmail(HttpServletResponse response, HttpServletRequest request) {
+        UserBean userBean = new UserBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            userBean.setEmail(users.getEmail());
+            userBean.setStatusCode("200");
+            userBean.setStatus("Success.");
+        } else {
+            response.setStatus(401);
+            userBean.setStatusCode("401");
+            userBean.setStatus("Invalid Token.");
+        }
+        return userBean;
+    }
+
+    @RequestMapping(value = "/set-user-email", method = RequestMethod.POST)    // viewe user's profile.
+    public UserBean setUserEmail(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
+        UserBean userBean = new UserBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            if (loginBean != null && loginBean.getEmail() != null) {
+                usersService.saveUsersEmail(users, loginBean.getEmail());
+                userBean.setEmail(users.getEmail());
+                userBean.setStatusCode("200");
+                userBean.setStatus("Success.");
+            } else {
+                response.setStatus(402);
+                userBean.setStatusCode("402");
+                userBean.setStatus("Please provide email.");
+            }
+        } else {
+            response.setStatus(401);
+            userBean.setStatusCode("401");
+            userBean.setStatus("Invalid Token.");
+        }
+        return userBean;
+    }
 //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="User address module">
@@ -451,8 +490,9 @@ public class UserController {
         if (users != null) {
             String status = "";
             requistBean.setUserId(users.getId());
-            statusBean.setStatusCode("200");
-            statusBean.setStatus(paymentService.getPaymentStatus(users.getId(), requistBean.getName()));    //requistBean.getName() = payKey
+            String[] responseArray = paymentService.getPaymentStatus(users.getId(), requistBean.getName()); //requistBean.getName() = payKey
+            statusBean.setStatus(responseArray[0]);
+            statusBean.setStatusCode(responseArray[1]);
 
         } else {
             response.setStatus(401);

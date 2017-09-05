@@ -35,7 +35,7 @@ public interface PaymentService {
 //</editor-fold>
 
 //<editor-fold defaultstate="collapsed" desc="Check payment status">
-    String getPaymentStatus(Long userId, String payKey);    // Paypal and Paytm both
+    String[] getPaymentStatus(Long userId, String payKey);    // Paypal and Paytm both
 //</editor-fold>
 
     int getApplicationType(String token);

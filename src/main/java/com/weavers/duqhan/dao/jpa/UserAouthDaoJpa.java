@@ -45,6 +45,17 @@ public class UserAouthDaoJpa extends BaseDaoJpa<UserAouth> implements UserAouthD
             return null;
         }
     }
+    
+    @Override
+    public UserAouth getTokenByUserId(Long userId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT ut FROM UserAouth ut WHERE ut.userId=:userId");
+            query.setParameter("userId", userId);
+            return (UserAouth) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
 
     @Override
     public UserAouth getTokenByEmailAndToken(String email, String aouthToken) {

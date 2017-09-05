@@ -479,8 +479,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public String getPaymentStatus(Long userId, String payKey) {
+    public String[] getPaymentStatus(Long userId, String payKey) {
         PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(payKey);
+        DecimalFormat df2 = new DecimalFormat(".##");
+        String[] responseArray = new String[2];
+        responseArray[1] = df2.format(paymentDetail.getPayAmount());
         int gateway = paymentDetail.getGatewayType();
         String status = StatusConstants.ARS_RETRY;
         List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(payKey, userId);
@@ -583,6 +586,7 @@ public class PaymentServiceImpl implements PaymentService {
             }
 //                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
             mailService.sendPurchaseMailToAdmin(orderDetails);
+            mailService.sendPurchaseMailToUser(orderDetails);
         } else {
             paymentDetail.setPaymentStatus(status);
             paymentDetailDao.save(paymentDetail);
@@ -595,7 +599,8 @@ public class PaymentServiceImpl implements PaymentService {
                 shipmentTableDao.save(shipmentTable);
             }
         }
-        return status;
+        responseArray[0] = status;
+        return responseArray;
     }
 
     @Override

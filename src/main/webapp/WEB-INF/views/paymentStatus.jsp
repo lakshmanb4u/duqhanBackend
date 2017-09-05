@@ -24,7 +24,7 @@
 <script type="text/javascript">
     setTimeout(function () {
         if (document.getElementById('appType').value == 2) {    //2 = web
-            window.location = "http://duqhan.com/#/store/after-payment";
+            window.location = "https://duqhan.com/#/store/after-payment";
 //            window.location = "http://localhost:3000/#/store/after-payment";
         }
     }, 3000);

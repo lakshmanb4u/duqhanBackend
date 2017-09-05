@@ -119,7 +119,9 @@ public class WebController {
     @ResponseBody
     public StatusBean buyPendingShipment(@RequestBody ShipmentDto shipmentDto) {
         StatusBean statusBean = new StatusBean();
-        statusBean.setStatus(paymentService.getPaymentStatus(shipmentDto.getUserId(), shipmentDto.getPayKey()));
+        String[] responseArray = paymentService.getPaymentStatus(shipmentDto.getUserId(), shipmentDto.getPayKey());
+        statusBean.setStatus(responseArray[0]);
+        statusBean.setStatusCode(responseArray[1]);
         return statusBean;
     }
 

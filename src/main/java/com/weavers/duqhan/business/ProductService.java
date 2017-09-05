@@ -18,6 +18,7 @@ import com.weavers.duqhan.dto.SizeDto;
 import com.weavers.duqhan.dto.SpecificationDto;
 import com.weavers.duqhan.dto.StatusBean;
 import java.util.List;
+import java.util.Map;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -107,7 +108,9 @@ public interface ProductService {
     String updateTempProductInventory(ProductBean productBean);
 
     List<StatusBean> moveTempProductToProduct(List<StatusBean> statusBeans);
-    
+
     @Async
     void test();   // to remove product with same name by putting 0 in quantity.
+
+    List<Map<String, Object>> getTestOrderDetails(List<String> orderids);
 }

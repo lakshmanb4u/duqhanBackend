@@ -6,12 +6,14 @@
 package com.weavers.duqhan.business.impl;
 
 import com.weavers.duqhan.business.MailService;
+import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.ColorDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductSizeColorMapDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
+import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Color;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.Product;
@@ -42,6 +44,8 @@ public class MailServiceImpl implements MailService {
     ColorDao colorDao;
     @Autowired
     OrderDetailsDao orderDetailsDao;
+    @Autowired
+    CategoryDao categoryDao;
     private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
     private static final String BCC = "krisanu.nandi@pkweb.in";
 
@@ -75,6 +79,36 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    public String sendWelcomeMailToUser(Users users) {
+        String body = "<table style=\"width:100%;border-collapse:collapse; border:3px solid rgb(250,144,5);\">"
+                + "    <tr>"
+                + "        <td style=\"padding:0 20px 20px 20px;vertical-align:top;font-size:13px;line-height:18px;font-family:Arial,sans-serif\">"
+                + "            <table style=\"width:100%;border-collapse:collapse\">"
+                + "                <thead>"
+                + "                    <tr>"
+                + "                        <th><h1 style=\"font-size:28px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">DUQHAN</h1><hr></th>"
+                + "                    </tr>"
+                + "                </thead>"
+                + "                <tbody>"
+                + "                    <tr>"
+                + "                        <th><h3 style=\"font-size:22px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">WELCOME TO DUQHAN</h3></th>"
+                + "                    </tr>"
+                + "                    <tr>"
+                + "                        <th><span>Thank you " + users.getName() + "for joining us.</span></th>"
+                + "                    </tr>"
+                + "                    <tr>"
+                + "                        <th><img src=\"https://storage.googleapis.com/duqhan-users/logo.png\"  alt=\"Duqhan\" src=\"\" style=\"border:0;width:115px\" /></th>"
+                + "                    </tr>"
+                + "                </tbody>"
+                + "            </table>"
+                + "        </td>"
+                + "    </tr>"
+                + "</table>";
+        String status = MailSender.sendEmail(users.getEmail(), "New user registration", body, BCC);// send mail to user at new registration.
+        return status;
+    }
+
+    @Override
     public String sendPurchaseMailToAdmin(List<OrderDetails> orderDetails) {
         if (!orderDetails.isEmpty()) {
             String body = "";
@@ -104,6 +138,104 @@ public class MailServiceImpl implements MailService {
                 body += order;
             }
             String status = MailSender.sendEmail(ADMIN_MAIL, "Product purchase", body, BCC);// send mail to Admin at purchase.
+            return status;
+        } else {
+            return "fail";
+        }
+    }
+
+    @Override
+    public String sendPurchaseMailToUser(List<OrderDetails> orderDetails) {
+        if (!orderDetails.isEmpty()) {
+            String body = "";
+            Users user = usersDao.loadById(orderDetails.get(0).getUserId());
+            long addressId = orderDetails.get(0).getAddressId();
+            UserAddress address = userAddressDao.loadById(addressId);
+            String addressPath = "                             <tr> "
+                    + "                                        <td style=\"font-size:14px;padding:11px 18px 18px 18px;background-color:rgb(250,244,237);width:50%;vertical-align:top;line-height:18px;font-family:Arial,sans-serif\"> "
+                    + "                                            <p style=\"margin:2px 0 9px 0;font:14px Arial,sans-serif\"> <span style=\"font-size:14px;color:rgb(89,145,57)\">Your order will be sent to:</span><br> "
+                    + "                                                <b> " + user.getName() + " <br>"
+                    + address.getStreetOne() + "," + address.getStreetTwo() + "<br>"
+                    + address.getCity() + " " + address.getState() + " " + address.getZipCode() + "<br>"
+                    + "                                                    India <br>" + address.getPhone()
+                    + "                                                </b>"
+                    + "                                            </p> "
+                    + "                                        </td> "
+                    + "                                    </tr> ";
+            Product product;
+            ProductSizeColorMap sizeColorMap;
+            String order = "";
+            Category category;
+            for (OrderDetails orderDetail : orderDetails) {
+                sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+//                String property = "";
+//                if (sizeColorMap.getColorId() != null) {
+//                    Color color = colorDao.loadById(sizeColorMap.getColorId());
+//                    property = color.getName();
+//                }
+                product = productDao.loadById(sizeColorMap.getProductId());
+                category = categoryDao.loadById(addressId);
+                order = order + "                               <tr>"
+                        + "                                        <td><img src=\"" + product.getImgurl() + "\"  alt=\"Duqhan\" style=\"border:0;width:115px\"/></td>"
+                        + "                                        <td>"
+                        + "                                            <table style=\"width:100%;border-collapse:collapse\">"
+                        + "                                                <tr>"
+                        + "                                                    <td>" + product.getName() + "</td>"
+                        + "                                                </tr>"
+                        + "                                                <tr>"
+                        + "                                                    <td>" + category.getName() + "</td>"
+                        + "                                                </tr>"
+                        + "                                                <tr>"
+                        + "                                                    <td style=\"color:rgb(0,102,153);font:Arial,sans-serif\">#" + orderDetail.getOrderId() + "</td>"
+                        + "                                                </tr>"
+                        + "                                            </table>"
+                        + "                                        </td>"
+                        + "                                        <td>Rs." + orderDetail.getPaymentAmount() + "</td>"
+                        + "                                    </tr>";
+            }
+            body = "<table style=\"width:100%;border-collapse:collapse\">"
+                    + "    <tr>"
+                    + "        <td style=\"padding:0 20px 20px 20px;vertical-align:top;font-size:13px;line-height:18px;font-family:Arial,sans-serif\">"
+                    + "            <table style=\"width:100%;border-collapse:collapse\">"
+                    + "                <thead>"
+                    + "                    <tr>"
+                    + "                        <td><img src=\"https://storage.googleapis.com/duqhan-users/logo.png\"  alt=\"Duqhan\" src=\"\" style=\"border:0;width:100px\" /><hr></td>"
+                    + "                    </tr>"
+                    + "                </thead>"
+                    + "                <tbody>"
+                    + "                    <tr>"
+                    + "                        <td><h3 style=\"font-size:18px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">Hello " + user.getName() + ",</h3></td>"
+                    + "                    </tr>"
+                    + "                    <tr>"
+                    + "                        <td><span>Thank you for your order.</span></td>"
+                    + "                    </tr>"
+                    + "                    <tr>"
+                    + "                        <td>"
+                    + "                            <table style=\"border-top:3px solid rgb(250,144,5);width:95%;border-collapse:collapse\">"
+                    + "                                <tbody>"
+                    + addressPath
+                    + "                                </tbody>"
+                    + "                            </table>"
+                    + "                        </td>"
+                    + "                    </tr>"
+                    + "                    <tr>"
+                    + "                        <td><h3 style=\"font-size:18px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">Order Details</h3></td>"
+                    + "                    </tr>"
+                    + "                    <tr>"
+                    + "                        <td>"
+                    + "                            <table style=\"width:100%;border-collapse:collapse\">"
+                    + "                                <tbody>"
+                    + order
+                    + "                                </tbody>"
+                    + "                            </table>"
+                    + "                        </td>"
+                    + "                    </tr>"
+                    + "                </tbody>"
+                    + "            </table>"
+                    + "        </td>"
+                    + "    </tr>"
+                    + "</table>";
+            String status = MailSender.sendEmail(user.getEmail(), "Product purchase", body, BCC);// send mail to User at purchase.
             return status;
         } else {
             return "fail";

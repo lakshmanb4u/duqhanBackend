@@ -46,6 +46,7 @@ import com.weavers.duqhan.domain.TempProductImg;
 import com.weavers.duqhan.domain.TempProductSizeColorMap;
 import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.domain.UserAddress;
+import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.AxpProductDto;
@@ -70,16 +71,10 @@ import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.FileUploader;
 import com.weavers.duqhan.util.StatusConstants;
-import java.awt.Image;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import static java.lang.Math.ceil;
-import static java.lang.Math.log10;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -89,19 +84,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.TreeMap;
 import java.util.logging.Level;
-import javax.imageio.ImageIO;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -2090,6 +2082,29 @@ public class ProductServiceImpl implements ProductService {
                 productSizeColorMapDao.save(productSizeColorMap);
             }
         }*/
+    }
+
+    @Override
+    public List<Map<String, Object>> getTestOrderDetails(List<String> orderids) {
+        List<Map<String, Object>> detailList = new ArrayList<>();
+        List<Object[]> allObjects = orderDetailsDao.getOrderDetailsByOrderIds(orderids);
+        for (Object[] objectArray : allObjects) {
+            OrderDetails orderDetails = (OrderDetails) objectArray[0];
+            ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) objectArray[1];
+            Users user = (Users) objectArray[2];
+            Product product = productDao.loadById(sizeColorMap.getProductId());
+            Map<String, Object> map = new TreeMap<>();
+            map.put("Date", DateFormater.formate(orderDetails.getOrderDate()));
+            map.put("Product_id", product.getId());
+            map.put("Product_name", product.getName());
+            map.put("External_link", product.getExternalLink());
+            map.put("Color_name", sizeColorMap.getColorId() != null ? colorDao.loadById(sizeColorMap.getColorId()).getName() : null);
+            map.put("Quantity", orderDetails.getQuentity());
+            map.put("User_name", user.getName());
+            map.put("Email", user.getEmail());
+            detailList.add(map);
+        }
+        return detailList;
     }
 
 }

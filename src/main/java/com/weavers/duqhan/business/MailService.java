@@ -17,12 +17,16 @@ import java.util.List;
 public interface MailService {
 
     String sendOTPforPasswordReset(String email, String otp);
-    
+
     String returnRequestToAdmin(OrderDetails orderDetails);
-    
+
     String sendMailToAdminByUser(StatusBean contactBean, Users users);
-    
+
     String sendNewRegistrationToAdmin(Users users);
-    
+
+    String sendWelcomeMailToUser(Users users);
+
     String sendPurchaseMailToAdmin(List<OrderDetails> orderDetails);
+    
+    String sendPurchaseMailToUser(List<OrderDetails> orderDetails);
 }

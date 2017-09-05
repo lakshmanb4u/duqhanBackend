@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface UsersService {
 
     Users getUserById(Long userId);
-    
+
     Users getAllUser();
 
     UserBean userRegistration(LoginBean loginBean);
@@ -41,6 +41,8 @@ public interface UsersService {
 
     AddressBean saveUserAddress(AddressDto addressDto);
 
+    void saveUsersEmail(Users users, String email);
+
     AddressBean getUserActiveAddresses(Long userId);
 
     AddressBean getUserDefaultAddress(Long userId);
@@ -50,7 +52,7 @@ public interface UsersService {
     AddressBean deactivateUserAddress(Long userId, Long addressId);
 
     StatusBean changePassword(LoginBean loginBean, Users users);
-    
+
     String contactToAdmin(StatusBean contactBean, Users users);
 
 }

@@ -25,7 +25,6 @@ import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.Crypting;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.GoogleBucketFileUploader;
-import com.weavers.duqhan.util.MailSender;
 import com.weavers.duqhan.util.RandomCodeGenerator;
 import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
@@ -114,6 +113,7 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
                 mailService.sendNewRegistrationToAdmin(saveUser);
+                mailService.sendWelcomeMailToUser(saveUser);
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
@@ -125,9 +125,14 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public UserBean fbUserLogin(LoginBean loginBean) {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
+        if (null == user) {
+            user = usersDao.loadByFbId(loginBean.getFbid());
+        }
         UserBean userBean = new UserBean();
         Date newDate = new Date();
         UserActivity activity = new UserActivity();
+        userBean.setIsFirstLogin(false);
+
         if (user != null) { // if user already exist
             activity.setUserId(user.getId());
             activity.setActivity(StatusConstants.LOGIN);
@@ -146,6 +151,7 @@ public class UsersServiceImpl implements UsersService {
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
         } else { // if user not exist
+            userBean.setIsFirstLogin(true);
             Users user2 = new Users();
             activity.setUserId(null);
             activity.setActivity(StatusConstants.NEW_RAGISTRATION);
@@ -169,6 +175,9 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
                 mailService.sendNewRegistrationToAdmin(saveUser);
+                if (user2.getEmail() != null) {
+                    mailService.sendWelcomeMailToUser(saveUser);
+                }
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
@@ -292,7 +301,8 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         userBean.setStatusCode("403");
         userBean.setStatus("Profile can not be update..");
-        if (userBean1.getEmail() != null) { // whether user present with that email or not. 
+        Users exsistUser = usersDao.loadByEmail(userBean1.getEmail());
+        if (userBean1.getEmail() != null && exsistUser == null) { // whether user present with that email or not. 
             user.setDob(DateFormater.formateToDate(userBean1.getDob()));
             user.setEmail(userBean1.getEmail());
             user.setGender(userBean1.getGender());
@@ -320,7 +330,7 @@ public class UsersServiceImpl implements UsersService {
         userBean.setStatusCode("403");
         userBean.setStatus("Profile image can not be update..");
         String oldImgUrl = user.getProfileImg();
-        if(oldImgUrl != null && oldImgUrl.contains("duqhan-users/")){
+        if (oldImgUrl != null && oldImgUrl.contains("duqhan-users/")) {
             String imgName = oldImgUrl.split("duqhan-users/")[1];
             GoogleBucketFileUploader.deleteProfileImg(imgName);
         }
@@ -335,6 +345,15 @@ public class UsersServiceImpl implements UsersService {
             }
         }
         return imgUrl;
+    }
+
+    @Override
+    public void saveUsersEmail(Users users, String email) {
+        Users exsistUser = usersDao.loadByEmail(email);
+        if (exsistUser == null) {
+            users.setEmail(email);
+            usersDao.save(users);
+        }
     }
 //===========================================Address module start========================================//
 // <editor-fold defaultstate="collapsed" desc="Address moduses">

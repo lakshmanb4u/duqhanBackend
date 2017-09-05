@@ -27,7 +27,7 @@ public class MailSender {
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "465");
 
@@ -67,7 +67,32 @@ public class MailSender {
         }
         return status;
     }
+
 //    public static void main(String[] args) {
-//        MailSender.sendEmail("santanu55.bankura@gmail.com","test" , "hi....", "subhendu.sett@pkweb.in");
+//        String body = "<table style=\"width:100%;border-collapse:collapse; border:3px solid rgb(250,144,5);\">"
+//                + "    <tr>"
+//                + "        <td style=\"padding:0 20px 20px 20px;vertical-align:top;font-size:13px;line-height:18px;font-family:Arial,sans-serif\">"
+//                + "            <table style=\"width:100%;border-collapse:collapse\">"
+//                + "                <thead>"
+//                + "                    <tr>"
+//                + "                        <th><h1 style=\"font-size:28px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">DUQHAN</h1><hr></th>"
+//                + "                    </tr>"
+//                + "                </thead>"
+//                + "                <tbody>"
+//                + "                    <tr>"
+//                + "                        <th><h3 style=\"font-size:22px;color:rgb(204,102,0);margin:15px 0 0 0;font-weight:normal\">WELCOME TO DUQHAN</h3></th>"
+//                + "                    </tr>"
+//                + "                    <tr>"
+//                + "                        <th><span>Thank you Subhendu Sett for joining us.</span></th>"
+//                + "                    </tr>"
+//                + "                    <tr>"
+//                + "                        <th><img src=\"https://storage.googleapis.com/duqhan-users/logo.png\"  alt=\"Duqhan\" src=\"\" style=\"border:0;width:115px\" /></th>"
+//                + "                    </tr>"
+//                + "                </tbody>"
+//                + "            </table>"
+//                + "        </td>"
+//                + "    </tr>"
+//                + "</table>";
+//        MailSender.sendEmail("subhendu.sett@pkweb.in", "Test template", body, "");
 //    }
 }
