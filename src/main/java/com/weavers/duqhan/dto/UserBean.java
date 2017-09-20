@@ -179,6 +179,7 @@ public class UserBean {
     private Long cartCount;
     private Long id;
     private boolean isFirstLogin;
+    private boolean freeProductEligibility;
 
     /**
      * @return the profileImg
@@ -234,6 +235,20 @@ public class UserBean {
      */
     public void setIsFirstLogin(boolean isFirstLogin) {
         this.isFirstLogin = isFirstLogin;
+    }
+
+    /**
+     * @return the freeProductEligibility
+     */
+    public boolean isFreeProductEligibility() {
+        return freeProductEligibility;
+    }
+
+    /**
+     * @param freeProductEligibility the freeProductEligibility to set
+     */
+    public void setFreeProductEligibility(boolean freeProductEligibility) {
+        this.freeProductEligibility = freeProductEligibility;
     }
 
 }

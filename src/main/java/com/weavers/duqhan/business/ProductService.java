@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.business;
 
+import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
@@ -109,8 +110,11 @@ public interface ProductService {
 
     List<StatusBean> moveTempProductToProduct(List<StatusBean> statusBeans);
 
-    @Async
     void test();   // to remove product with same name by putting 0 in quantity.
 
     List<Map<String, Object>> getTestOrderDetails(List<String> orderids);
+
+    ProductBeans getFreeProducts();
+
+    void acceptFreeProduct(Users users, CartBean cartBean);
 }

@@ -34,6 +34,8 @@
     <bean id="tempProductDao" class="com.weavers.duqhan.dao.jpa.TempProductDaoJpa" />
     <bean id="tempProductImgDao" class="com.weavers.duqhan.dao.jpa.TempProductImgDaoJpa" />
     <bean id="tempProductSizeColorMapDao" class="com.weavers.duqhan.dao.jpa.TempProductSizeColorMapDaoJpa" />
+    <bean id="offerProductsDao" class="com.weavers.duqhan.dao.jpa.OfferProductsDaoJpa" />
+    <bean id="offerProductUsedDao" class="com.weavers.duqhan.dao.jpa.OfferProductUsedDaoJpa" />
     <bean
         id="entityManagerFactory"
         class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
@@ -65,15 +67,15 @@
         
         <!-- Local Configuration -->
     
-        <!--        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
-        <property name="password" value="" /> -->
+        <property name="password" value="" /> 
     
         <!-- Server Configuration virginia -->
         
-        <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />
+        <!--                <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
-        <property name="password" value="wgJncDU2M-=vMkEU" />
+        <property name="password" value="wgJncDU2M-=vMkEU" />-->
         
     </bean>
 

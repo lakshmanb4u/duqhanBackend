@@ -148,12 +148,13 @@ public class UserController {
         return statusBean;
     }
 
-    @RequestMapping(value = "/get-user-email", method = RequestMethod.POST)    // viewe user's profile.
+    @RequestMapping(value = "/get-user-email-phone", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getUserEmail(HttpServletResponse response, HttpServletRequest request) {
         UserBean userBean = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean.setEmail(users.getEmail());
+            userBean.setMobile(users.getMobile());
             userBean.setStatusCode("200");
             userBean.setStatus("Success.");
         } else {
@@ -164,20 +165,16 @@ public class UserController {
         return userBean;
     }
 
-    @RequestMapping(value = "/set-user-email", method = RequestMethod.POST)    // viewe user's profile.
-    public UserBean setUserEmail(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
-        UserBean userBean = new UserBean();
+    @RequestMapping(value = "/set-user-email-phone", method = RequestMethod.POST)    // viewe user's profile.
+    public UserBean setUserEmail(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            if (loginBean != null && loginBean.getEmail() != null) {
-                usersService.saveUsersEmail(users, loginBean.getEmail());
-                userBean.setEmail(users.getEmail());
-                userBean.setStatusCode("200");
-                userBean.setStatus("Success.");
+            if (userBean != null && userBean.getEmail() != null && userBean.getMobile() != null) {
+                usersService.saveUsersEmailAndPhone(users, userBean);
             } else {
                 response.setStatus(402);
                 userBean.setStatusCode("402");
-                userBean.setStatus("Please provide email.");
+                userBean.setStatus("Please provide email and phone.");
             }
         } else {
             response.setStatus(401);
@@ -534,17 +531,56 @@ public class UserController {
 
     //<editor-fold defaultstate="collapsed" desc="Contact to admin">
     @RequestMapping(value = "/contact-us", method = RequestMethod.POST)   //send a mail to admin from user
-    public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody StatusBean statusBean) {
+    public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody UserBean userBean) {
         StatusBean status = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            status.setStatus(usersService.contactToAdmin(statusBean, users));
-            status.setStatusCode("200");
+            if (userBean != null && userBean.getEmail() != null && userBean.getMobile() != null && userBean.getStatus() != null && userBean.getStatusCode() != null) { //userBean.getStatus = coments, userBean.getStatusCode = subject
+                status.setStatus(usersService.contactToAdmin(userBean, users));
+                status.setStatusCode("200");
+            } else {
+                status.setStatus("Inadequate information.");
+            }
         } else {
             status.setStatusCode("401");
             status.setStatus("Invalid Token.");
         }
         return status;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Free product">
+    @RequestMapping(value = "/get-free-product", method = RequestMethod.POST)
+    public ProductBeans getFreeProduct(HttpServletRequest request) {
+        ProductBeans productBeans = new ProductBeans();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            if (users.getFreeOfferAccepted()) {
+                productBeans.setStatus("You have already claimed your free product.");
+                productBeans.setStatusCode("200");
+            } else {
+                productBeans = productService.getFreeProducts();
+                productBeans.setStatus(null != productBeans.getProducts() ? "success" : "There is no free products available right now. Please try later.");
+                productBeans.setStatusCode("200");
+            }
+        } else {
+            productBeans.setStatusCode("401");
+            productBeans.setStatus("Invalid Token.");
+        }
+        return productBeans;
+    }
+
+    @RequestMapping(value = "/accept-free-product-offer", method = RequestMethod.POST)
+    public CartBean acceptFreeProduct(HttpServletRequest request, @RequestBody CartBean cartBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null && cartBean != null && cartBean.getUserId() != null) {
+            productService.acceptFreeProduct(users, cartBean); //cartBean.getUserId() = product_size_color_map id
+//            cartBean.setStatusCode("200");
+        } else {
+            cartBean.setStatusCode("401");
+            cartBean.setStatus("Invalid Token.");
+        }
+        return cartBean;
     }
 //</editor-fold>
 

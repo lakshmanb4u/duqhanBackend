@@ -6,6 +6,7 @@
 package com.weavers.duqhan.controller;
 
 import com.weavers.duqhan.business.AdminService;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
@@ -15,6 +16,7 @@ import com.weavers.duqhan.dto.AouthBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.StatusBean;
+import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.PaytmConstants;
 import java.io.IOException;
 import java.util.List;
@@ -54,6 +56,8 @@ public class WebController {
     NotificationService notificationService;
     @Autowired
     AdminService adminService;
+    @Autowired
+    MailService mailService;
 
     private final Logger logger = Logger.getLogger(WebController.class);
 
@@ -123,6 +127,18 @@ public class WebController {
         statusBean.setStatus(responseArray[0]);
         statusBean.setStatusCode(responseArray[1]);
         return statusBean;
+    }
+
+    @RequestMapping(value = "/contact-to-admin", method = RequestMethod.POST)
+    @ResponseBody
+    public String buyPendingShipment(@RequestBody UserBean userBean) {
+        String response = "Thanks";
+        if (userBean != null && userBean.getStatusCode() != null && userBean.getStatus() != null && userBean.getName() != null && userBean.getEmail() != null && userBean.getMobile() != null) {
+            response = mailService.sendMailToAdminByUser(userBean);
+        } else {
+            response = "Inadequate information.";
+        }
+        return response;
     }
 
     //<editor-fold defaultstate="collapsed" desc="Paytm">

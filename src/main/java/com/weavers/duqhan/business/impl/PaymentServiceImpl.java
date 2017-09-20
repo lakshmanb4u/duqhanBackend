@@ -26,15 +26,19 @@ import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dao.CartDao;
+import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
+import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductSizeColorMapDao;
 import com.weavers.duqhan.dao.ShipmentTableDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.Cart;
+import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
+import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductSizeColorMap;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
@@ -102,9 +106,30 @@ public class PaymentServiceImpl implements PaymentService {
     NotificationService notificationService;
     @Autowired
     MailService mailService;
+    @Autowired
+    ProductDao productDao;
+    @Autowired
+    CategoryDao categoryDao;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
+
+    private void diductProductQuentityFromCategory(Long productId, Long quantity) {
+        Product product = productDao.loadById(productId);
+        Category category = categoryDao.loadById(product.getCategoryId());
+        category.setQuantity(category.getQuantity() - quantity);
+        categoryDao.save(category);
+        String[] categoryArray = product.getParentPath().split("=");
+        for (String string : categoryArray) {
+            try {
+                category = categoryDao.loadById(Long.valueOf(string));
+                category.setQuantity(category.getQuantity() - quantity);
+                categoryDao.save(category);
+
+            } catch (NumberFormatException | NullPointerException e) {
+            }
+        }
+    }
 
     @Override
     public CheckoutPaymentBean transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {
@@ -371,6 +396,10 @@ public class PaymentServiceImpl implements PaymentService {
                     orderDetailsMap.put(orderDetail.getMapId(), null);
                     orderDetail.setStatus(status);
                     ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                    try {
+                        this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                    } catch (Exception e) {
+                    }
                     sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
                     productSizeColorMapDao.save(sizeColorMap);
                     orderDetailsDao.save(orderDetail);
@@ -443,6 +472,10 @@ public class PaymentServiceImpl implements PaymentService {
                         orderDetailsMap.put(orderDetail.getMapId(), null);
                         orderDetail.setStatus(status);
                         ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                        try {
+                            this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                        } catch (Exception e) {
+                        }
                         sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
                         productSizeColorMapDao.save(sizeColorMap);
                         orderDetailsDao.save(orderDetail);

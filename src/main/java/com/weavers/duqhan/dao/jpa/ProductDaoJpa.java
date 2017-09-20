@@ -63,7 +63,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     @Override
     public List<Product> getAllRecentViewProduct(Long userid, int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.id IN (SELECT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
         return query.getResultList();
     }

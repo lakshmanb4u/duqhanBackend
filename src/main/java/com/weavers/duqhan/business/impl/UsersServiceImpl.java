@@ -8,10 +8,12 @@ package com.weavers.duqhan.business.impl;
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OtpTableDao;
 import com.weavers.duqhan.dao.UserActivityDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
+import com.weavers.duqhan.domain.OfferProducts;
 import com.weavers.duqhan.domain.OtpTable;
 import com.weavers.duqhan.domain.UserActivity;
 import com.weavers.duqhan.domain.UserAddress;
@@ -53,6 +55,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     UserActivityDao userActivityDao;
+
+    @Autowired
+    OfferProductsDao offerProductsDao;
 
     private final Logger logger = Logger.getLogger(UsersServiceImpl.class);
 
@@ -106,10 +111,12 @@ public class UsersServiceImpl implements UsersService {
             user2.setLatitude(loginBean.getLatitude());
             user2.setLongitude(loginBean.getLongitude());
             user2.setUserAgent(loginBean.getUserAgent());
+            user2.setFreeOfferAccepted(false);
             Users saveUser = usersDao.save(user2);  // new user registration.
             if (saveUser != null) {
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
+                userBean.setMobile(user2.getMobile());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
                 mailService.sendNewRegistrationToAdmin(saveUser);
@@ -138,6 +145,7 @@ public class UsersServiceImpl implements UsersService {
             activity.setActivity(StatusConstants.LOGIN);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
+            userBean.setMobile(user.getMobile());
             userBean.setProfileImg(user.getProfileImg());
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
@@ -150,6 +158,13 @@ public class UsersServiceImpl implements UsersService {
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
+            userBean.setFreeProductEligibility(false);
+            if (!user.getFreeOfferAccepted()) {
+                List<OfferProducts> offerProducts = offerProductsDao.loadAll();
+                if (!offerProducts.isEmpty()) {
+                    userBean.setFreeProductEligibility(true);
+                }
+            }
         } else { // if user not exist
             userBean.setIsFirstLogin(true);
             Users user2 = new Users();
@@ -165,12 +180,14 @@ public class UsersServiceImpl implements UsersService {
             user2.setLatitude(loginBean.getLatitude());
             user2.setLongitude(loginBean.getLongitude());
             user2.setUserAgent(loginBean.getUserAgent());
+            user2.setFreeOfferAccepted(false);
             Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
                 AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
                 userBean.setAuthtoken(aouthBean.getAouthToken());
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
+                userBean.setMobile(user2.getMobile());
                 userBean.setProfileImg(user2.getProfileImg());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
@@ -225,6 +242,13 @@ public class UsersServiceImpl implements UsersService {
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             userBean.setAuthtoken(aouthBean.getAouthToken());
+            userBean.setFreeProductEligibility(false);
+            if (!user.getFreeOfferAccepted()) {
+                List<OfferProducts> offerProducts = offerProductsDao.loadAll();
+                if (!offerProducts.isEmpty()) {
+                    userBean.setFreeProductEligibility(true);
+                }
+            }
         } else {
             userBean.setStatusCode("403");
             userBean.setStatus("Wrong email or password");
@@ -348,10 +372,13 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public void saveUsersEmail(Users users, String email) {
-        Users exsistUser = usersDao.loadByEmail(email);
-        if (exsistUser == null) {
-            users.setEmail(email);
+    public void saveUsersEmailAndPhone(Users users, UserBean userBean) {
+        Users exsistUser = usersDao.loadByEmail(userBean.getEmail());
+        if (exsistUser == null || exsistUser.getId().equals(users.getId())) {
+            users.setEmail(userBean.getEmail());
+            if (userBean.getMobile() != null) {
+                users.setMobile(userBean.getMobile());
+            }
             usersDao.save(users);
         }
     }
@@ -558,7 +585,10 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public String contactToAdmin(StatusBean contactBean, Users users) {
+    public String contactToAdmin(UserBean contactBean, Users users) {
+        if (users.getEmail() == null || users.getMobile() == null) {
+            this.saveUsersEmailAndPhone(users, contactBean);
+        }
         return mailService.sendMailToAdminByUser(contactBean, users);
     }
 

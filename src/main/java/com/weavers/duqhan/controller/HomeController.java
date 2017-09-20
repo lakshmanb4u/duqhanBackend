@@ -92,6 +92,7 @@ public class HomeController {
     @RequestMapping(value = "/test", method = RequestMethod.GET) // for test
     public String test() {
 //        System.out.println("ddddd " + NotificationPusher.pushOnSingleDevice("title_new", "body_new", "ejZtGLpjmqk:APA91bFCfB6aW2SsZVEG_0vau7ZaTa507NjzDJ9qgx-5knIvETJkyE3pVVFPCd03Xy70mVotCzhkP5HV_cGSpPlwzyfAEAv6mDceVDvIopCQf_-jBSqM6EEJT-XR70u_5Vo2nP92cYXh").getResults().size());
+        productService.test();
         return "OOKK";
     }
 

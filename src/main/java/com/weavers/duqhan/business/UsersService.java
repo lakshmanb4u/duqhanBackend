@@ -41,7 +41,7 @@ public interface UsersService {
 
     AddressBean saveUserAddress(AddressDto addressDto);
 
-    void saveUsersEmail(Users users, String email);
+    void saveUsersEmailAndPhone(Users users, UserBean userBean);
 
     AddressBean getUserActiveAddresses(Long userId);
 
@@ -53,6 +53,6 @@ public interface UsersService {
 
     StatusBean changePassword(LoginBean loginBean, Users users);
 
-    String contactToAdmin(StatusBean contactBean, Users users);
+    String contactToAdmin(UserBean contactBean, Users users);
 
 }
