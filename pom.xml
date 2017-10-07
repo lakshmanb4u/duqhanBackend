@@ -190,6 +190,18 @@
             <scope>runtime</scope>
         </dependency>
         
+        
+        
+       <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-cloudwatch -->
+		<dependency>
+		    <groupId>com.amazonaws</groupId>
+		    <artifactId>aws-java-sdk-cloudwatch</artifactId>
+		    <version>1.11.204</version>
+		</dependency>
+        
+        
+        
+        
         <!--easypost shipping-->
         <!-- https://mvnrepository.com/artifact/com.easypost/easypost-api-client -->
         <dependency>
