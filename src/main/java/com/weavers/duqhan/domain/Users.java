@@ -23,6 +23,13 @@ import javax.validation.constraints.Size;
 @Table(name = "users")
 public class Users extends BaseDomain {
 
+    @Column(name = "fbid")
+    private Long fbid;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "free_offer_accepted")
+    private boolean freeOfferAccepted;
+
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
@@ -32,10 +39,7 @@ public class Users extends BaseDomain {
     @Size(max = 255)
     @Column(name = "mobile")
     private String mobile;
-    // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
+    @Size(max = 255)
     @Column(name = "email")
     private String email;
     @Size(max = 255)
@@ -53,8 +57,6 @@ public class Users extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "password")
     private String password;
-    @Column(name = "fbid")
-    private Long fbid;
     @Size(max = 255)
     @Column(name = "profile_img")
     private String profileImg;
@@ -135,14 +137,6 @@ public class Users extends BaseDomain {
         this.password = password;
     }
 
-    public Long getFbid() {
-        return fbid;
-    }
-
-    public void setFbid(Long fbid) {
-        this.fbid = fbid;
-    }
-
     public String getProfileImg() {
         return profileImg;
     }
@@ -181,6 +175,22 @@ public class Users extends BaseDomain {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public Long getFbid() {
+        return fbid;
+    }
+
+    public void setFbid(Long fbid) {
+        this.fbid = fbid;
+    }
+
+    public boolean getFreeOfferAccepted() {
+        return freeOfferAccepted;
+    }
+
+    public void setFreeOfferAccepted(boolean freeOfferAccepted) {
+        this.freeOfferAccepted = freeOfferAccepted;
     }
 
 }

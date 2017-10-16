@@ -67,6 +67,18 @@ public class PaymentDetail extends BaseDomain {
     @NotNull
     @Column(name = "app_type")
     private int appType;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "paytm_txn_id")
+    private String paytmTxnId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "gateway_type")
+    private int gatewayType;
+    @Size(max = 255)
+    @Column(name = "remarks")
+    private String remarks;
 
     public long getUserId() {
         return userId;
@@ -146,6 +158,48 @@ public class PaymentDetail extends BaseDomain {
 
     public void setAppType(int appType) {
         this.appType = appType;
+    }
+
+    /**
+     * @return the paytmTxnId
+     */
+    public String getPaytmTxnId() {
+        return paytmTxnId;
+    }
+
+    /**
+     * @param paytmTxnId the paytmTxnId to set
+     */
+    public void setPaytmTxnId(String paytmTxnId) {
+        this.paytmTxnId = paytmTxnId;
+    }
+
+    /**
+     * @return the gatewayType
+     */
+    public int getGatewayType() {
+        return gatewayType;
+    }
+
+    /**
+     * @param gatewayType the gatewayType to set
+     */
+    public void setGatewayType(int gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+
+    /**
+     * @return the remarks
+     */
+    public String getRemarks() {
+        return remarks;
+    }
+
+    /**
+     * @param remarks the remarks to set
+     */
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
 }

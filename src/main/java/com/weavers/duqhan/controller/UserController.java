@@ -17,6 +17,7 @@ import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
+import com.weavers.duqhan.dto.CheckoutPaymentBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
@@ -34,7 +35,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -74,6 +77,7 @@ public class UserController {
         UserBean userBean = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
+            userBean.setId(users.getId());
             userBean.setDob(DateFormater.formate(users.getDob(), "dd-MMM-yyyy"));
             userBean.setEmail(users.getEmail());
             userBean.setGender(users.getGender());
@@ -104,12 +108,25 @@ public class UserController {
         return userBean1;
     }
 
-    @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
+    /*@RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
     public UserBean updateProfileImage(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
         UserBean userBean1 = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean1 = usersService.updateUserProfileImage(users, userBean);
+        } else {
+            response.setStatus(401);
+            userBean1.setStatusCode("401");
+            userBean1.setStatus("Invalid Token.");
+        }
+        return userBean1;
+    }*/
+    @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
+    public UserBean updateProfileImage(HttpServletResponse response, @RequestParam MultipartFile file, @RequestParam Long userId) {
+        UserBean userBean1 = new UserBean();
+        Users users = usersService.getUserById(userId);   // Check whether Auth-Token is valid, provided by user
+        if (users != null && file != null) {
+            userBean1.setProfileImg(usersService.updateUserProfileImage(users, file));
         } else {
             response.setStatus(401);
             userBean1.setStatusCode("401");
@@ -129,6 +146,42 @@ public class UserController {
             statusBean.setStatus("Invalid Token.");
         }
         return statusBean;
+    }
+
+    @RequestMapping(value = "/get-user-email-phone", method = RequestMethod.POST)    // viewe user's profile.
+    public UserBean getUserEmail(HttpServletResponse response, HttpServletRequest request) {
+        UserBean userBean = new UserBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            userBean.setEmail(users.getEmail());
+            userBean.setMobile(users.getMobile());
+            userBean.setStatusCode("200");
+            userBean.setStatus("Success.");
+        } else {
+            response.setStatus(401);
+            userBean.setStatusCode("401");
+            userBean.setStatus("Invalid Token.");
+        }
+        return userBean;
+    }
+
+    @RequestMapping(value = "/set-user-email-phone", method = RequestMethod.POST)    // viewe user's profile.
+    public UserBean setUserEmail(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            if (userBean != null && userBean.getEmail() != null && userBean.getMobile() != null) {
+                usersService.saveUsersEmailAndPhone(users, userBean);
+            } else {
+                response.setStatus(402);
+                userBean.setStatusCode("402");
+                userBean.setStatus("Please provide email and phone.");
+            }
+        } else {
+            response.setStatus(401);
+            userBean.setStatusCode("401");
+            userBean.setStatus("Invalid Token.");
+        }
+        return userBean;
     }
 //</editor-fold>
 
@@ -355,9 +408,8 @@ public class UserController {
 
     //<editor-fold defaultstate="collapsed" desc="Checkout, Payment, Order">
     @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
-    public StatusBean payPayPal(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
-        StatusBean statusBean = new StatusBean();
-        String[] stringStr = new String[2];
+    public CheckoutPaymentBean paymentRequest(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
         Double shippingCost = 0.0;
         List<Shipment> shipments = new ArrayList<>();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
@@ -370,49 +422,62 @@ public class UserController {
                         shippingCost = (Double) objects[0];
                         shipments = (List<Shipment>) objects[1];
                         if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
-                            stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
-                            if (stringStr != null) {
-                                statusBean.setStatusCode(stringStr[1]); // pay key
-                                statusBean.setStatus(stringStr[0]); // Paypal url
+                            if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
+                                paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                            } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
+                                String url = request.getRequestURL().toString();
+                                String uri = request.getRequestURI();
+                                String ctx = request.getContextPath();
+                                String base = url.substring(0, url.length() - uri.length()) + ctx;
+                                paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments, base);
+                            }
+                            if (paymentBean != null) {
+
                             } else {
                                 response.setStatus(500);
-                                statusBean.setStatusCode("500");
-                                statusBean.setStatus("Payment not done. Please try again.");
+                                paymentBean.setStatusCode("500");
+                                paymentBean.setStatus("Payment not done. Please try again.");
                             }
                         } else {
                             response.setStatus(500);
-                            statusBean.setStatusCode("500");
-                            statusBean.setStatus("Shipment can not create. Please try again.");
+                            paymentBean.setStatusCode("500");
+                            paymentBean.setStatus("Shipment can not create. Please try again.");
                         }
                     } else {
                         response.setStatus(500);
-                        statusBean.setStatusCode("500");
-                        statusBean.setStatus("Shipment can not create. Please try again2.");
+                        paymentBean.setStatusCode("500");
+                        paymentBean.setStatus("Shipment can not create. Please try again2.");
                     }
                 } else {
-                    stringStr = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
-                    if (stringStr != null) {
-                        statusBean.setStatusCode(stringStr[1]); // pay key
-                        statusBean.setStatus(stringStr[0]); // Paypal url
+                    if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
+                        paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                    } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
+                        String url = request.getRequestURL().toString();
+                        String uri = request.getRequestURI();
+                        String ctx = request.getContextPath();
+                        String base = url.substring(0, url.length() - uri.length()) + ctx;
+                        paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments, base);
+                    }
+                    if (paymentBean != null) {
                     } else {
                         response.setStatus(500);
-                        statusBean.setStatusCode("500");
-                        statusBean.setStatus("Payment not done. Please try again.");
+                        paymentBean.setStatusCode("500");
+                        paymentBean.setStatus("Payment not done. Please try again.");
                         logger.error("(==E==)Payment not done. Please try again. ");
                     }
                 }
             } catch (Exception e) {
                 response.setStatus(500);
-                statusBean.setStatusCode("500");
+                paymentBean.setStatusCode("500");
                 logger.error("(==E==)payPayPal() in controller. " + e);
             }
         } else {
             logger.error("(==E==)Invalid Token. ");
             response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
+            paymentBean.setStatusCode("401");
+            paymentBean.setStatus("Invalid Token.");
         }
-        return statusBean;
+        return paymentBean;
     }
 
     @RequestMapping(value = "/check-payment-status", method = RequestMethod.POST)   // .
@@ -420,9 +485,12 @@ public class UserController {
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
+            String status = "";
             requistBean.setUserId(users.getId());
-            statusBean.setStatusCode("200");
-            statusBean.setStatus(paymentService.getPaymentStatus(users.getId(), requistBean.getName()));
+            String[] responseArray = paymentService.getPaymentStatus(users.getId(), requistBean.getName()); //requistBean.getName() = payKey
+            statusBean.setStatus(responseArray[0]);
+            statusBean.setStatusCode(responseArray[1]);
+
         } else {
             response.setStatus(401);
             statusBean.setStatusCode("401");
@@ -463,17 +531,56 @@ public class UserController {
 
     //<editor-fold defaultstate="collapsed" desc="Contact to admin">
     @RequestMapping(value = "/contact-us", method = RequestMethod.POST)   //send a mail to admin from user
-    public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody StatusBean statusBean) {
+    public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody UserBean userBean) {
         StatusBean status = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            status.setStatus(usersService.contactToAdmin(statusBean, users));
-            status.setStatusCode("200");
+            if (userBean != null && userBean.getEmail() != null && userBean.getMobile() != null && userBean.getStatus() != null && userBean.getStatusCode() != null) { //userBean.getStatus = coments, userBean.getStatusCode = subject
+                status.setStatus(usersService.contactToAdmin(userBean, users));
+                status.setStatusCode("200");
+            } else {
+                status.setStatus("Inadequate information.");
+            }
         } else {
             status.setStatusCode("401");
             status.setStatus("Invalid Token.");
         }
         return status;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Free product">
+    @RequestMapping(value = "/get-free-product", method = RequestMethod.POST)
+    public ProductBeans getFreeProduct(HttpServletRequest request) {
+        ProductBeans productBeans = new ProductBeans();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            if (users.getFreeOfferAccepted()) {
+                productBeans.setStatus("You have already claimed your free product.");
+                productBeans.setStatusCode("200");
+            } else {
+                productBeans = productService.getFreeProducts();
+                productBeans.setStatus(null != productBeans.getProducts() ? "success" : "There is no free products available right now. Please try later.");
+                productBeans.setStatusCode("200");
+            }
+        } else {
+            productBeans.setStatusCode("401");
+            productBeans.setStatus("Invalid Token.");
+        }
+        return productBeans;
+    }
+
+    @RequestMapping(value = "/accept-free-product-offer", method = RequestMethod.POST)
+    public CartBean acceptFreeProduct(HttpServletRequest request, @RequestBody CartBean cartBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null && cartBean != null && cartBean.getUserId() != null) {
+            productService.acceptFreeProduct(users, cartBean); //cartBean.getUserId() = product_size_color_map id
+//            cartBean.setStatusCode("200");
+        } else {
+            cartBean.setStatusCode("401");
+            cartBean.setStatus("Invalid Token.");
+        }
+        return cartBean;
     }
 //</editor-fold>
 

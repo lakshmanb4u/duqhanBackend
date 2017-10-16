@@ -35,6 +35,17 @@ public class UsersDaoJpa extends BaseDaoJpa<Users> implements UsersDao {
     }
 
     @Override
+    public Users loadByFbId(Long fbid) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT u FROM Users u WHERE u.fbid=:fbid");
+            query.setParameter("fbid", fbid);
+            return (Users) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+
+    @Override
     public Users loadByEmailAndPass(String email, String password) {
         try {
             Query query = getEntityManager().createQuery("SELECT u FROM Users u WHERE u.email=:email AND u.password=:password");

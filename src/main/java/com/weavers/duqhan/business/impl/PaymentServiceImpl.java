@@ -7,11 +7,11 @@ package com.weavers.duqhan.business.impl;
 
 import com.easypost.exception.EasyPostException;
 import com.easypost.model.Shipment;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Item;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payer;
-import com.paypal.api.payments.PayerInfo;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RedirectUrls;
@@ -19,43 +19,63 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.core.rest.APIContext;
 import com.paypal.core.rest.PayPalRESTException;
 import com.paypal.core.rest.PayPalResource;
+import com.paytm.merchant.CheckSumServiceHelper;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dao.CartDao;
+import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
+import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductSizeColorMapDao;
 import com.weavers.duqhan.dao.ShipmentTableDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.Cart;
+import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
+import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductSizeColorMap;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
+import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
+import com.weavers.duqhan.dto.CheckoutPaymentBean;
+import com.weavers.duqhan.dto.PaytmStatusJSONReader;
 import com.weavers.duqhan.util.GenerateAccessToken;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.util.CurrencyConverter;
 import com.weavers.duqhan.util.PayPalConstants;
+import com.weavers.duqhan.util.PaytmConstants;
 import com.weavers.duqhan.util.StatusConstants;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -84,13 +104,37 @@ public class PaymentServiceImpl implements PaymentService {
     UsersService usersService;
     @Autowired
     NotificationService notificationService;
+    @Autowired
+    MailService mailService;
+    @Autowired
+    ProductDao productDao;
+    @Autowired
+    CategoryDao categoryDao;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
 
+    private void diductProductQuentityFromCategory(Long productId, Long quantity) {
+        Product product = productDao.loadById(productId);
+        Category category = categoryDao.loadById(product.getCategoryId());
+        category.setQuantity(category.getQuantity() - quantity);
+        categoryDao.save(category);
+        String[] categoryArray = product.getParentPath().split("=");
+        for (String string : categoryArray) {
+            try {
+                category = categoryDao.loadById(Long.valueOf(string));
+                category.setQuantity(category.getQuantity() - quantity);
+                categoryDao.save(category);
+
+            } catch (NumberFormatException | NullPointerException e) {
+            }
+        }
+    }
+
     @Override
-    public String[] transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {
-        String[] strArray = new String[2];
+    public CheckoutPaymentBean transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {
+        CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
+
         String returnUrl = null;
         String payKey = null;
         InputStream is;
@@ -205,10 +249,12 @@ public class PaymentServiceImpl implements PaymentService {
             paymentDetail.setPaymentStatus(createdPayment.getState());
             paymentDetail.setAccessToken(accessToken);
             paymentDetail.setPaypalToken(paypalToken);
-            if (cartBean.getAppType() != 1) {
+            paymentDetail.setPaytmTxnId("NA");
+            paymentDetail.setGatewayType(StatusConstants.PAYPAL_GATEWAY);
+            if (cartBean.getAppType() == 2) {
                 paymentDetail.setAppType(StatusConstants.WEB_APP);
             } else {
-                paymentDetail.setAppType(cartBean.getAppType());
+                paymentDetail.setAppType(StatusConstants.MOBILE_APP);
             }
             try {
                 paymentDetail.setPaymentDate(sdf.parse(createdPayment.getCreateTime()));
@@ -287,9 +333,10 @@ public class PaymentServiceImpl implements PaymentService {
             }
             payKey = createdPayment.getId();
         }
-        strArray[0] = returnUrl;
-        strArray[1] = payKey;
-        return strArray;
+        paymentBean.setPaymentUrl(returnUrl);
+        paymentBean.setGateway(StatusConstants.PAYPAL_GATEWAY);
+        paymentBean.setStatusCode(payKey);
+        return paymentBean;
     }
 
     @Override
@@ -341,19 +388,27 @@ public class PaymentServiceImpl implements PaymentService {
         }
         if (status != null) {
             if (status.equals("approved")) {
-                List<Cart> carts = cartDao.getCartByUserId(paymentDetail.getUserId());
-                for (Cart cart : carts) {
-                    cartDao.delete(cart);
-                }
+                HashMap<Long, Long> orderDetailsMap = new HashMap<>();
                 paymentDetail.setPaymentStatus(status);
                 paymentDetail.setPayerId(payerId);
                 paymentDetailDao.save(paymentDetail);
                 for (OrderDetails orderDetail : orderDetails) {
+                    orderDetailsMap.put(orderDetail.getMapId(), null);
                     orderDetail.setStatus(status);
                     ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                    try {
+                        this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                    } catch (Exception e) {
+                    }
                     sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
                     productSizeColorMapDao.save(sizeColorMap);
                     orderDetailsDao.save(orderDetail);
+                }
+                List<Cart> carts = cartDao.getCartByUserId(paymentDetail.getUserId());
+                for (Cart cart : carts) {
+                    if (orderDetailsMap.containsKey(cart.getSizecolormapId())) {
+                        cartDao.delete(cart);
+                    }
                 }
 
             } else {
@@ -378,69 +433,356 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public String getPaymentStatus(Long userId, String payKey) {
+    public Object[] storePaytmFeedBack(HttpServletRequest request) {
+        Object[] feedback = new Object[2];
+        String status = "";
+        Integer appType = 5;
+        Enumeration<String> paramNames = request.getParameterNames();
+        Map<String, String[]> mapData = request.getParameterMap();
+        TreeMap<String, String> parameters = new TreeMap<>();
+        String paytmChecksum = "";
+        while (paramNames.hasMoreElements()) {
+            String paramName = (String) paramNames.nextElement();
+            if (paramName.equals("CHECKSUMHASH")) {
+                paytmChecksum = mapData.get(paramName)[0];
+            } else {
+                parameters.put(paramName, mapData.get(paramName)[0]);
+            }
+        }
+        boolean isValideChecksum = false;
+        try {
+            isValideChecksum = CheckSumServiceHelper.getCheckSumServiceHelper().verifycheckSum(PaytmConstants.MERCHANT_KEY, parameters, paytmChecksum);
+            if (isValideChecksum && parameters.containsKey("RESPCODE")) {
+                PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(parameters.get("ORDERID"));
+                List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(parameters.get("ORDERID"), paymentDetail.getUserId());
+                appType = paymentDetail.getAppType();
+                if (parameters.get("RESPCODE").equals("01")) {
+                    status = StatusConstants.PPS_APPROVED;
+                    HashMap<Long, Long> orderDetailsMap = new HashMap<>();
+                    paymentDetail.setPaymentStatus(status);
+                    paymentDetail.setPayerId("NA");
+                    /*paymentDetails.setBankName(parameters.get("BANKNAME"));
+                    paymentDetails.setBanktxnId(parameters.get("BANKTXNID"));
+                    paymentDetails.setPaymentMode(parameters.get("PAYMENTMODE"));
+                    paymentDetails.setPaytmTxnId(parameters.get("TXNID"));
+                    paymentDetails.setCurrency(parameters.get("CURRENCY"));
+                    paymentDetails.setGatewayName(parameters.get("GATEWAYNAME"));*/
+                    paymentDetailDao.save(paymentDetail);
+                    for (OrderDetails orderDetail : orderDetails) {
+                        orderDetailsMap.put(orderDetail.getMapId(), null);
+                        orderDetail.setStatus(status);
+                        ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                        try {
+                            this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                        } catch (Exception e) {
+                        }
+                        sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
+                        productSizeColorMapDao.save(sizeColorMap);
+                        orderDetailsDao.save(orderDetail);
+                    }
+                    List<Cart> carts = cartDao.getCartByUserId(paymentDetail.getUserId());
+                    for (Cart cart : carts) {
+                        if (orderDetailsMap.containsKey(cart.getSizecolormapId())) {
+                            cartDao.delete(cart);
+                        }
+                    }
+
+                } else {
+                    paymentDetail.setRemarks(parameters.get("RESPCODE") + ": " + parameters.get("RESPMSG"));
+                    status = StatusConstants.PPS_FAILED;
+                    paymentDetail.setPaymentStatus(status);
+                    paymentDetailDao.save(paymentDetail);
+                    for (OrderDetails orderDetail : orderDetails) {
+                        orderDetail.setStatus(status);
+                        orderDetailsDao.save(orderDetail);
+                    }
+                    System.out.println("(=====)Paytm: Payment not aproved. " + parameters.get("RESPMSG"));
+                    logger.error("(==E==)Paytm: Payment not aproved. " + parameters.get("RESPMSG"));
+                }
+
+            } else {
+                System.out.println("(=====)Paytm: Checksum mismatch.");
+                logger.error("(==E==)Paytm: Checksum mismatch.");
+            }
+        } catch (Exception e) {
+        }
+        feedback[0] = status;
+        feedback[1] = appType;
+        return feedback;
+    }
+
+    @Override
+    public String[] getPaymentStatus(Long userId, String payKey) {
         PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(payKey);
+        DecimalFormat df2 = new DecimalFormat(".##");
+        String[] responseArray = new String[2];
+        responseArray[1] = df2.format(paymentDetail.getPayAmount());
+        int gateway = paymentDetail.getGatewayType();
         String status = StatusConstants.ARS_RETRY;
         List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(payKey, userId);
         List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(payKey, userId);
+        boolean flag = false;
         //=============================check payment status===========================//
-        Payment payment = new Payment();
-        try {
-            APIContext apiContext = new APIContext(paymentDetail.getAccessToken());
-            payment = Payment.get(apiContext, payKey);
-            status = payment.getState();
-        } catch (PayPalRESTException e) {
-            logger.error("(==E==)PayPalRESTException :getPaymentStatus by pay key", e);
-        }
-
-        if (payment.getState() != null && !status.equals(StatusConstants.ARS_RETRY)) {
-            if (payment.getState().equals(StatusConstants.PPS_APPROVED)) {
-                //=============================buy shipment==========================//
-                for (ShipmentTable shipmentTable : shipmentTables) {
-                    Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
-                    try {
-                        Shipment shipment1 = shippingService.BuyShipment(shipment);
-                        shipmentTable.setRateId(shipment1.lowestRate().getId());
-                        shipmentTable.setCreatedAt(new Date());
-                        shipmentTable.setCustomsInfoId(shipment1.getCustomsInfo().getId());
-                        shipmentTable.setIsReturn(false);
-                        shipmentTable.setParcelId(shipment1.getParcel().getId());
-                        shipmentTable.setPostageLabelId(shipment1.getPostageLabel().getId());
-                        shipmentTable.setShipmentId(shipment1.getId());
-                        shipmentTable.setStatus(shipment1.getStatus());
-                        shipmentTable.setTrackerId(shipment1.getTracker().getId());
-                        shipmentTableDao.save(shipmentTable);
-                    } catch (EasyPostException | NullPointerException ex) {
-                        shipmentTable.setStatus(StatusConstants.ESS_FAILED);
-                        shipmentTableDao.save(shipmentTable);
-                        logger.error("(==E==)PayPalRESTException : At buy shipment", ex);
-                    }
-                }
-//                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
-            } else {
+        if (gateway == StatusConstants.PAYPAL_GATEWAY) {
+            Payment payment = new Payment();
+            try {
+                APIContext apiContext = new APIContext(paymentDetail.getAccessToken());
+                payment = Payment.get(apiContext, payKey);
                 status = payment.getState();
-                if (payment.getState().equals(StatusConstants.PPS_CREATED)) {
+            } catch (PayPalRESTException e) {
+                logger.error("(==E==)PayPalRESTException :getPaymentStatus by pay key", e);
+            }
+            if (payment.getState() != null && !status.equals(StatusConstants.ARS_RETRY)) {
+                if (payment.getState().equals(StatusConstants.PPS_APPROVED)) {
+                    flag = true;
+                } else if (payment.getState().equals(StatusConstants.PPS_CREATED)) {
+                    paymentDetail.setRemarks("Payment process not completed");
                     status = StatusConstants.PPS_FAILED;
                 }
-                paymentDetail.setPaymentStatus(status);
-                paymentDetailDao.save(paymentDetail);
-                for (OrderDetails orderDetail : orderDetails) {
-                    orderDetail.setStatus(status);
-                    orderDetailsDao.save(orderDetail);
+            }
+        } else if (gateway == StatusConstants.PAYTM_GATEWAY) {
+            PaytmStatusJSONReader jSONReader = null;
+            TreeMap<String, String> parameters = new TreeMap<>();
+            parameters.put("MID", PaytmConstants.MID);
+            parameters.put("ORDER_ID", payKey);
+            String checkSum = this.genrateCheckSum(parameters);
+            parameters.put("CHECKSUMHASH", checkSum);
+            HttpURLConnection connection = null;
+            StringBuilder response = new StringBuilder();
+            try {
+                JSONObject obj = new JSONObject(parameters);
+                String urlParameters = obj.toString();
+                urlParameters = URLEncoder.encode(urlParameters);
+
+                URL url = new URL(PaytmConstants.PAYTM_BASE_URL + "/oltp/HANDLER_INTERNAL/getTxnStatus?");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("contentType", "application/json");
+
+                connection.setUseCaches(false);
+                connection.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
+                wr.writeBytes("JsonData=");
+                wr.writeBytes(urlParameters);
+                wr.close();
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
                 }
-                for (ShipmentTable shipmentTable : shipmentTables) {
-                    shipmentTable.setStatus(StatusConstants.ESS_FAILED);
-                    shipmentTableDao.save(shipmentTable);
+                in.close();
+
+                //print result
+                String jsonData = response.toString();
+                ObjectMapper mapper = new ObjectMapper();
+                jSONReader = mapper.readValue(jsonData, PaytmStatusJSONReader.class);
+                System.out.println("getPaymentStatus response...........................................................");
+                System.out.println(jsonData);
+            } catch (Exception e) {
+                status = StatusConstants.PPS_FAILED;
+            }
+            if (jSONReader != null && jSONReader.getRESPCODE() != null) {
+                if (status != null && jSONReader.getRESPCODE().equals("01")) {
+                    status = StatusConstants.PPS_APPROVED;
+                    flag = true;
+                } else {
+                    paymentDetail.setRemarks("Payment process not completed");
+                    status = StatusConstants.PPS_FAILED;
                 }
+            } else {
+                paymentDetail.setRemarks("Payment process not completed");
+                status = StatusConstants.PPS_FAILED;
             }
         }
-        return status;
+
+        if (flag) {
+            //=============================buy shipment==========================//
+            for (ShipmentTable shipmentTable : shipmentTables) {
+                Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
+                try {
+                    Shipment shipment1 = shippingService.BuyShipment(shipment);
+                    shipmentTable.setRateId(shipment1.lowestRate().getId());
+                    shipmentTable.setCreatedAt(new Date());
+                    shipmentTable.setCustomsInfoId(shipment1.getCustomsInfo().getId());
+                    shipmentTable.setIsReturn(false);
+                    shipmentTable.setParcelId(shipment1.getParcel().getId());
+                    shipmentTable.setPostageLabelId(shipment1.getPostageLabel().getId());
+                    shipmentTable.setShipmentId(shipment1.getId());
+                    shipmentTable.setStatus(shipment1.getStatus());
+                    shipmentTable.setTrackerId(shipment1.getTracker().getId());
+                    shipmentTableDao.save(shipmentTable);
+                } catch (EasyPostException | NullPointerException ex) {
+                    shipmentTable.setStatus(StatusConstants.ESS_FAILED);
+                    shipmentTableDao.save(shipmentTable);
+                    logger.error("(==E==)PayPalRESTException : At buy shipment", ex);
+                }
+            }
+//                status = paymentDetailDao.getPamentStatusBypaymentIdAndUserId(payKey, userId);
+            mailService.sendPurchaseMailToAdmin(orderDetails);
+            mailService.sendPurchaseMailToUser(orderDetails);
+        } else {
+            paymentDetail.setPaymentStatus(status);
+            paymentDetailDao.save(paymentDetail);
+            for (OrderDetails orderDetail : orderDetails) {
+                orderDetail.setStatus(status);
+                orderDetailsDao.save(orderDetail);
+            }
+            for (ShipmentTable shipmentTable : shipmentTables) {
+                shipmentTable.setStatus(StatusConstants.ESS_FAILED);
+                shipmentTableDao.save(shipmentTable);
+            }
+        }
+        responseArray[0] = status;
+        return responseArray;
     }
 
     @Override
     public int getApplicationType(String token) {
         PaymentDetail paymentDetail = paymentDetailDao.getPaymentDetailByPaypalToken(token);
         return paymentDetail.getAppType();
+    }
+
+    @Override
+    public String genrateCheckSum(TreeMap<String, String> parameters) {
+        String checkSum = "";
+        try {
+            checkSum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum(PaytmConstants.MERCHANT_KEY, parameters);
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(PaytmConstants.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return checkSum;
+    }
+
+    @Override
+    public CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments, String baseUrl) {// String orderId, String amount, 
+        String payKey = "PAYKEY" + Calendar.getInstance().getTimeInMillis();
+        DecimalFormat df2 = new DecimalFormat(".##");
+        String amount = df2.format(cartBean.getOrderTotal());
+        List<ProductBean> productBeans = cartBean.getProducts();
+        CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
+        TreeMap<String, String> parameters = new TreeMap<String, String>();
+
+        parameters.put("ORDER_ID", payKey);
+        parameters.put("CUST_ID", user.getId().toString());
+        parameters.put("TXN_AMOUNT", amount);
+
+        parameters.put("MID", PaytmConstants.MID);
+        parameters.put("CHANNEL_ID", PaytmConstants.CHANNEL_ID);
+        parameters.put("INDUSTRY_TYPE_ID", PaytmConstants.INDUSTRY_TYPE_ID);
+        parameters.put("WEBSITE", PaytmConstants.WEBSITE);
+        parameters.put("MOBILE_NO", user.getMobile());
+        parameters.put("EMAIL", user.getEmail());
+
+        parameters.put("CALLBACK_URL", baseUrl + PaytmConstants.CALLBACK_URL);   // TODO: have to chack.
+
+        String checkSum = this.genrateCheckSum(parameters);
+
+        parameters.put("CHECKSUMHASH", checkSum);
+
+        paymentBean.setParameters(parameters);
+//        paymentBean.setPaymentUrl(PaytmConstants.PAYTM_TRANSACTION_REQUEST_URL);
+        paymentBean.setPaymentUrl(baseUrl + "/web/paytmpayment");
+        paymentBean.setGateway(StatusConstants.PAYTM_GATEWAY);
+        paymentBean.setStatusCode(payKey);
+        if (checkSum == null || checkSum.equals("")) {
+            return null;
+        }
+        /////////////////start
+        Date date = new Date();
+        PaymentDetail paymentDetail = new PaymentDetail();
+        paymentDetail.setId(null);
+        try {
+            paymentDetail.setPayAmount(Double.valueOf(amount));
+        } catch (NumberFormatException | NullPointerException e) {
+            paymentDetail.setPayAmount(0.0);
+        }
+        paymentDetail.setPaymentType("CREDITED");
+        paymentDetail.setUserId(cartBean.getUserId());
+        paymentDetail.setPaymentKey(payKey);    // reuse
+        paymentDetail.setPaymentStatus(StatusConstants.PPS_CREATED);
+        paymentDetail.setAccessToken(parameters.get("CHECKSUMHASH"));  // reuse
+        paymentDetail.setPaypalToken("NA");
+        if (cartBean.getAppType() == 2) {
+            paymentDetail.setAppType(StatusConstants.WEB_APP);
+        } else {
+            paymentDetail.setAppType(StatusConstants.MOBILE_APP);
+        }
+        paymentDetail.setPaymentDate(date);
+        paymentDetail.setPaytmTxnId("0");
+        paymentDetail.setGatewayType(StatusConstants.PAYTM_GATEWAY);
+        paymentDetailDao.save(paymentDetail);
+
+        //====================================//
+        Long addressId = null;
+        if (cartBean.getDeliveryAddressId() != null) {
+            addressId = cartBean.getDeliveryAddressId();
+        } else {
+            AddressDto address = cartBean.getAddressDto();
+            UserAddress newAddress = new UserAddress();
+            newAddress.setId(null);
+            newAddress.setCity(address.getCity());
+            newAddress.setCompanyName(address.getCompanyName());
+            newAddress.setContactName(address.getContactName());
+            newAddress.setCountry(address.getCountry());
+            newAddress.setEmail(address.getEmail());
+            newAddress.setPhone(address.getPhone());
+            newAddress.setResidential(address.getIsResidential());
+            newAddress.setState(address.getState());
+            newAddress.setStatus(2l);
+            newAddress.setStreetOne(address.getStreetOne());
+            newAddress.setStreetTwo(address.getStreetTwo());
+            newAddress.setUserId(address.getUserId());
+            newAddress.setZipCode(address.getZipCode());
+            UserAddress newAddress1 = userAddressDao.save(newAddress);
+            addressId = newAddress1.getId();
+        }
+        //========================store shipment======================//
+        HashMap<Long, String> orderShipmentMap = new HashMap<>();
+        for (Shipment shipment : shipments) {
+            try {
+                if (null != shipment.lowestRate().getRate()) {
+                    orderShipmentMap.put(Long.valueOf(shipment.getCustomsInfo().getCustomsItems().get(0).getHsTariffNumber()), shipment.getId());
+                    ShipmentTable shipmentTable = new ShipmentTable();
+                    shipmentTable.setId(null);
+                    shipmentTable.setCreatedAt(new Date());
+                    shipmentTable.setCustomsInfoId("0");
+                    shipmentTable.setIsReturn(false);
+                    shipmentTable.setParcelId("0");
+                    shipmentTable.setPostageLabelId("0");
+                    shipmentTable.setRateId("0");
+                    shipmentTable.setShipmentId(shipment.getId());
+                    shipmentTable.setStatus(StatusConstants.ESS_CREATED);
+                    shipmentTable.setTrackerId("0");
+                    shipmentTable.setUserId(cartBean.getUserId());
+                    shipmentTable.setPayKey(payKey);
+                    shipmentTableDao.save(shipmentTable);
+                } else {
+                    logger.error("(==E==)shipment.lowestRate().getRate() = null");
+                    return null;
+                }
+            } catch (EasyPostException ex) {
+                logger.error("(==E==)EasyPostException :shipment.lowestRate().getRate() = null", ex);
+            }
+        }
+
+        for (ProductBean productBean : productBeans) {
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.setId(null);
+            orderDetails.setOrderId("OD" + Calendar.getInstance().getTimeInMillis());
+            orderDetails.setMapId(productBean.getSizeColorMapId());//required
+            orderDetails.setOrderDate(date);
+            orderDetails.setPaymentAmount(productBean.getDiscountedPrice());//required
+            orderDetails.setPaymentKey(payKey);
+            orderDetails.setStatus(StatusConstants.PPS_CREATED);
+            orderDetails.setUserId(cartBean.getUserId());
+            orderDetails.setQuentity(Long.valueOf(productBean.getQty()));//required
+            orderDetails.setAddressId(addressId);//*******************not null
+            orderDetails.setShipmentId(orderShipmentMap.get(productBean.getSizeColorMapId()));
+            orderDetailsDao.save(orderDetails);
+        }
+        ////////////////////end
+
+        return paymentBean;
     }
 
 }

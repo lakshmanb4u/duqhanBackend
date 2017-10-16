@@ -144,8 +144,10 @@ public class ProductSizeColorMapDaoJpa extends BaseDaoJpa<ProductSizeColorMap> i
     }
 
     @Override
-    public List<ProductSizeColorMap> test() {   // to remove product with same name by putting 0 in quantity.
-        Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap AS map where map.productId in (SELECT p.id FROM Product as p group by p.name having count(p.name)>1)");
+    public List<ProductSizeColorMap> test(Long productId) {   // to remove product with same name by putting 0 in quantity.
+        //Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap AS map where map.productId in (SELECT p.id FROM Product as p group by p.name having count(p.name)>1)");
+        Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap AS map WHERE map.productId =:productId");
+        query.setParameter("productId", productId);
         return query.getResultList();
     }
-}
+        }

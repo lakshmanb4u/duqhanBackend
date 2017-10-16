@@ -20,4 +20,6 @@ public interface OrderDetailsDao extends BaseDao<OrderDetails> {
 
     OrderDetails getOrderDetailsByUserIdAndOrderId(Long userId, String orderId);
 
+    List<Object[]> getOrderDetailsByOrderIds(List<String> orderids);
+
 }

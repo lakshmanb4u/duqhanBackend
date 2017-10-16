@@ -30,6 +30,7 @@ public class AouthServiceImpl implements AouthService {
     UsersDao usersDao;
 
     private final Logger logger = Logger.getLogger(AouthServiceImpl.class);
+
     private String createToken(Long userId) {
         String token = null;
         Calendar cal = Calendar.getInstance();
@@ -48,7 +49,8 @@ public class AouthServiceImpl implements AouthService {
     @Override
     public AouthBean generatAccessToken(String email, Long userId) {
         AouthBean aouthBean = new AouthBean();
-        UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
+//        UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
+        UserAouth userAouth = userAouthDao.getTokenByUserId(userId);
         String token = this.createToken(userId);
         if (userAouth != null) {    // for existing user update token
             userAouth.setAouthToken(token);
