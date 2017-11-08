@@ -2,15 +2,7 @@
 <persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
   <persistence-unit name="duqhan-db" transaction-type="RESOURCE_LOCAL">
     <provider>org.hibernate.ejb.HibernatePersistence</provider>
-    <!--    <properties>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
-      <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
-      <property name="hibernate.connection.username" value="${jdbc.username}"/>
-      <property name="hibernate.connection.password" value="${jdbc.password}"/>
-      <property name="hibernate.connection.url" value="${jdbc.url}"/>
-      <property name="hibernate.hbm2ddl.auto" value="create-update"/>
-      <property name="hibernate.ejb.autodetection" value="class"/>
-    </properties>-->
+    
     <!--<class>in.cloudlabz.tradengain.domain.Test</class>-->
     <class>com.weavers.duqhan.domain.Kart</class>
     <class>com.weavers.duqhan.domain.Store</class>
@@ -41,5 +33,16 @@
     <class>com.weavers.duqhan.domain.TempProductSizeColorMap</class>
     <class>com.weavers.duqhan.domain.OfferProductUsed</class>
     <class>com.weavers.duqhan.domain.OfferProducts</class>
+    
+    <properties>
+      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
+      <property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver"/>
+      <property name="hibernate.connection.username" value="stagingdb"/>
+      <property name="hibernate.connection.password" value="staging123"/>
+      <property name="hibernate.connection.url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp"/>
+      <property name="hibernate.hbm2ddl.auto" value="create-update"/>
+      <property name="hibernate.ejb.autodetection" value="class"/>
+    </properties>
+    
   </persistence-unit>
 </persistence>

@@ -67,10 +67,13 @@
         
         <!-- Local Configuration -->
     
-        <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
+       <!--  <property name="url" value="jdbc:mysql://localhost:3306/duqhandb" />
         <property name="username" value="root" />
-        <property name="password" value="" /> 
+        <property name="password" value="" />  -->
     
+    	<property name="url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp" />
+        <property name="username" value="stagingdb" />
+        <property name="password" value="staging123" /> 
         <!-- Server Configuration virginia -->
         
         <!--                <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />

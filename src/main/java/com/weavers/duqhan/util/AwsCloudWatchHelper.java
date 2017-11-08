@@ -23,7 +23,7 @@ public class AwsCloudWatchHelper {
 	private static AmazonCloudWatch cw;
 	
 	public AwsCloudWatchHelper() {
-		BasicAWSCredentials bawsCredentials =	new BasicAWSCredentials(awsAccessKey, awsSecretKey);
+		BasicAWSCredentials bawsCredentials =	new BasicAWSCredentials("","");
 		awsCredentialProvider = new AWSStaticCredentialsProvider(bawsCredentials);
 		cw = AmazonCloudWatchClientBuilder
     			.standard()

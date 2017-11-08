@@ -89,14 +89,14 @@ public class HomeController {
 	        long loginEndTime = System.currentTimeMillis();
 	        double timeTakenToLogin = (loginEndTime - loginStartTime)/1000.0;
 	        
-	        int logCountResponseCode = awsCloudWatchHelper.logCount("Login dimension", "Login dimension value", 
+	       /* int logCountResponseCode = awsCloudWatchHelper.logCount("Login dimension", "Login dimension value", 
 	    			"Number of users using login(Duplicate users too)", StandardUnit.Count, 1.0, "DUQHAN SITE/TRAFFIC");
 	        logger.info("Response code for AWS log count: " + logCountResponseCode);
 	        
 	        int logTimeResponseCode = awsCloudWatchHelper.logTimeSecounds("Login start time",
 	        		"Login start value", "Time taken for the user login", StandardUnit.Seconds,
 	        		(loginEndTime - loginStartTime)/1000.0, "DUQHAN SITE/TRAFFIC");
-	        logger.info("Time taken to login: " + timeTakenToLogin + " Response code from AWS for logging time:" +logTimeResponseCode);
+	        logger.info("Time taken to login: " + timeTakenToLogin + " Response code from AWS for logging time:" +logTimeResponseCode);*/
     	} catch (Exception e) {
     		logger.error(e);
     		int logErrorCount = awsCloudWatchHelper.logCount(errorDimensionName, errordDimensionValue, "Number of errors noticed", StandardUnit.Count, 1.0, "DUQHAN SITE/TRAFFIC");
