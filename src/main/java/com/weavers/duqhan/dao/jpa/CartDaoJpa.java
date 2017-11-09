@@ -7,7 +7,7 @@ package com.weavers.duqhan.dao.jpa;
 
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.domain.Cart;
-import com.weavers.duqhan.domain.ProductSizeColorMap;
+import com.weavers.duqhan.domain.ProductPropertiesMap;
 import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
@@ -23,18 +23,18 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
     }
 
     @Override
-    public List<ProductSizeColorMap> getProductSizeColorMapByUserId(Long userId) {
-        Query query = getEntityManager().createQuery("SELECT map FROM ProductSizeColorMap map, Cart c WHERE c.sizecolormapId=map.id AND c.userId=:userId");
+    public List<ProductPropertiesMap> getProductPropertiesMapByUserId(Long userId) {
+        Query query = getEntityManager().createQuery("SELECT map FROM ProductPropertiesMap map, Cart c WHERE c.productPropertyMapId=map.id AND c.userId=:userId");
         query.setParameter("userId", userId);
-        return query.getResultList();   // get productSizeColorMap for User
+        return query.getResultList();   // get ProductPropertiesMap for User
     }
 
     @Override
-    public Cart loadByUserIdAndMapId(Long userId, Long sizecolormapId) {
+    public Cart loadByUserIdAndMapId(Long userId, Long productPropertyMapId) {
         try {
-            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.sizecolormapId=:sizecolormapId AND c.userId=:userId");
+            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.productPropertyMapId=:productPropertyMapId AND c.userId=:userId");
             query.setParameter("userId", userId);
-            query.setParameter("sizecolormapId", sizecolormapId);
+            query.setParameter("productPropertyMapId", productPropertyMapId);
             return (Cart) query.getSingleResult();  // // get cart for User by mapid
         } catch (NoResultException nre) {
             return null;
@@ -62,7 +62,7 @@ public class CartDaoJpa extends BaseDaoJpa<Cart> implements CartDao {
     @Override
     public Cart getCartByIdAndMapId(Long cartId, Long mapId) {  //return cart for a purticular product.
         try {
-            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.id=:cartId AND c.sizecolormapId=:mapId");
+            Query query = getEntityManager().createQuery("SELECT c FROM Cart c WHERE c.id=:cartId AND c.productPropertyMapId=:mapId");
             query.setParameter("cartId", cartId);
             query.setParameter("mapId", mapId);
             return (Cart) query.getSingleResult();

@@ -15,6 +15,8 @@ public class CategoryDto {
     private String categoryName;
     private Long patentId;
     private boolean isLeaf;
+    private String imgUrl;
+    private String displayText;
 
     /**
      * @return the categoryId
@@ -70,5 +72,33 @@ public class CategoryDto {
      */
     public void setIsLeaf(boolean isLeaf) {
         this.isLeaf = isLeaf;
+    }
+
+    /**
+     * @return the imgUrl
+     */
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    /**
+     * @param imgUrl the imgUrl to set
+     */
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    /**
+     * @return the displayText
+     */
+    public String getDisplayText() {
+        return displayText;
+    }
+
+    /**
+     * @param displayText the displayText to set
+     */
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
     }
 }

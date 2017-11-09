@@ -17,6 +17,10 @@ public class StatusConstants {
     public static final String PPS_FAILED = "failed";       // when buyer pay but request cannot success.
     public static final String PPS_CANCELLED = "cancelled"; // when buyer not accepted to pay.
 
+//**********************************payment GATEWAY**************************************//
+    public static final int PAYPAL_GATEWAY = 1;     // PAYPAL
+    public static final int PAYTM_GATEWAY = 2;      // PAYTM
+
 //*******************************Easypost Shipment Status*******************************//
     public static final String ESS_CREATED = "created";     // when a shipment create but not buy.
     public static final String ESS_APPROVED = "approved";   // when created shipment successfully buy.
@@ -41,4 +45,6 @@ public class StatusConstants {
 
 //******************************PRICE FILTER*****************************//
     public static final double PRICE_FILTER = 300.0;
+    public static final double PRICE_FILTER_BAG = 600.0;
+    public static final double PRICE_GREASE = 1000.0;
 }

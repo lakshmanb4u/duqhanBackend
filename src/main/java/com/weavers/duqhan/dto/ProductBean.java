@@ -17,20 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class ProductBean {
 
     /**
-     * @return the sizeColorMaps
-     */
-    public List<SizeColorMapDto> getSizeColorMaps() {
-        return sizeColorMaps;
-    }
-
-    /**
-     * @param sizeColorMaps the sizeColorMaps to set
-     */
-    public void setSizeColorMaps(List<SizeColorMapDto> sizeColorMaps) {
-        this.sizeColorMaps = sizeColorMaps;
-    }
-
-    /**
      * @return the imageDtos
      */
     public List<ImageDto> getImageDtos() {
@@ -54,15 +40,8 @@ public class ProductBean {
     private Double price;
     private Double discountedPrice;
     private Double discountPCT;
-    private Long sizeId;
-    private String size;
-    private String sizeUnit;
-    private Long colorId;
-    private String color;
     private int available;
-    private Long sizeColorMapId;
     private Long cartId;
-    private List<SizeColorMapDto> sizeColorMaps;
     private List<ImageDto> imageDtos;
     private MultipartFile frontImage;
     private String qty;
@@ -78,6 +57,8 @@ public class ProductBean {
     private HashMap<String,String> specificationsMap;
     private String statusCode;
     private String status;
+    private Long productPropertiesMapId;
+    private HashMap<String, String> propertyMap;
 
     /**
      * @return the productId
@@ -206,48 +187,6 @@ public class ProductBean {
     }
 
     /**
-     * @return the size
-     */
-    public String getSize() {
-        return size;
-    }
-
-    /**
-     * @param size the size to set
-     */
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    /**
-     * @return the sizeUnit
-     */
-    public String getSizeUnit() {
-        return sizeUnit;
-    }
-
-    /**
-     * @param sizeUnit the sizeUnit to set
-     */
-    public void setSizeUnit(String sizeUnit) {
-        this.sizeUnit = sizeUnit;
-    }
-
-    /**
-     * @return the color
-     */
-    public String getColor() {
-        return color;
-    }
-
-    /**
-     * @param color the color to set
-     */
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    /**
      * @return the available
      */
     public int getAvailable() {
@@ -273,48 +212,6 @@ public class ProductBean {
      */
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
-    }
-
-    /**
-     * @return the sizeId
-     */
-    public Long getSizeId() {
-        return sizeId;
-    }
-
-    /**
-     * @param sizeId the sizeId to set
-     */
-    public void setSizeId(Long sizeId) {
-        this.sizeId = sizeId;
-    }
-
-    /**
-     * @return the colorId
-     */
-    public Long getColorId() {
-        return colorId;
-    }
-
-    /**
-     * @param colorId the colorId to set
-     */
-    public void setColorId(Long colorId) {
-        this.colorId = colorId;
-    }
-
-    /**
-     * @return the sizeColorMapId
-     */
-    public Long getSizeColorMapId() {
-        return sizeColorMapId;
-    }
-
-    /**
-     * @param sizeColorMapId the sizeColorMapId to set
-     */
-    public void setSizeColorMapId(Long sizeColorMapId) {
-        this.sizeColorMapId = sizeColorMapId;
     }
 
     /**
@@ -525,6 +422,35 @@ public class ProductBean {
      */
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    
+    /**
+     * @return the productPropertiesMapId
+     */
+    public Long getProductPropertiesMapId() {
+        return productPropertiesMapId;
+    }
+
+    /**
+     * @param productPropertiesMapId the productPropertiesMapId to set
+     */
+    public void setProductPropertiesMapId(Long productPropertiesMapId) {
+        this.productPropertiesMapId = productPropertiesMapId;
+    }
+
+    /**
+     * @return the propertyMap
+     */
+    public HashMap<String, String> getPropertyMap() {
+        return propertyMap;
+    }
+
+    /**
+     * @param propertyMap the propertyMap to set
+     */
+    public void setPropertyMap(HashMap<String, String> propertyMap) {
+        this.propertyMap = propertyMap;
     }
 
 }

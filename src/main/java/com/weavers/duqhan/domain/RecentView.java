@@ -16,11 +16,11 @@ import javax.validation.constraints.NotNull;
 
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
 @Entity
 @Table(name = "recent_view")
-public class RecentView extends BaseDomain{
+public class RecentView extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -36,6 +36,10 @@ public class RecentView extends BaseDomain{
     @Column(name = "view_date")
     @Temporal(TemporalType.DATE)
     private Date viewDate;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "visit_count")
+    private long visitCount;
 
     public long getUserId() {
         return userId;
@@ -61,5 +65,12 @@ public class RecentView extends BaseDomain{
         this.viewDate = viewDate;
     }
 
-    
+    public long getVisitCount() {
+        return visitCount;
+    }
+
+    public void setVisitCount(long visitCount) {
+        this.visitCount = visitCount;
+    }
+
 }

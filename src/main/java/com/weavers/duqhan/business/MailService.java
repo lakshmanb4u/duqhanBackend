@@ -7,7 +7,8 @@ package com.weavers.duqhan.business;
 
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.Users;
-import com.weavers.duqhan.dto.StatusBean;
+import com.weavers.duqhan.dto.UserBean;
+import java.util.List;
 
 /**
  *
@@ -16,8 +17,18 @@ import com.weavers.duqhan.dto.StatusBean;
 public interface MailService {
 
     String sendOTPforPasswordReset(String email, String otp);
-    
+
     String returnRequestToAdmin(OrderDetails orderDetails);
-    
-    String sendMailToAdminByUser(StatusBean contactBean, Users users);
+
+    String sendMailToAdminByUser(UserBean contactBean, Users users);
+
+    String sendMailToAdminByUser(UserBean contactBean);
+
+    String sendNewRegistrationToAdmin(Users users);
+
+    String sendWelcomeMailToUser(Users users);
+
+    String sendPurchaseMailToAdmin(List<OrderDetails> orderDetails);
+
+    String sendPurchaseMailToUser(List<OrderDetails> orderDetails);
 }

@@ -5,6 +5,8 @@
  */
 package com.weavers.duqhan.dto;
 
+import java.util.HashMap;
+
 /**
  *
  * @author Android-3
@@ -21,8 +23,6 @@ public class OrderDetailsDto {
     private String orderDate;
     private String status;
     private String productName;
-    private String color;
-    private String size;
     private String deliveryDate;
     private String phone;
     private String email;
@@ -31,6 +31,7 @@ public class OrderDetailsDto {
     private AddressDto addressDto;
     private TrackerBean trackerBean;
     private String returnStatus;
+    private HashMap<String, String> propertyMap;
 
     /**
      * @return the userId
@@ -128,34 +129,6 @@ public class OrderDetailsDto {
      */
     public void setProductName(String productName) {
         this.productName = productName;
-    }
-
-    /**
-     * @return the color
-     */
-    public String getColor() {
-        return color;
-    }
-
-    /**
-     * @param color the color to set
-     */
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    /**
-     * @return the size
-     */
-    public String getSize() {
-        return size;
-    }
-
-    /**
-     * @param size the size to set
-     */
-    public void setSize(String size) {
-        this.size = size;
     }
 
     /**
@@ -310,6 +283,20 @@ public class OrderDetailsDto {
      */
     public void setReturnStatus(String returnStatus) {
         this.returnStatus = returnStatus;
+    }
+
+    /**
+     * @return the propertyMap
+     */
+    public HashMap<String, String> getPropertyMap() {
+        return propertyMap;
+    }
+
+    /**
+     * @param propertyMap the propertyMap to set
+     */
+    public void setPropertyMap(HashMap<String, String> propertyMap) {
+        this.propertyMap = propertyMap;
     }
 
 }

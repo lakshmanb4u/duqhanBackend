@@ -13,15 +13,15 @@
                 http://www.springframework.org/schema/context/spring-context-4.2.xsd
                 http://www.springframework.org/schema/task
                 http://www.springframework.org/schema/task/spring-task-4.2.xsd">
-    
+   
 
     <beans:bean id="tilesConfigurer"
-                  class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
-                  p:definitions="/WEB-INF/tiles-defs/templates.xml" />
+                class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"
+                p:definitions="/WEB-INF/tiles-defs/templates.xml" />
 
     <beans:bean id="tilesViewResolver"
-               class="org.springframework.web.servlet.view.UrlBasedViewResolver"
-               p:viewClass="org.springframework.web.servlet.view.tiles3.TilesView">
+                class="org.springframework.web.servlet.view.UrlBasedViewResolver"
+                p:viewClass="org.springframework.web.servlet.view.tiles3.TilesView">
         <!--        <beans:property name="order" value="1"/>-->
     </beans:bean>
     
@@ -34,7 +34,6 @@
     <beans:bean id="shippingService" class="com.weavers.duqhan.business.impl.ShippingServiceImpl"/>
     <beans:bean id="notificationService" class="com.weavers.duqhan.business.impl.NotificationServiceImpl"/>
     <beans:bean id="mailService" class="com.weavers.duqhan.business.impl.MailServiceImpl"/>
-    <beans:bean id="adminService" class="com.weavers.duqhan.business.impl.AdminServiceImpl"/>
     
     <!-- Root Context: defines shared resources visible to all other web components -->
     <context:component-scan base-package="com.weavers.duqhan" />
@@ -63,11 +62,4 @@
             <beans:bean class="com.weavers.duqhan.interceptor.UserInterceptor" />
         </mvc:interceptor>
     </mvc:interceptors>
-<!--    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/admin/**"/>
-            <beans:bean class="com.weavers.duqhan.interceptor.AdminInterceptor" />
-        </mvc:interceptor>
-    </mvc:interceptors>-->
-
 </beans:beans>

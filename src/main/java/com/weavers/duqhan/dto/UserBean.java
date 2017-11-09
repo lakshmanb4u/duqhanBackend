@@ -177,6 +177,9 @@ public class UserBean {
     private String statusCode;
     private String status;
     private Long cartCount;
+    private Long id;
+    private boolean isFirstLogin;
+    private boolean freeProductEligibility;
 
     /**
      * @return the profileImg
@@ -204,6 +207,48 @@ public class UserBean {
      */
     public void setCartCount(Long cartCount) {
         this.cartCount = cartCount;
+    }
+
+    /**
+     * @return the id
+     */
+    public Long getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    /**
+     * @return the isFirstLogin
+     */
+    public boolean isIsFirstLogin() {
+        return isFirstLogin;
+    }
+
+    /**
+     * @param isFirstLogin the isFirstLogin to set
+     */
+    public void setIsFirstLogin(boolean isFirstLogin) {
+        this.isFirstLogin = isFirstLogin;
+    }
+
+    /**
+     * @return the freeProductEligibility
+     */
+    public boolean isFreeProductEligibility() {
+        return freeProductEligibility;
+    }
+
+    /**
+     * @param freeProductEligibility the freeProductEligibility to set
+     */
+    public void setFreeProductEligibility(boolean freeProductEligibility) {
+        this.freeProductEligibility = freeProductEligibility;
     }
 
 }

@@ -43,8 +43,10 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
 
     @Override
     public List<Category> getChildByParentId(Long parentId) {
-        Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId");
+        Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId AND c.quantity>:quantity");
+//        Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId");
         query.setParameter("parentId", parentId);
+        query.setParameter("quantity", 0l);
         return query.getResultList();
     }
 

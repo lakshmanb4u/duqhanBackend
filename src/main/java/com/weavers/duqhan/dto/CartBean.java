@@ -25,6 +25,7 @@ public class CartBean {
     private Long userId;
     private AddressDto addressDto;
     private int appType;
+    private int paymentGateway;
 
     /**
      * @return the itemTotal
@@ -192,5 +193,19 @@ public class CartBean {
      */
     public void setAppType(int appType) {
         this.appType = appType;
+    }
+
+    /**
+     * @return the paymentGateway
+     */
+    public int getPaymentGateway() {
+        return paymentGateway;
+    }
+
+    /**
+     * @param paymentGateway the paymentGateway to set
+     */
+    public void setPaymentGateway(int paymentGateway) {
+        this.paymentGateway = paymentGateway;
     }
 }

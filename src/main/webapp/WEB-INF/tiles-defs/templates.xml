@@ -12,6 +12,12 @@
         <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
     </definition>
     
+    <definition name="paymentGatewayTemplate" template="/WEB-INF/layouts/classic.jsp">
+        <put-attribute name="header" value="/WEB-INF/layouts/body.jsp" />
+        <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/layouts/body.jsp" />
+    </definition>
+    
     <definition name="mainTemplateSignin" template="/WEB-INF/layouts/classic.jsp">
         <!--<put-attribute name="title" value="/WEB-INF/templates/title.jsp" />-->
         <put-attribute name="header" value="/WEB-INF/layouts/signinheader.jsp" />
@@ -24,6 +30,8 @@
         <put-attribute name="body" value="/WEB-INF/layouts/body.jsp" />
         <put-attribute name="footer" value="/WEB-INF/layouts/footer.jsp" />
     </definition>
+    
+    
     
     
     <definition name="index" extends="common">
@@ -41,7 +49,7 @@
         <put-attribute name="body" value="/WEB-INF/views/admin/addProduct.jsp" />
     </definition>
     
-    <definition name="paymentStatus" extends="common">
+    <definition name="paymentStatus" extends="paymentGatewayTemplate">
         <put-attribute name="title" value="duqhan.com-payment-status" />
         <put-attribute name="body" value="/WEB-INF/views/paymentStatus.jsp" />
     </definition>
@@ -49,6 +57,11 @@
     <definition name="shipmentDetails" extends="common">
         <put-attribute name="title" value="duqhan.com-shipment-status" />
         <put-attribute name="body" value="/WEB-INF/views/shipmentDetails.jsp" />
+    </definition>
+    
+    <definition name="paytmpayment" extends="paymentGatewayTemplate">
+        <put-attribute name="title" value="duqhan.com" />
+        <put-attribute name="body" value="/WEB-INF/views/paytmpayment.jsp" />
     </definition>
     
 </tiles-definitions>

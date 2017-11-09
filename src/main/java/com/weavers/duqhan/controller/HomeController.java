@@ -11,9 +11,9 @@ import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
+//import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,17 +36,23 @@ public class HomeController {
     ProductService productService;
 
     private final Logger logger = Logger.getLogger(HomeController.class);
+    //private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public void home(HttpServletResponse response) throws IOException {
-//        return "OK....";
-        response.sendRedirect("web/home");
+    public String home(HttpServletResponse response) throws IOException {
+        return "API APP DEPLOYED SUCCESSFULLY.....";
     }
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST) // User registration by email id.
     public UserBean signup(HttpServletResponse response, @RequestBody LoginBean loginBean) {
+        long loginStartTime = System.currentTimeMillis();
         UserBean userBean = usersService.userRegistration(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Signup", "signup count", "signup API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Signup", "signup response", "signup API response time", timeTakenToLogin);
         return userBean;
     }
 
@@ -59,8 +65,18 @@ public class HomeController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
     public UserBean login(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        UserBean userBean = usersService.userLogin(loginBean);
+//        UserBean userBean = usersService.userLogin(loginBean);
+//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+
+        long loginStartTime = System.currentTimeMillis();
+        UserBean userBean = null;
+        userBean = usersService.userLogin(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+
         return userBean;
     }
 
@@ -85,10 +101,16 @@ public class HomeController {
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return categorysBean;
     }
-
+    /*
     @RequestMapping(value = "/test", method = RequestMethod.GET) // for test
     public String test() {
 //        System.out.println("ddddd " + NotificationPusher.pushOnSingleDevice("title_new", "body_new", "ejZtGLpjmqk:APA91bFCfB6aW2SsZVEG_0vau7ZaTa507NjzDJ9qgx-5knIvETJkyE3pVVFPCd03Xy70mVotCzhkP5HV_cGSpPlwzyfAEAv6mDceVDvIopCQf_-jBSqM6EEJT-XR70u_5Vo2nP92cYXh").getResults().size());
+        productService.test();
         return "OOKK";
     }
+
+    @RequestMapping(value = "/test-order-details", method = RequestMethod.GET) // for test
+    public List<Map<String, Object>> test1(@RequestParam("orderids") String... orderids) {
+        return productService.getTestOrderDetails(Arrays.asList(orderids));
+    }*/
 }

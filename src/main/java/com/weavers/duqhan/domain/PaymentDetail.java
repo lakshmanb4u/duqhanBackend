@@ -17,7 +17,7 @@ import javax.validation.constraints.Size;
 
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
 @Entity
 @Table(name = "payment_detail")
@@ -60,13 +60,25 @@ public class PaymentDetail extends BaseDomain {
     private String paypalToken;
     @Basic(optional = false)
     @NotNull
-    @Size(max = 255)
+    @Size(min = 1, max = 255)
     @Column(name = "access_token")
     private String accessToken;
     @Basic(optional = false)
     @NotNull
     @Column(name = "app_type")
     private int appType;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "paytm_txn_id")
+    private String paytmTxnId;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "gateway_type")
+    private int gatewayType;
+    @Size(max = 255)
+    @Column(name = "remarks")
+    private String remarks;
 
     public long getUserId() {
         return userId;
@@ -124,14 +136,6 @@ public class PaymentDetail extends BaseDomain {
         this.paymentStatus = paymentStatus;
     }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
     public String getPaypalToken() {
         return paypalToken;
     }
@@ -140,12 +144,44 @@ public class PaymentDetail extends BaseDomain {
         this.paypalToken = paypalToken;
     }
 
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     public int getAppType() {
         return appType;
     }
 
     public void setAppType(int appType) {
         this.appType = appType;
+    }
+
+    public String getPaytmTxnId() {
+        return paytmTxnId;
+    }
+
+    public void setPaytmTxnId(String paytmTxnId) {
+        this.paytmTxnId = paytmTxnId;
+    }
+
+    public int getGatewayType() {
+        return gatewayType;
+    }
+
+    public void setGatewayType(int gatewayType) {
+        this.gatewayType = gatewayType;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
 }

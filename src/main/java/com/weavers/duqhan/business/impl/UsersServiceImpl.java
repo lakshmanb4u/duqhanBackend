@@ -8,10 +8,12 @@ package com.weavers.duqhan.business.impl;
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OtpTableDao;
 import com.weavers.duqhan.dao.UserActivityDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
+import com.weavers.duqhan.domain.OfferProducts;
 import com.weavers.duqhan.domain.OtpTable;
 import com.weavers.duqhan.domain.UserActivity;
 import com.weavers.duqhan.domain.UserAddress;
@@ -24,7 +26,7 @@ import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.Crypting;
 import com.weavers.duqhan.util.DateFormater;
-import com.weavers.duqhan.util.MailSender;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 import com.weavers.duqhan.util.RandomCodeGenerator;
 import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import java.util.Date;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 public class UsersServiceImpl implements UsersService {
 
@@ -53,6 +56,9 @@ public class UsersServiceImpl implements UsersService {
     @Autowired
     UserActivityDao userActivityDao;
 
+    @Autowired
+    OfferProductsDao offerProductsDao;
+
     private final Logger logger = Logger.getLogger(UsersServiceImpl.class);
 
     private UserBean setUserBean(Users users) {
@@ -62,6 +68,12 @@ public class UsersServiceImpl implements UsersService {
             userBean.setEmail(userBean.getEmail());
         }
         return userBean;
+    }
+
+    @Override
+    public Users getUserById(Long userId) {
+        Users users = usersDao.loadById(userId);
+        return users;
     }
 
     @Override
@@ -99,12 +111,16 @@ public class UsersServiceImpl implements UsersService {
             user2.setLatitude(loginBean.getLatitude());
             user2.setLongitude(loginBean.getLongitude());
             user2.setUserAgent(loginBean.getUserAgent());
+            user2.setFreeOfferAccepted(false);
             Users saveUser = usersDao.save(user2);  // new user registration.
             if (saveUser != null) {
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
+                userBean.setMobile(user2.getMobile());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
+                mailService.sendNewRegistrationToAdmin(saveUser);
+                mailService.sendWelcomeMailToUser(saveUser);
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
@@ -116,14 +132,21 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public UserBean fbUserLogin(LoginBean loginBean) {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
+        if (null == user) {
+            user = usersDao.loadByFbId(loginBean.getFbid());
+        }
         UserBean userBean = new UserBean();
         Date newDate = new Date();
         UserActivity activity = new UserActivity();
+        userBean.setIsFirstLogin(false);
+
         if (user != null) { // if user already exist
             activity.setUserId(user.getId());
             activity.setActivity(StatusConstants.LOGIN);
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
+            userBean.setMobile(user.getMobile());
+            userBean.setProfileImg(user.getProfileImg());
             userBean.setStatusCode("200");
             userBean.setStatus("Success");
             user.setLastloginDate(new Date());
@@ -135,7 +158,15 @@ public class UsersServiceImpl implements UsersService {
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
             userBean.setAuthtoken(aouthBean.getAouthToken());
+            userBean.setFreeProductEligibility(false);
+            if (!user.getFreeOfferAccepted()) {
+                List<OfferProducts> offerProducts = offerProductsDao.loadAll();
+                if (!offerProducts.isEmpty()) {
+                    userBean.setFreeProductEligibility(true);
+                }
+            }
         } else { // if user not exist
+            userBean.setIsFirstLogin(true);
             Users user2 = new Users();
             activity.setUserId(null);
             activity.setActivity(StatusConstants.NEW_RAGISTRATION);
@@ -149,14 +180,21 @@ public class UsersServiceImpl implements UsersService {
             user2.setLatitude(loginBean.getLatitude());
             user2.setLongitude(loginBean.getLongitude());
             user2.setUserAgent(loginBean.getUserAgent());
+            user2.setFreeOfferAccepted(false);
             Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
                 AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
                 userBean.setAuthtoken(aouthBean.getAouthToken());
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
+                userBean.setMobile(user2.getMobile());
+                userBean.setProfileImg(user2.getProfileImg());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success");
+                mailService.sendNewRegistrationToAdmin(saveUser);
+                if (user2.getEmail() != null) {
+                    mailService.sendWelcomeMailToUser(saveUser);
+                }
             } else {
                 userBean.setStatusCode("500");
                 userBean.setStatus("Server side exception");
@@ -204,6 +242,13 @@ public class UsersServiceImpl implements UsersService {
             Users user2 = usersDao.save(user);
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             userBean.setAuthtoken(aouthBean.getAouthToken());
+            userBean.setFreeProductEligibility(false);
+            if (!user.getFreeOfferAccepted()) {
+                List<OfferProducts> offerProducts = offerProductsDao.loadAll();
+                if (!offerProducts.isEmpty()) {
+                    userBean.setFreeProductEligibility(true);
+                }
+            }
         } else {
             userBean.setStatusCode("403");
             userBean.setStatus("Wrong email or password");
@@ -280,7 +325,8 @@ public class UsersServiceImpl implements UsersService {
         UserBean userBean = new UserBean();
         userBean.setStatusCode("403");
         userBean.setStatus("Profile can not be update..");
-        if (userBean1.getEmail() != null) { // whether user present with that email or not. 
+        Users exsistUser = usersDao.loadByEmail(userBean1.getEmail());
+        if (userBean1.getEmail() != null && (exsistUser == null || exsistUser.getId().equals(user.getId()))) { // whether user present with that email or not. 
             user.setDob(DateFormater.formateToDate(userBean1.getDob()));
             user.setEmail(userBean1.getEmail());
             user.setGender(userBean1.getGender());
@@ -303,18 +349,38 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UserBean updateUserProfileImage(Users user, UserBean userBean1) {
+    public String updateUserProfileImage(Users user, MultipartFile file) {
         UserBean userBean = new UserBean();
         userBean.setStatusCode("403");
         userBean.setStatus("Profile image can not be update..");
-        user.setProfileImg(userBean1.getProfileImg());
-        Users users = usersDao.save(user);  // update user profile image.
-        if (users != null) {
-            userBean.setProfileImg(users.getProfileImg());
-            userBean.setStatusCode("200");
-            userBean.setStatus("Profile image update successfully");
+        String oldImgUrl = user.getProfileImg();
+        if (oldImgUrl != null && oldImgUrl.contains("duqhan-users/")) {
+            String imgName = oldImgUrl.split("duqhan-users/")[1];
+            GoogleBucketFileUploader.deleteProfileImg(imgName);
         }
-        return userBean;
+        String imgUrl = GoogleBucketFileUploader.uploadProfileImage(file, user.getId());
+        if (!imgUrl.equals("failure")) {
+            user.setProfileImg(imgUrl);
+            Users users = usersDao.save(user);  // update user profile image.
+            if (users != null) {
+                userBean.setProfileImg(users.getProfileImg());
+                userBean.setStatusCode("200");
+                userBean.setStatus("Profile image update successfully");
+            }
+        }
+        return imgUrl;
+    }
+
+    @Override
+    public void saveUsersEmailAndPhone(Users users, UserBean userBean) {
+        Users exsistUser = usersDao.loadByEmail(userBean.getEmail());
+        if (exsistUser == null || exsistUser.getId().equals(users.getId())) {
+            users.setEmail(userBean.getEmail());
+            if (userBean.getMobile() != null) {
+                users.setMobile(userBean.getMobile());
+            }
+            usersDao.save(users);
+        }
     }
 //===========================================Address module start========================================//
 // <editor-fold defaultstate="collapsed" desc="Address moduses">
@@ -519,8 +585,11 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public String contactToAdmin(StatusBean contactBean, Users users) {
-        return mailService.sendMailToAdminByUser(contactBean,users);
+    public String contactToAdmin(UserBean contactBean, Users users) {
+        if (users.getEmail() == null || users.getMobile() == null) {
+            this.saveUsersEmailAndPhone(users, contactBean);
+        }
+        return mailService.sendMailToAdminByUser(contactBean, users);
     }
 
 }

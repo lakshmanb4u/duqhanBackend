@@ -11,12 +11,15 @@ import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author clb14
  */
 public interface UsersService {
+
+    Users getUserById(Long userId);
 
     Users getAllUser();
 
@@ -34,9 +37,11 @@ public interface UsersService {
 
     UserBean updateUserProfile(Users users, UserBean userBean);
 
-    UserBean updateUserProfileImage(Users users, UserBean userBean);
+    String updateUserProfileImage(Users users, MultipartFile file);
 
     AddressBean saveUserAddress(AddressDto addressDto);
+
+    void saveUsersEmailAndPhone(Users users, UserBean userBean);
 
     AddressBean getUserActiveAddresses(Long userId);
 
@@ -47,7 +52,7 @@ public interface UsersService {
     AddressBean deactivateUserAddress(Long userId, Long addressId);
 
     StatusBean changePassword(LoginBean loginBean, Users users);
-    
-    String contactToAdmin(StatusBean contactBean, Users users);
+
+    String contactToAdmin(UserBean contactBean, Users users);
 
 }

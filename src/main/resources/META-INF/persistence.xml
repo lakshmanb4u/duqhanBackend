@@ -20,20 +20,21 @@
     <class>com.weavers.duqhan.domain.PaymentDetail</class>
     <class>com.weavers.duqhan.domain.Users</class>
     <class>com.weavers.duqhan.domain.UserAddress</class>
-    <class>com.weavers.duqhan.domain.Color</class>
     <class>com.weavers.duqhan.domain.Category</class>
     <class>com.weavers.duqhan.domain.Product</class>
-    <class>com.weavers.duqhan.domain.Sizee</class>
     <class>com.weavers.duqhan.domain.ProductImg</class>
     <class>com.weavers.duqhan.domain.RecentView</class>
-    <class>com.weavers.duqhan.domain.ProductSizeColorMap</class>
     <class>com.weavers.duqhan.domain.OrderDetails</class>
     <class>com.weavers.duqhan.domain.OtpTable</class>
     <class>com.weavers.duqhan.domain.Vendor</class>
     <class>com.weavers.duqhan.domain.ShipmentTable</class>
     <class>com.weavers.duqhan.domain.UserActivity</class>
-    <class>com.weavers.duqhan.domain.SpecificationJewelry</class>
-    <class>com.weavers.duqhan.domain.DuqhanAdmin</class>
-    <class>com.weavers.duqhan.domain.Specification</class>
+    <class>com.weavers.duqhan.domain.Temtproductlinklist</class>
+    <class>com.weavers.duqhan.domain.OfferProductUsed</class>
+    <class>com.weavers.duqhan.domain.OfferProducts</class>
+    <class>com.weavers.duqhan.domain.ProductPropertiesMap</class>
+    <class>com.weavers.duqhan.domain.ProductPropertyvalues</class>
+    <class>com.weavers.duqhan.domain.UserAouth</class>
+    <class>com.weavers.duqhan.domain.ProductProperties</class>
   </persistence-unit>
 </persistence>

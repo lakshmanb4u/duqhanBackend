@@ -6,16 +6,25 @@
 package com.weavers.duqhan.domain;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ *
+ * @author weaversAndroid
+ */
 @Entity
 @Table(name = "product")
 public class Product extends BaseDomain {
@@ -23,7 +32,8 @@ public class Product extends BaseDomain {
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
+    @Lob
+    @Size(min = 1, max = 65535)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
@@ -51,6 +61,7 @@ public class Product extends BaseDomain {
     @Size(max = 20)
     @Column(name = "shipping_time")
     private String shippingTime;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "shipping_rate")
     private Double shippingRate;
     @Basic(optional = false)
@@ -58,10 +69,37 @@ public class Product extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "parent_path")
     private String parentPath;
+    @Lob
+    @Size(max = 65535)
     @Column(name = "external_link")
     private String externalLink;
+    @Lob
+    @Size(max = 65535)
     @Column(name = "specifications")
     private String specifications;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "properties")
+    private String properties;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_height")
+    private double productHeight;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_length")
+    private double productLength;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_weight")
+    private double productWeight;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_width")
+    private double productWidth;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "productId", cascade = CascadeType.ALL)
+    private List<ProductPropertiesMap> ProductPropertiesMaps;
 
     public String getName() {
         return name;
@@ -127,16 +165,10 @@ public class Product extends BaseDomain {
         this.shippingRate = shippingRate;
     }
 
-    /**
-     * @return the parentPath
-     */
     public String getParentPath() {
         return parentPath;
     }
 
-    /**
-     * @param parentPath the parentPath to set
-     */
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
@@ -155,6 +187,60 @@ public class Product extends BaseDomain {
 
     public void setSpecifications(String specifications) {
         this.specifications = specifications;
+    }
+
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
+    }
+
+    public double getProductHeight() {
+        return productHeight;
+    }
+
+    public void setProductHeight(double productHeight) {
+        this.productHeight = productHeight;
+    }
+
+    public double getProductLength() {
+        return productLength;
+    }
+
+    public void setProductLength(double productLength) {
+        this.productLength = productLength;
+    }
+
+    public double getProductWeight() {
+        return productWeight;
+    }
+
+    public void setProductWeight(double productWeight) {
+        this.productWeight = productWeight;
+    }
+
+    public double getProductWidth() {
+        return productWidth;
+    }
+
+    public void setProductWidth(double productWidth) {
+        this.productWidth = productWidth;
+    }
+
+    /**
+     * @return the ProductPropertiesMaps
+     */
+    public List<ProductPropertiesMap> getProductPropertiesMaps() {
+        return ProductPropertiesMaps;
+    }
+
+    /**
+     * @param ProductPropertiesMaps the ProductPropertiesMaps to set
+     */
+    public void setProductPropertiesMaps(List<ProductPropertiesMap> ProductPropertiesMaps) {
+        this.ProductPropertiesMaps = ProductPropertiesMaps;
     }
 
 }

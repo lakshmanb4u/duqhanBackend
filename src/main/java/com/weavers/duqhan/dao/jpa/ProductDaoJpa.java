@@ -63,7 +63,8 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     @Override
     public List<Product> getAllRecentViewProduct(Long userid, int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.id IN (SELECT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)").setFirstResult(start).setMaxResults(limit);
+        //SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv WHERE p.id = rv.productId AND rv.userId=:userId ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
         return query.getResultList();
     }
@@ -76,16 +77,16 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
-    public List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY RAND()").setMaxResults(limit);
+    public List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit) {/*SELECT p FROM Product p INNER JOIN ProductPropertiesMap map ON p.id = map.productId WHERE map.discount < 300 AND p.categoryId=:categoryId OR p.parentPath LIKE :parentPath GROUP BY p.id ORDER BY p.lastUpdate DESC*/
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("categoryId", categoryId);
         query.setParameter("parentPath", "%=" + categoryId + "=%");
         return query.getResultList();
     }
 
     @Override
-    public List<Product> getAllAvailableProduct(int start, int limit) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p ORDER BY RAND()").setMaxResults(limit);
+    public List<Product> getAllAvailableProduct(int start, int limit) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p INNER JOIN p.ProductPropertiesMaps AS map WHERE map.discount < 300 AND p.parentPath NOT LIKE'0=42%' GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         return query.getResultList();
     }
 
@@ -104,8 +105,25 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
             return (Product) query.getSingleResult();
         } catch (NoResultException nre) {
             return null;
-        }catch (NonUniqueResultException nre) {
+        } catch (NonUniqueResultException nre) {
             return new Product();
         }
+    }
+
+    @Override
+    public boolean isAnyProductInCategoryId(Long categoryId) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId").setMaxResults(1);
+            query.setParameter("categoryId", categoryId);
+            return !query.getResultList().isEmpty();
+        } catch (NoResultException nre) {
+            return false;
+        }
+    }
+
+    @Override
+    public List<Product> loadAllByLimit(int start, int limit) {
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p").setFirstResult(start).setMaxResults(limit);
+        return query.getResultList();
     }
 }

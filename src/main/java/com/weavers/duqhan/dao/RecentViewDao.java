@@ -12,8 +12,9 @@ import java.util.List;
  *
  * @author Android-3
  */
-public interface RecentViewDao extends BaseDao<RecentView>{
-    
+public interface RecentViewDao extends BaseDao<RecentView> {
+
     List<RecentView> getRecentViewProductByUserId(Long userId);
-    
+
+    RecentView getRecentViewProductByUserIdProductId(Long userId, Long productId);
 }

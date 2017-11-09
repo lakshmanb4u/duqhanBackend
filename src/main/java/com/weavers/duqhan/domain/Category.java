@@ -14,11 +14,11 @@ import javax.validation.constraints.Size;
 
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
 @Entity
 @Table(name = "category")
-public class Category extends BaseDomain{
+public class Category extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
@@ -35,7 +35,16 @@ public class Category extends BaseDomain{
     @Size(min = 1, max = 255)
     @Column(name = "parent_path")
     private String parentPath;
-
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "quantity")
+    private long quantity;
+    @Size(max = 255)
+    @Column(name = "img_url")
+    private String imgUrl;
+    @Size(max = 255)
+    @Column(name = "display_text")
+    private String displayText;
 
     public String getName() {
         return name;
@@ -52,6 +61,7 @@ public class Category extends BaseDomain{
     public void setParentId(long parentId) {
         this.parentId = parentId;
     }
+
     public String getParentPath() {
         return parentPath;
     }
@@ -60,5 +70,27 @@ public class Category extends BaseDomain{
         this.parentPath = parentPath;
     }
 
-
+    public long getQuantity() {
+        return quantity;
     }
+
+    public void setQuantity(long quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    public String getDisplayText() {
+        return displayText;
+    }
+
+    public void setDisplayText(String displayText) {
+        this.displayText = displayText;
+    }
+}

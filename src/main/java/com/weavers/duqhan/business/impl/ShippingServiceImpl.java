@@ -174,7 +174,7 @@ public class ShippingServiceImpl implements ShippingService {
         customsItemMap.put("value", CurrencyConverter.inrTOusd(product.getDiscountedPrice()));
         customsItemMap.put("weight", product.getProductWeight());
         customsItemMap.put("origin_country", vendor.getCountry());
-        customsItemMap.put("hs_tariff_number", product.getSizeColorMapId().toString());
+        //customsItemMap.put("hs_tariff_number", product.getSizeColorMapId().toString());
         CustomsItem customsItem1;
         try {
             customsItem1 = CustomsItem.create(customsItemMap);

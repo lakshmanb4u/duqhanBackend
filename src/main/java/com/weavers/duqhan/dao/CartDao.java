@@ -6,7 +6,7 @@
 package com.weavers.duqhan.dao;
 
 import com.weavers.duqhan.domain.Cart;
-import com.weavers.duqhan.domain.ProductSizeColorMap;
+import com.weavers.duqhan.domain.ProductPropertiesMap;
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ import java.util.List;
  */
 public interface CartDao extends BaseDao<Cart> {
 
-    List<ProductSizeColorMap> getProductSizeColorMapByUserId(Long userId);
+    List<ProductPropertiesMap> getProductPropertiesMapByUserId(Long userId);
 
     Cart loadByUserIdAndMapId(Long userId, Long mapId);
 

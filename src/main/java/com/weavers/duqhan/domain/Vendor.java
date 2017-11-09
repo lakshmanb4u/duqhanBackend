@@ -14,7 +14,7 @@ import javax.validation.constraints.Size;
 
 /**
  *
- * @author Android-3
+ * @author weaversAndroid
  */
 @Entity
 @Table(name = "vendor")
@@ -122,4 +122,5 @@ public class Vendor extends BaseDomain {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-    }
+
+}

@@ -7,7 +7,6 @@ package com.weavers.duqhan.dto;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -25,8 +24,6 @@ public class ProductDetailBean {
     private Double salesPrice;
     private Double discount;
     private List<ImageDto> images;
-    private Set<SizeDto> sizes;
-    private Set<ColorDto> colors;
     private String arrival;
     private Double shippingCost;
     private Long vendorId;
@@ -34,7 +31,9 @@ public class ProductDetailBean {
     private ProductBeans relatedProducts;
     private String statusCode;
     private String status;
-    private HashMap<String,String> specifications;
+    private HashMap<String, String> specifications;
+    private List<ProductPropertiesMapDto> propertiesMapDtos;
+    private List<PropertyDto> properties;
 
     /**
      * @return the productId
@@ -132,34 +131,6 @@ public class ProductDetailBean {
      */
     public void setImages(List<ImageDto> images) {
         this.images = images;
-    }
-
-    /**
-     * @return the sizes
-     */
-    public Set<SizeDto> getSizes() {
-        return sizes;
-    }
-
-    /**
-     * @param sizes the sizes to set
-     */
-    public void setSizes(Set<SizeDto> sizes) {
-        this.sizes = sizes;
-    }
-
-    /**
-     * @return the colors
-     */
-    public Set<ColorDto> getColors() {
-        return colors;
-    }
-
-    /**
-     * @param colors the colors to set
-     */
-    public void setColors(Set<ColorDto> colors) {
-        this.colors = colors;
     }
 
     /**
@@ -305,14 +276,42 @@ public class ProductDetailBean {
     /**
      * @return the specifications
      */
-    public HashMap<String,String> getSpecifications() {
+    public HashMap<String, String> getSpecifications() {
         return specifications;
     }
 
     /**
      * @param specifications the specifications to set
      */
-    public void setSpecifications(HashMap<String,String> specifications) {
+    public void setSpecifications(HashMap<String, String> specifications) {
         this.specifications = specifications;
+    }
+
+    /**
+     * @return the propertiesMapDtos
+     */
+    public List<ProductPropertiesMapDto> getPropertiesMapDto() {
+        return propertiesMapDtos;
+    }
+
+    /**
+     * @param propertiesMapDtos the propertiesMapDtos to set
+     */
+    public void setPropertiesMapDto(List<ProductPropertiesMapDto> propertiesMapDtos) {
+        this.propertiesMapDtos = propertiesMapDtos;
+    }
+
+    /**
+     * @return the properties
+     */
+    public List<PropertyDto> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(List<PropertyDto> properties) {
+        this.properties = properties;
     }
 }
