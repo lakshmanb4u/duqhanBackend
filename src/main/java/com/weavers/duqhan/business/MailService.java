@@ -5,7 +5,6 @@
  */
 package com.weavers.duqhan.business;
 
-import com.weavers.duqhan.domain.OfferProductUsed;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.UserBean;
@@ -32,8 +31,4 @@ public interface MailService {
     String sendPurchaseMailToAdmin(List<OrderDetails> orderDetails);
 
     String sendPurchaseMailToUser(List<OrderDetails> orderDetails);
-
-    String sendPurchaseMailToAdmin(OfferProductUsed offerProductUsed);  // free product
-
-    String sendPurchaseMailToUser(OfferProductUsed offerProductUsed);   // free product
 }

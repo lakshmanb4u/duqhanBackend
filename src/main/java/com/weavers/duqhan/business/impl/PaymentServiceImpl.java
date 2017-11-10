@@ -30,7 +30,7 @@ import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
 import com.weavers.duqhan.dao.ProductDao;
-import com.weavers.duqhan.dao.ProductSizeColorMapDao;
+import com.weavers.duqhan.dao.ProductPropertiesMapDao;
 import com.weavers.duqhan.dao.ShipmentTableDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
@@ -39,7 +39,7 @@ import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.Product;
-import com.weavers.duqhan.domain.ProductSizeColorMap;
+import com.weavers.duqhan.domain.ProductPropertiesMap;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.Users;
@@ -91,8 +91,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     OrderDetailsDao orderDetailsDao;
     @Autowired
-    ProductSizeColorMapDao productSizeColorMapDao;
-    @Autowired
     UserAddressDao userAddressDao;
     @Autowired
     CartDao cartDao;
@@ -110,6 +108,8 @@ public class PaymentServiceImpl implements PaymentService {
     ProductDao productDao;
     @Autowired
     CategoryDao categoryDao;
+    @Autowired
+    ProductPropertiesMapDao productPropertiesMapDao;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
@@ -169,12 +169,12 @@ public class PaymentServiceImpl implements PaymentService {
                 if (itemName.length() > 90) {
                     itemName = itemName.substring(0, 90).concat("...");
                 }
-                if (productBean.getSize() != null) {
-                    itemName = itemName.concat(" " + productBean.getSize());
-                }
-                if (productBean.getColor() != null) {
-                    itemName = itemName.concat(" " + productBean.getColor());
-                }
+//                HashMap<String, String> propertyMap = productBean.getPropertyMap();
+//                for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
+//                    String key = entry.getKey();
+//                    String value = entry.getValue();
+//                    itemName = itemName.concat(" " + value + ",");
+//                }
                 item.setName(itemName);//***********************
                 item.setCurrency(PayPalConstants.CURRENCY);
                 item.setQuantity(productBean.getQty());
@@ -320,7 +320,7 @@ public class PaymentServiceImpl implements PaymentService {
                 OrderDetails orderDetails = new OrderDetails();
                 orderDetails.setId(null);
                 orderDetails.setOrderId("OD" + Calendar.getInstance().getTimeInMillis());
-                orderDetails.setMapId(productBean.getSizeColorMapId());//required
+                orderDetails.setMapId(productBean.getProductPropertiesMapId());//required
                 orderDetails.setOrderDate(date);
                 orderDetails.setPaymentAmount(productBean.getDiscountedPrice());//required
                 orderDetails.setPaymentKey(createdPayment.getId());
@@ -328,7 +328,7 @@ public class PaymentServiceImpl implements PaymentService {
                 orderDetails.setUserId(cartBean.getUserId());
                 orderDetails.setQuentity(Long.valueOf(productBean.getQty()));//required
                 orderDetails.setAddressId(addressId);//*******************not null
-                orderDetails.setShipmentId(orderShipmentMap.get(productBean.getSizeColorMapId()));
+                orderDetails.setShipmentId(orderShipmentMap.get(productBean.getProductPropertiesMapId()));
                 orderDetailsDao.save(orderDetails);
             }
             payKey = createdPayment.getId();
@@ -345,29 +345,29 @@ public class PaymentServiceImpl implements PaymentService {
         Payment createdPayment = new Payment();
         PaymentDetail paymentDetail = paymentDetailDao.getDetailBypaymentId(paymentId);
         List<OrderDetails> orderDetails = orderDetailsDao.getDetailBypaymentIdAndUserId(paymentId, paymentDetail.getUserId());
-        /*//=============================buy shipment==========================//
-        List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(paymentId, paymentDetail.getUserId());
-        for (ShipmentTable shipmentTable : shipmentTables) {
-            Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
-            try {
-                Shipment shipment1 = shippingService.BuyShipment(shipment);
-                shipmentTable.setRateId(shipment1.lowestRate().getId());
-                shipmentTable.setCreatedAt(new Date());
-                shipmentTable.setCustomsInfoId(shipment1.getCustomsInfo().getId());
-                shipmentTable.setIsReturn(false);
-                shipmentTable.setParcelId(shipment1.getParcel().getId());
-                shipmentTable.setPostageLabelId(shipment1.getPostageLabel().getId());
-                shipmentTable.setShipmentId(shipment1.getId());
-                shipmentTable.setStatus(shipment1.getStatus());
-                shipmentTable.setTrackerId(shipment1.getTracker().getId());
-                shipmentTableDao.save(shipmentTable);
-            } catch (EasyPostException | NullPointerException ex) {
-                shipmentTable.setStatus("can_not_buy");
-
-                shipmentTableDao.save(shipmentTable);
-                Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }*/
+        //=============================buy shipment==========================//
+//        List<ShipmentTable> shipmentTables = shipmentTableDao.getShipmentByPayKeyAndUserId(paymentId, paymentDetail.getUserId());
+//        for (ShipmentTable shipmentTable : shipmentTables) {
+//            Shipment shipment = shippingService.getShipmentByShipmentId(shipmentTable.getShipmentId());
+//            try {
+//                Shipment shipment1 = shippingService.BuyShipment(shipment);
+//                shipmentTable.setRateId(shipment1.lowestRate().getId());
+//                shipmentTable.setCreatedAt(new Date());
+//                shipmentTable.setCustomsInfoId(shipment1.getCustomsInfo().getId());
+//                shipmentTable.setIsReturn(false);
+//                shipmentTable.setParcelId(shipment1.getParcel().getId());
+//                shipmentTable.setPostageLabelId(shipment1.getPostageLabel().getId());
+//                shipmentTable.setShipmentId(shipment1.getId());
+//                shipmentTable.setStatus(shipment1.getStatus());
+//                shipmentTable.setTrackerId(shipment1.getTracker().getId());
+//                shipmentTableDao.save(shipmentTable);
+//            } catch (EasyPostException | NullPointerException ex) {
+//                shipmentTable.setStatus("can_not_buy");
+//
+//                shipmentTableDao.save(shipmentTable);
+//                Logger.getLogger(PaymentServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
         try {
 
             Map<String, String> sdkConfig = new HashMap<>();
@@ -395,18 +395,18 @@ public class PaymentServiceImpl implements PaymentService {
                 for (OrderDetails orderDetail : orderDetails) {
                     orderDetailsMap.put(orderDetail.getMapId(), null);
                     orderDetail.setStatus(status);
-                    ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                    ProductPropertiesMap propertyMap = productPropertiesMapDao.loadById(orderDetail.getMapId());
                     try {
-                        this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                        this.diductProductQuentityFromCategory(propertyMap.getProductId().getId(), orderDetail.getQuentity());
                     } catch (Exception e) {
                     }
-                    sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
-                    productSizeColorMapDao.save(sizeColorMap);
+                    propertyMap.setQuantity(propertyMap.getQuantity() - orderDetail.getQuentity());
+                    productPropertiesMapDao.save(propertyMap);
                     orderDetailsDao.save(orderDetail);
                 }
                 List<Cart> carts = cartDao.getCartByUserId(paymentDetail.getUserId());
                 for (Cart cart : carts) {
-                    if (orderDetailsMap.containsKey(cart.getSizecolormapId())) {
+                    if (orderDetailsMap.containsKey(cart.getProductPropertyMapId())) {
                         cartDao.delete(cart);
                     }
                 }
@@ -461,28 +461,28 @@ public class PaymentServiceImpl implements PaymentService {
                     HashMap<Long, Long> orderDetailsMap = new HashMap<>();
                     paymentDetail.setPaymentStatus(status);
                     paymentDetail.setPayerId("NA");
-                    /*paymentDetails.setBankName(parameters.get("BANKNAME"));
-                    paymentDetails.setBanktxnId(parameters.get("BANKTXNID"));
-                    paymentDetails.setPaymentMode(parameters.get("PAYMENTMODE"));
-                    paymentDetails.setPaytmTxnId(parameters.get("TXNID"));
-                    paymentDetails.setCurrency(parameters.get("CURRENCY"));
-                    paymentDetails.setGatewayName(parameters.get("GATEWAYNAME"));*/
+//                    paymentDetails.setBankName(parameters.get("BANKNAME"));
+//                    paymentDetails.setBanktxnId(parameters.get("BANKTXNID"));
+//                    paymentDetails.setPaymentMode(parameters.get("PAYMENTMODE"));
+//                    paymentDetails.setPaytmTxnId(parameters.get("TXNID"));
+//                    paymentDetails.setCurrency(parameters.get("CURRENCY"));
+//                    paymentDetails.setGatewayName(parameters.get("GATEWAYNAME"));
                     paymentDetailDao.save(paymentDetail);
                     for (OrderDetails orderDetail : orderDetails) {
                         orderDetailsMap.put(orderDetail.getMapId(), null);
                         orderDetail.setStatus(status);
-                        ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(orderDetail.getMapId());
+                        ProductPropertiesMap propertyMap = productPropertiesMapDao.loadById(orderDetail.getMapId());
                         try {
-                            this.diductProductQuentityFromCategory(sizeColorMap.getProductId(), orderDetail.getQuentity());
+                            this.diductProductQuentityFromCategory(propertyMap.getProductId().getId(), orderDetail.getQuentity());
                         } catch (Exception e) {
                         }
-                        sizeColorMap.setQuentity(sizeColorMap.getQuentity() - orderDetail.getQuentity());
-                        productSizeColorMapDao.save(sizeColorMap);
+                        propertyMap.setQuantity(propertyMap.getQuantity() - orderDetail.getQuentity());
+                        productPropertiesMapDao.save(propertyMap);
                         orderDetailsDao.save(orderDetail);
                     }
                     List<Cart> carts = cartDao.getCartByUserId(paymentDetail.getUserId());
                     for (Cart cart : carts) {
-                        if (orderDetailsMap.containsKey(cart.getSizecolormapId())) {
+                        if (orderDetailsMap.containsKey(cart.getProductPropertyMapId())) {
                             cartDao.delete(cart);
                         }
                     }
@@ -769,7 +769,7 @@ public class PaymentServiceImpl implements PaymentService {
             OrderDetails orderDetails = new OrderDetails();
             orderDetails.setId(null);
             orderDetails.setOrderId("OD" + Calendar.getInstance().getTimeInMillis());
-            orderDetails.setMapId(productBean.getSizeColorMapId());//required
+            orderDetails.setMapId(productBean.getProductPropertiesMapId());//required
             orderDetails.setOrderDate(date);
             orderDetails.setPaymentAmount(productBean.getDiscountedPrice());//required
             orderDetails.setPaymentKey(payKey);
@@ -777,11 +777,10 @@ public class PaymentServiceImpl implements PaymentService {
             orderDetails.setUserId(cartBean.getUserId());
             orderDetails.setQuentity(Long.valueOf(productBean.getQty()));//required
             orderDetails.setAddressId(addressId);//*******************not null
-            orderDetails.setShipmentId(orderShipmentMap.get(productBean.getSizeColorMapId()));
+            orderDetails.setShipmentId(orderShipmentMap.get(productBean.getProductPropertiesMapId()));
             orderDetailsDao.save(orderDetails);
         }
         ////////////////////end
-
         return paymentBean;
     }
 

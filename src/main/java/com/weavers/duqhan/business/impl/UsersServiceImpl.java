@@ -326,7 +326,7 @@ public class UsersServiceImpl implements UsersService {
         userBean.setStatusCode("403");
         userBean.setStatus("Profile can not be update..");
         Users exsistUser = usersDao.loadByEmail(userBean1.getEmail());
-        if (userBean1.getEmail() != null && exsistUser == null) { // whether user present with that email or not. 
+        if (userBean1.getEmail() != null && (exsistUser == null || exsistUser.getId().equals(user.getId()))) { // whether user present with that email or not. 
             user.setDob(DateFormater.formateToDate(userBean1.getDob()));
             user.setEmail(userBean1.getEmail());
             user.setGender(userBean1.getGender());
@@ -591,5 +591,5 @@ public class UsersServiceImpl implements UsersService {
         }
         return mailService.sendMailToAdminByUser(contactBean, users);
     }
-
+    
 }

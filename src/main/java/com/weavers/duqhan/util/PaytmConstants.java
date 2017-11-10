@@ -17,20 +17,20 @@ import com.paytm.pg.merchant.CheckSumServiceHelper;
  */
 public class PaytmConstants {
 
-    /*
-    public final static String MID = "DUQHAN23756765142856";
+    /*public final static String MID = "DUQHAN23756765142856";
     public final static String MERCHANT_KEY = "%Bhyu4K9NMv8FAdJ";
     public final static String INDUSTRY_TYPE_ID = "Retail";
     public final static String CHANNEL_ID = "WEB";
     public final static String WEBSITE = "WEB_STAGING";
-    public final static String PAYTM_BASE_URL = "https://pguat.paytm.com";  //  Staging     
-     */
+    public final static String PAYTM_BASE_URL = "https://pguat.paytm.com";  //  Staging   */  
+
     public final static String MID = "DUQHAN71559260066171";
     public final static String MERCHANT_KEY = "FzAhP41GLlI3sWEM";
     public final static String INDUSTRY_TYPE_ID = "Retail109";
     public final static String CHANNEL_ID = "WEB";
     public final static String WEBSITE = "DUQHANWEB";
     public final static String PAYTM_BASE_URL = "https://secure.paytm.in";  //  Production
+    
     public final static String PAYTM_TRANSACTION_REQUEST_URL = PAYTM_BASE_URL + "/oltp-web/processTransaction";
     public final static String CALLBACK_URL = "/web/paytm-call-back";
 

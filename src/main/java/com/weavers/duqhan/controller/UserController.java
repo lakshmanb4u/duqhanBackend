@@ -21,8 +21,11 @@ import com.weavers.duqhan.dto.CheckoutPaymentBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
+import com.weavers.duqhan.dto.ReviewBean;
+import com.weavers.duqhan.dto.ReviewDto;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
+//import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
@@ -59,13 +62,15 @@ public class UserController {
     PaymentService paymentService;
     @Autowired
     ShippingService shippingService;
+    
 
     private final Logger logger = Logger.getLogger(UserController.class);
 //</editor-fold>
 
+    //private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
     //<editor-fold defaultstate="collapsed" desc="User Profile Module">
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
-    public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
+     public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
         StatusBean statusBean = new StatusBean();
         loginBean.setAuthtoken(request.getHeader("X-Auth-Token"));  // Check whether Auth-Token is valid, provided by user
         statusBean.setStatus(usersService.userLogout(loginBean));
@@ -74,6 +79,7 @@ public class UserController {
 
     @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getProfileDetails(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         UserBean userBean = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -91,11 +97,17 @@ public class UserController {
             userBean.setStatusCode("401");
             userBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Profile Details", "profile details count", "get-profile-details API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Profile Details", "profile details response", "get-profile-details API response time", timeTaken);
         return userBean;
     }
 
     @RequestMapping(value = "/update-profile-details", method = RequestMethod.POST) // Update user profile.
     public UserBean updateProfileDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
+        long startTime = System.currentTimeMillis();
         UserBean userBean1 = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -105,6 +117,11 @@ public class UserController {
             userBean1.setStatusCode("401");
             userBean1.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Update Profile", "update profile count", "update-profile-details API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Update Profile", "update profile response", "update-profile-details API response time", timeTaken);
         return userBean1;
     }
 
@@ -123,6 +140,7 @@ public class UserController {
     }*/
     @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
     public UserBean updateProfileImage(HttpServletResponse response, @RequestParam MultipartFile file, @RequestParam Long userId) {
+        long startTime = System.currentTimeMillis();
         UserBean userBean1 = new UserBean();
         Users users = usersService.getUserById(userId);   // Check whether Auth-Token is valid, provided by user
         if (users != null && file != null) {
@@ -132,11 +150,17 @@ public class UserController {
             userBean1.setStatusCode("401");
             userBean1.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Update Profile Image", "update profile image count", "update-profile-image API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Update Profile Image", "update profile image response", "update-profile-image API response time", timeTaken);
         return userBean1;
     }
 
     @RequestMapping(value = "/change-password", method = RequestMethod.POST)
     public StatusBean changePassword(HttpServletResponse response, HttpServletRequest request, @RequestBody LoginBean loginBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -145,6 +169,11 @@ public class UserController {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Change Password", "change password count", "change-password API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Change Password", "change password response", "change-password API response time", timeTaken);
         return statusBean;
     }
 
@@ -188,6 +217,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="User address module">
     @RequestMapping(value = "/get-addresses", method = RequestMethod.POST)   // get Addresses.
     public AddressBean getUserAddresses(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         AddressBean addressBean = new AddressBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -197,11 +227,16 @@ public class UserController {
             addressBean.setStatusCode("401");
             addressBean.setStatus("Invalid Token.");
         }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Addresses", "get addresses count", "get-addresses API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Addresses", "get addresses response", "get-addresses API response time", timeTaken);
         return addressBean;
     }
 
     @RequestMapping(value = "/save-address", method = RequestMethod.POST)   // saveUserAddress
     public AddressBean saveOrUpdateUserAddress(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        long startTime = System.currentTimeMillis();
         AddressBean addressBean = new AddressBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -219,11 +254,16 @@ public class UserController {
             addressBean.setStatusCode("401");
             addressBean.setStatus("Invalid Token.");
         }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Save Address", "save address count", "save-address API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Save Address", "save address response", "save-address API response time", timeTaken);
         return addressBean;
     }
 
     @RequestMapping(value = "/set-default-addresses", method = RequestMethod.POST)   // setUserAddressesAsDefault
     public AddressBean setDefaultAddresses(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        long startTime = System.currentTimeMillis();
         AddressBean addressBean = new AddressBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -233,11 +273,16 @@ public class UserController {
             addressBean.setStatusCode("401");
             addressBean.setStatus("Invalid Token.");
         }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Set Default Addresses", "set default addresses count", "set-default-addresses API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Set Default Addresses", "set default addresses response", "set-default-addresses API response time", timeTaken);
         return addressBean;
     }
 
     @RequestMapping(value = "/get-default-addresses", method = RequestMethod.POST)   // get default Address
     public AddressBean getDefaultAddresses(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         AddressBean addressBean = new AddressBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -247,11 +292,16 @@ public class UserController {
             addressBean.setStatusCode("401");
             addressBean.setStatus("Invalid Token.");
         }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Default Addresses", "get default addresses count", "get-default-addresses API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Default Addresses", "get default addresses response", "get-default-addresses API response time", timeTaken);
         return addressBean;
     }
 
     @RequestMapping(value = "/deactivate-address", method = RequestMethod.POST)   // deactivateAddress
     public AddressBean deactivateAddress(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
+        long startTime = System.currentTimeMillis();
         AddressBean addressBean = new AddressBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -261,6 +311,10 @@ public class UserController {
             addressBean.setStatusCode("401");
             addressBean.setStatus("Invalid Token.");
         }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Deactivate Address", "deactivate address count", "deactivate-address API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Deactivate Address", "deactivate address response", "deactivate-address API response time", timeTaken);
         return addressBean;
     }
 //</editor-fold>
@@ -268,6 +322,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Find Product">
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
@@ -281,6 +336,9 @@ public class UserController {
 
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
+                if (categoryId.equals(1l)) {
+                    categoryId = 12l;
+                }
                 productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit());
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
@@ -294,11 +352,17 @@ public class UserController {
             productBeans.setStatusCode("401");
             productBeans.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Get Product", "get product count", "get-product API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Get Product", "get product response", "get-product API response time", timeTaken);
         return productBeans;
     }
 
     @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
     public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
@@ -309,11 +373,17 @@ public class UserController {
             productBeans.setStatusCode("401");
             productBeans.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Search Product", "search product count", "search-product API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Search Product", "search product response", "search-product API response time", timeTaken);
         return productBeans;
     }
 
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
     public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductDetailBean productDetailBean = new ProductDetailBean();
         if (users != null) {
@@ -323,6 +393,11 @@ public class UserController {
             productDetailBean.setStatusCode("401");
             productDetailBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Product Detail", "product detail count", "get-product-detail API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
         return productDetailBean;
     }
 //</editor-fold>
@@ -330,6 +405,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Cart Module">
     @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.
     public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -340,11 +416,17 @@ public class UserController {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Add To Cart", "add to cart count", "add-to-cart API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Add To Cart", "add to cart response", "add-to-cart API response time", timeTaken);
         return statusBean;
     }
 
     @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
     public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         CartBean cartBean = new CartBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -354,11 +436,17 @@ public class UserController {
             cartBean.setStatusCode("401");
             cartBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Cart", "cart count", "cart API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Cart", "cart response", "cart API response time", timeTaken);
         return cartBean;
     }
 
     @RequestMapping(value = "/get-cart-count", method = RequestMethod.POST) // number of item added in cart by user.
     public UserBean getCartCount(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         UserBean userBean = new UserBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -370,11 +458,17 @@ public class UserController {
             userBean.setStatusCode("401");
             userBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Cart Count", "cart-count count", "get-cart-count API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Cart Count", "cart-count response", "get-cart-count API response time", timeTaken);
         return userBean;
     }
 
     @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)   // product remove from cart.
     public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -385,6 +479,11 @@ public class UserController {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Remove From Cart", "remove from cart count", "remove-from-cart API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Remove From Cart", "remove from cart response", "remove-from-cart API response time", timeTaken);
         return statusBean;
     }
 //</editor-fold>
@@ -409,6 +508,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Checkout, Payment, Order">
     @RequestMapping(value = "/checkout", method = RequestMethod.POST)   // .
     public CheckoutPaymentBean paymentRequest(HttpServletRequest request, HttpServletResponse response, @RequestBody CartBean cartBean) {
+        long startTime = System.currentTimeMillis();
         CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
         Double shippingCost = 0.0;
         List<Shipment> shipments = new ArrayList<>();
@@ -477,11 +577,17 @@ public class UserController {
             paymentBean.setStatusCode("401");
             paymentBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Checkout", "checkout count", "checkout API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Checkout", "checkout response", "checkout API response time", timeTaken);
         return paymentBean;
     }
 
     @RequestMapping(value = "/check-payment-status", method = RequestMethod.POST)   // .
     public StatusBean checkPaymentStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -496,11 +602,17 @@ public class UserController {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Check Payment Status", "check payment status count", "check-payment-status API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Check Payment Status", "check payment status response", "check-payment-status API response time", timeTaken);
         return statusBean;
     }
 
     @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // List of order
     public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -510,11 +622,17 @@ public class UserController {
             orderDetailsBean.setStatusCode("401");
             orderDetailsBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Order Details", "order details count", "get-order-details API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Order Details", "order details response", "get-order-details API response time", timeTaken);
         return orderDetailsBean;
     }
 
     @RequestMapping(value = "/cancel-order", method = RequestMethod.POST)   //cancel order
     public StatusBean cancelOrder(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean statusBean = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -525,6 +643,11 @@ public class UserController {
             statusBean.setStatusCode("401");
             statusBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Cancel Order", "cancel order count", "cancel-order API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Cancel Order", "cancel order response", "cancel-order API response time", timeTaken);
         return statusBean;
     }
 //</editor-fold>
@@ -532,6 +655,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Contact to admin">
     @RequestMapping(value = "/contact-us", method = RequestMethod.POST)   //send a mail to admin from user
     public StatusBean contactToAdmin(HttpServletRequest request, @RequestBody UserBean userBean) {
+        long startTime = System.currentTimeMillis();
         StatusBean status = new StatusBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -545,6 +669,11 @@ public class UserController {
             status.setStatusCode("401");
             status.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Contact Us", "contact us count", "contact-us API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Contact Us", "contact us response", "contact-us API response time", timeTaken);
         return status;
     }
 //</editor-fold>
@@ -552,6 +681,7 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Free product">
     @RequestMapping(value = "/get-free-product", method = RequestMethod.POST)
     public ProductBeans getFreeProduct(HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
         ProductBeans productBeans = new ProductBeans();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
@@ -567,11 +697,17 @@ public class UserController {
             productBeans.setStatusCode("401");
             productBeans.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Free Product", "get free product count", "get-free-product API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Free Product", "get free product response", "get-free-product API response time", timeTaken);
         return productBeans;
     }
 
     @RequestMapping(value = "/accept-free-product-offer", method = RequestMethod.POST)
     public CartBean acceptFreeProduct(HttpServletRequest request, @RequestBody CartBean cartBean) {
+        long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null && cartBean != null && cartBean.getUserId() != null) {
             productService.acceptFreeProduct(users, cartBean); //cartBean.getUserId() = product_size_color_map id
@@ -580,14 +716,38 @@ public class UserController {
             cartBean.setStatusCode("401");
             cartBean.setStatus("Invalid Token.");
         }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Accept Free Product", "accept free product offer count", "accept-free-product-offer API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Accept Free Product", "accept free product offer response", "accept-free-product-offer API response time", timeTaken);
         return cartBean;
     }
 //</editor-fold>
-
+/**/
     //<editor-fold defaultstate="collapsed" desc="Test">
-//    @RequestMapping(value = "/test", method = RequestMethod.GET)
-//    public void test() {
-//        productService.test();
-//    }
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public void test() {
+        productService.test();
+    }
 //</editor-fold>
+    
+    @RequestMapping(value = "/save-review", method = RequestMethod.POST)   // saveUserReview
+    public ReviewBean saveReview(HttpServletResponse response, HttpServletRequest request, @RequestBody ReviewDto review ) {
+        long startTime = System.currentTimeMillis();
+        ReviewBean reviewBean = new ReviewBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+            review.setUserId(users.getId());
+            review.setUserName(users.getName());
+            reviewBean =productService.saveReview(review);
+        } else {
+            response.setStatus(401);
+            reviewBean.setStatusCode("401");
+            reviewBean.setStatus("Invalid Token.");
+        }
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        return reviewBean;
+    }
 }

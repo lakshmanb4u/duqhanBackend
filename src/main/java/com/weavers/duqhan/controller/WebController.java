@@ -5,25 +5,18 @@
  */
 package com.weavers.duqhan.controller;
 
-import com.weavers.duqhan.business.AdminService;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.VendorService;
-import com.weavers.duqhan.dto.AouthBean;
-import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ShipmentDto;
 import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.PaytmConstants;
-import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -33,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 /**
  *
@@ -55,34 +47,9 @@ public class WebController {
     @Autowired
     NotificationService notificationService;
     @Autowired
-    AdminService adminService;
-    @Autowired
     MailService mailService;
 
-    private final Logger logger = Logger.getLogger(WebController.class);
-
-    @RequestMapping(value = "/home", method = RequestMethod.GET) // open home page
-    public String home() {
-        return "index";
-    }
-
-//    @RequestMapping(value = "/adminlogin", method = RequestMethod.GET) // open admin login page
-//    public String adminLogin() {
-//        return "adminlogin";
-//    }
-    @RequestMapping(value = "/admin-login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
-    @ResponseBody
-    public AouthBean trainerLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        AouthBean userBean = adminService.generatAccessToken(loginBean);
-        return userBean;
-    }
-
-    @RequestMapping(value = "/adminlogin-action", method = RequestMethod.POST) // admin login action
-    public ModelAndView adminLoginAction(LoginBean loginBean, HttpSession session, HttpServletResponse response) throws IOException {
-        String redirect = adminService.adminLogin(loginBean, session);
-        return new ModelAndView("redirect:/" + redirect);
-    }
-
+    //<editor-fold defaultstate="collapsed" desc="Paypal">
     @RequestMapping(value = "/to-be-redirected", method = RequestMethod.GET)
     public String redirected(@RequestParam String paymentId, @RequestParam String token, @RequestParam String PayerID, HttpServletRequest request, ModelMap modelMap) {
         String status = paymentService.getPayerInformation(PayerID, paymentId, token);
@@ -111,35 +78,7 @@ public class WebController {
         /*notificationService.sendPaymentNotification(token);*///fcm token not useed
         return "paymentStatus";
     }
-
-    @RequestMapping(value = "/get-pending-shipment", method = RequestMethod.GET)
-    public String getPendingShipment(ModelMap modelMap) {
-        List<ShipmentDto> shipmentDtos = shippingService.getPendingShipmentButPaymentApproved();
-        modelMap.addAttribute("shipmentDtos", shipmentDtos);
-        return "shipmentDetails";
-    }
-
-    @RequestMapping(value = "/buy-pending-shipment", method = RequestMethod.POST)
-    @ResponseBody
-    public StatusBean buyPendingShipment(@RequestBody ShipmentDto shipmentDto) {
-        StatusBean statusBean = new StatusBean();
-        String[] responseArray = paymentService.getPaymentStatus(shipmentDto.getUserId(), shipmentDto.getPayKey());
-        statusBean.setStatus(responseArray[0]);
-        statusBean.setStatusCode(responseArray[1]);
-        return statusBean;
-    }
-
-    @RequestMapping(value = "/contact-to-admin", method = RequestMethod.POST)
-    @ResponseBody
-    public String buyPendingShipment(@RequestBody UserBean userBean) {
-        String response = "Thanks";
-        if (userBean != null && userBean.getStatusCode() != null && userBean.getStatus() != null && userBean.getName() != null && userBean.getEmail() != null && userBean.getMobile() != null) {
-            response = mailService.sendMailToAdminByUser(userBean);
-        } else {
-            response = "Inadequate information.";
-        }
-        return response;
-    }
+//</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Paytm">
     @RequestMapping(value = "/paytmpayment", method = RequestMethod.GET)
@@ -180,6 +119,39 @@ public class WebController {
         modelMap.addAttribute("altclass", altclass);
 
         return "paymentStatus";
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Shipment">
+    @RequestMapping(value = "/get-pending-shipment", method = RequestMethod.GET)
+    public String getPendingShipment(ModelMap modelMap) {
+        List<ShipmentDto> shipmentDtos = shippingService.getPendingShipmentButPaymentApproved();
+        modelMap.addAttribute("shipmentDtos", shipmentDtos);
+        return "shipmentDetails";
+    }
+
+    @RequestMapping(value = "/buy-pending-shipment", method = RequestMethod.POST)
+    @ResponseBody
+    public StatusBean buyPendingShipment(@RequestBody ShipmentDto shipmentDto) {
+        StatusBean statusBean = new StatusBean();
+        String[] responseArray = paymentService.getPaymentStatus(shipmentDto.getUserId(), shipmentDto.getPayKey());
+        statusBean.setStatus(responseArray[0]);
+        statusBean.setStatusCode(responseArray[1]);
+        return statusBean;
+    }
+//</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Contact Admin">
+    @RequestMapping(value = "/contact-to-admin", method = RequestMethod.POST)
+    @ResponseBody
+    public String contactAdmin(@RequestBody UserBean userBean) {
+        String response = "Thanks";
+        if (userBean != null && userBean.getStatusCode() != null && userBean.getStatus() != null && userBean.getName() != null && userBean.getEmail() != null && userBean.getMobile() != null) {
+            response = mailService.sendMailToAdminByUser(userBean);
+        } else {
+            response = "Inadequate information.";
+        }
+        return response;
     }
 //</editor-fold>
 }

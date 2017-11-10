@@ -5,94 +5,67 @@
  */
 package com.weavers.duqhan.business.impl;
 
-import com.easypost.model.Shipment;
-import com.google.gson.Gson;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
-import com.weavers.duqhan.dao.ColorDao;
-import com.weavers.duqhan.dao.OfferProductUsedDao;
 import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductImgDao;
-import com.weavers.duqhan.dao.ProductSizeColorMapDao;
+import com.weavers.duqhan.dao.ProductPropertiesDao;
+import com.weavers.duqhan.dao.ProductPropertiesMapDao;
+import com.weavers.duqhan.dao.ProductPropertyvaluesDao;
 import com.weavers.duqhan.dao.RecentViewDao;
-import com.weavers.duqhan.dao.SizeGroupDao;
-import com.weavers.duqhan.dao.SizeeDao;
-import com.weavers.duqhan.dao.SpecificationDao;
-import com.weavers.duqhan.dao.TempProductDao;
-import com.weavers.duqhan.dao.TempProductImgDao;
-import com.weavers.duqhan.dao.TempProductSizeColorMapDao;
-import com.weavers.duqhan.dao.TemtproductlinklistDao;
+import com.weavers.duqhan.dao.ReviewDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
-import com.weavers.duqhan.domain.Color;
-import com.weavers.duqhan.domain.OfferProductUsed;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductImg;
-import com.weavers.duqhan.domain.ProductSizeColorMap;
+import com.weavers.duqhan.domain.ProductProperties;
+import com.weavers.duqhan.domain.ProductPropertiesMap;
+import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.RecentView;
+import com.weavers.duqhan.domain.Review;
 import com.weavers.duqhan.domain.ShipmentTable;
-import com.weavers.duqhan.domain.SizeGroup;
-import com.weavers.duqhan.domain.Sizee;
-import com.weavers.duqhan.domain.Specification;
-import com.weavers.duqhan.domain.TempProduct;
-import com.weavers.duqhan.domain.TempProductImg;
-import com.weavers.duqhan.domain.TempProductSizeColorMap;
-import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.Users;
-import com.weavers.duqhan.domain.Vendor;
 import com.weavers.duqhan.dto.AddressDto;
-import com.weavers.duqhan.dto.AxpProductDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
-import com.weavers.duqhan.dto.ColorAndSizeDto;
-import com.weavers.duqhan.dto.ColorDto;
 import com.weavers.duqhan.dto.ImageDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderDetailsDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
+import com.weavers.duqhan.dto.ProductPropertiesMapDto;
 import com.weavers.duqhan.dto.ProductRequistBean;
-import com.weavers.duqhan.dto.SizeColorMapDto;
-import com.weavers.duqhan.dto.SizeDto;
-import com.weavers.duqhan.dto.SkuVal;
-import com.weavers.duqhan.dto.SpecificationDto;
-import com.weavers.duqhan.dto.StatusBean;
-import com.weavers.duqhan.util.CurrencyConverter;
+import com.weavers.duqhan.dto.PropertyDto;
+import com.weavers.duqhan.dto.PropertyValueDto;
+import com.weavers.duqhan.dto.ReviewBean;
+import com.weavers.duqhan.dto.ReviewDto;
 import com.weavers.duqhan.util.DateFormater;
-import com.weavers.duqhan.util.FileUploader;
 import com.weavers.duqhan.util.StatusConstants;
-import java.io.IOException;
+
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.logging.Level;
+import java.util.Objects;
+
 import org.apache.log4j.Logger;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -104,7 +77,11 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductDao productDao;
     @Autowired
-    ProductSizeColorMapDao productSizeColorMapDao;
+    ProductPropertiesMapDao productPropertiesMapDao;
+    @Autowired
+    ProductPropertiesDao productPropertiesDao;
+    @Autowired
+    ProductPropertyvaluesDao productPropertyvaluesDao;
     @Autowired
     RecentViewDao recentViewDao;
     @Autowired
@@ -112,13 +89,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ProductImgDao productImgDao;
     @Autowired
-    SizeeDao sizeeDao;
-    @Autowired
-    ColorDao colorDao;
-    @Autowired
     CartDao cartDao;
-    @Autowired
-    SizeGroupDao sizeGroupDao;
     @Autowired
     OrderDetailsDao orderDetailsDao;
     @Autowired
@@ -132,21 +103,11 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     MailService mailService;
     @Autowired
-    SpecificationDao specificationDao;
-    @Autowired
-    TemtproductlinklistDao temtproductlinklistDao;
-    @Autowired
-    TempProductDao tempProductDao;
-    @Autowired
-    TempProductSizeColorMapDao tempProductSizeColorMapDao;
-    @Autowired
-    TempProductImgDao tempProductImgDao;
-    @Autowired
     OfferProductsDao offerProductsDao;
     @Autowired
-    OfferProductUsedDao offerProductUsedDao;
-    @Autowired
     UsersDao usersDao;
+    @Autowired
+    ReviewDao reviewDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -185,38 +146,11 @@ public class ProductServiceImpl implements ProductService {
 // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="setProductBeans">
-    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductSizeColorMap> mapSizeColorMap) {
+    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps) {
         ProductBeans productBeans = new ProductBeans();
         List<String> allImages = new ArrayList<>();
         List<ProductBean> beans = new ArrayList<>();
         List<Long> ids;
-        //==================Load color start====================//
-        ids = new ArrayList<>();
-        for (ProductSizeColorMap sizeColorMap : mapSizeColorMap.values()) {
-            if (sizeColorMap.getColorId() != null) {
-                ids.add(sizeColorMap.getColorId());
-            }
-        }
-        List<Color> colors = colorDao.loadByIds(ids);
-        HashMap<Long, Color> mapColor = new HashMap<>();
-        for (Color color : colors) {
-            mapColor.put(color.getId(), color);
-        }
-        //==================Load Color end====================//
-
-        //==================Load Size start====================//
-        ids = new ArrayList<>();
-        for (ProductSizeColorMap sizeColorMap : mapSizeColorMap.values()) {
-            if (sizeColorMap.getSizeId() != null) {
-                ids.add(sizeColorMap.getSizeId());
-            }
-        }
-        List<Sizee> sizees = sizeeDao.loadByIds(ids);
-        HashMap<Long, Sizee> mapSize = new HashMap<>();
-        for (Sizee sizee : sizees) {
-            mapSize.put(sizee.getId(), sizee);
-        }
-        //==================Load Size end====================//
 
         //==================Load Category start====================//
         ids = new ArrayList<>();
@@ -231,39 +165,40 @@ public class ProductServiceImpl implements ProductService {
         //==================Load Category end====================//
         int i = 0;
         for (Product product : products) {
-            if (mapSizeColorMap.containsKey(product.getId())) {
+            if (mapProductPropertiesMaps.containsKey(product.getId())) {
                 ProductBean bean = new ProductBean();
+                double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
                 bean.setImgurl(product.getImgurl());
-                allImages.add(product.getImgurl());
                 bean.setDescription(product.getDescription());
                 bean.setCategoryId(product.getCategoryId());
                 bean.setCategoryName(mapCategory.get(product.getCategoryId()));
-                bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
-                bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
-                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {     // if this product have any size
-                    bean.setSize(mapSize.get(mapSizeColorMap.get(product.getId()).getSizeId()).getValu());
-                }
-                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {    // if this product have any color
-                    bean.setColor(mapColor.get(mapSizeColorMap.get(product.getId()).getColorId()).getName());
-                }
-                bean.setPrice(getTwoDecimalFormat(mapSizeColorMap.get(product.getId()).getPrice()));
-                bean.setDiscountedPrice(getTwoDecimalFormat(mapSizeColorMap.get(product.getId()).getDiscount()));
-                bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
-                Long qunty = mapSizeColorMap.get(product.getId()).getQuentity();
+                bean.setPrice(price);
+                bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                Long qunty = mapProductPropertiesMaps.get(product.getId()).getQuantity();
                 bean.setAvailable(qunty.intValue());
                 bean.setVendorId(product.getVendorId());
                 bean.setShippingRate(product.getShippingRate());
                 bean.setShippingTime(product.getShippingTime());
                 bean.setExternalLink(product.getExternalLink());
+                boolean isAdd = false;
+                double filter = StatusConstants.PRICE_FILTER;
+                if (product.getParentPath().contains("25")) {
+                    filter = StatusConstants.PRICE_FILTER_BAG;
+                }
+                if (bean.getDiscountedPrice() < filter && !product.getParentPath().contains("43")) {
+                    isAdd = true;
+                    allImages.add(product.getImgurl());
+                }
 
-//            ==========================load specification==================================//
+                //==========================load specification start==============================//
                 String specifications = product.getSpecifications();
                 bean.setSpecifications(specifications);
                 if (specifications != null && !specifications.equals("")) {
                     String[] fiturs = specifications.split(",");
-                    HashMap<String, String> map = new HashMap<String, String>();
+                    HashMap<String, String> map = new HashMap<>();
                     for (String fitur : fiturs) {
                         map.put(fitur.split(":")[0], fitur.split(":")[1]);
                     }
@@ -271,107 +206,14 @@ public class ProductServiceImpl implements ProductService {
                 } else {
                     bean.setSpecificationsMap(new HashMap<String, String>());
                 }
-                if (mapSizeColorMap.get(product.getId()).getDiscount() < StatusConstants.PRICE_FILTER) {
+                //==========================load specification end==============================//
+
+                //==========================Price filter start==============================//
+                if (isAdd) {
                     i = i + qunty.intValue();   // count total product
                     beans.add(bean);
                 }
-            }
-        }
-        productBeans.setTotalProducts(i);
-        productBeans.setProducts(beans);
-        productBeans.setAllImages(allImages);
-        return productBeans;
-    }
-// </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="setTempProductBeans">
-    private ProductBeans setTempProductBeans(List<TempProduct> products, HashMap<Long, TempProductSizeColorMap> mapSizeColorMap) {
-        ProductBeans productBeans = new ProductBeans();
-        List<String> allImages = new ArrayList<>();
-        List<ProductBean> beans = new ArrayList<>();
-        List<Long> ids;
-        //==================Load color start====================//
-        ids = new ArrayList<>();
-        for (TempProductSizeColorMap sizeColorMap : mapSizeColorMap.values()) {
-            if (sizeColorMap.getColorId() != null) {
-                ids.add(sizeColorMap.getColorId());
-            }
-        }
-        List<Color> colors = colorDao.loadByIds(ids);
-        HashMap<Long, Color> mapColor = new HashMap<>();
-        for (Color color : colors) {
-            mapColor.put(color.getId(), color);
-        }
-        //==================Load Color end====================//
-
-        //==================Load Size start====================//
-        ids = new ArrayList<>();
-        for (TempProductSizeColorMap sizeColorMap : mapSizeColorMap.values()) {
-            if (sizeColorMap.getSizeId() != null) {
-                ids.add(sizeColorMap.getSizeId());
-            }
-        }
-        List<Sizee> sizees = sizeeDao.loadByIds(ids);
-        HashMap<Long, Sizee> mapSize = new HashMap<>();
-        for (Sizee sizee : sizees) {
-            mapSize.put(sizee.getId(), sizee);
-        }
-        //==================Load Size end====================//
-
-        //==================Load Category start====================//
-        ids = new ArrayList<>();
-        for (TempProduct product : products) {
-            ids.add(product.getCategoryId());
-        }
-        List<Category> categorys = categoryDao.loadByIds(ids);
-        HashMap<Long, String> mapCategory = new HashMap<>();
-        for (Category category : categorys) {
-            mapCategory.put(category.getId(), category.getName());
-        }
-        //==================Load Category end====================//
-        int i = 0;
-        for (TempProduct product : products) {
-            if (mapSizeColorMap.containsKey(product.getId())) {
-                ProductBean bean = new ProductBean();
-                bean.setProductId(product.getId());
-                bean.setName(product.getName());
-                bean.setImgurl(product.getImgurl());
-                allImages.add(product.getImgurl());
-                bean.setDescription(product.getDescription());
-                bean.setCategoryId(product.getCategoryId());
-                bean.setCategoryName(mapCategory.get(product.getCategoryId()));
-                bean.setSizeId(mapSizeColorMap.get(product.getId()).getSizeId());
-                bean.setColorId(mapSizeColorMap.get(product.getId()).getColorId());
-                if (mapSizeColorMap.get(product.getId()).getSizeId() != null) {     // if this product have any size
-                    bean.setSize(mapSize.get(mapSizeColorMap.get(product.getId()).getSizeId()).getValu());
-                }
-                if (mapSizeColorMap.get(product.getId()).getColorId() != null) {    // if this product have any color
-                    bean.setColor(mapColor.get(mapSizeColorMap.get(product.getId()).getColorId()).getName());
-                }
-                bean.setPrice(mapSizeColorMap.get(product.getId()).getPrice());
-                bean.setDiscountedPrice(mapSizeColorMap.get(product.getId()).getDiscount());
-                bean.setDiscountPCT(this.getPercentage(mapSizeColorMap.get(product.getId()).getPrice(), mapSizeColorMap.get(product.getId()).getDiscount()));
-                Long qunty = mapSizeColorMap.get(product.getId()).getQuantity();
-                bean.setAvailable(qunty.intValue());
-                bean.setVendorId(product.getVendorId());
-                bean.setShippingRate(product.getShippingRate());
-                bean.setShippingTime(product.getShippingTime());
-                bean.setExternalLink(product.getExternalLink());
-                i = i + qunty.intValue();   // count total product
-//            ==========================load specification==================================//
-                String specifications = product.getSpecifications();
-                bean.setSpecifications(specifications);
-                if (specifications != null && !specifications.equals("")) {
-                    String[] fiturs = specifications.split(",");
-                    HashMap<String, String> map = new HashMap<String, String>();
-                    for (String fitur : fiturs) {
-                        map.put(fitur.split(":")[0], fitur.split(":")[1]);
-                    }
-                    bean.setSpecificationsMap(map);
-                } else {
-                    bean.setSpecificationsMap(new HashMap<String, String>());
-                }
-                beans.add(bean);
+                //==========================Price filter end==============================//
             }
         }
         productBeans.setTotalProducts(i);
@@ -394,63 +236,7 @@ public class ProductServiceImpl implements ProductService {
     }
     // </editor-fold>
 
-    private String saveTempProduct(ProductBean productBean) {
-        String status = "ERROR: Product can not be saved!!";
-        if (productBean != null) {
-            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());//>>>>>>>>>>>>>>
-            TempProduct product = new TempProduct();
-            product.setId(null);
-            product.setName(productBean.getName());//>>>>>>>>>>>>>>>>>
-            product.setImgurl(productBean.getImgurl());//>>>>>>>>>>>>>>>>
-            product.setCategoryId(productBean.getCategoryId());//>>>>>>>>>>>
-            product.setDescription(productBean.getDescription());//>>>>>>>>>>>>>>>>
-            product.setLastUpdate(new Date());
-            product.setVendorId(productBean.getVendorId());     //>>>>>>>>>>>>>>>>>
-            product.setParentPath(parentCategory.getParentPath());
-            product.setExternalLink(productBean.getExternalLink()); //>>>>>>>>>>>>>>
-            product.setSpecifications(productBean.getSpecifications());//>>>>>>>>>>>>
-            product.setShippingTime(productBean.getShippingTime());
-            product.setShippingRate(productBean.getShippingRate());
-            TempProduct product1 = tempProductDao.save(product);
-            if (product1 != null) {
-                //====multiple ProductSizeColorMap added=======//
-                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();//>>>>>>>>>>>>>>
-                if (!sizeColorMapDtos.isEmpty()) {
-                    for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
-                        TempProductSizeColorMap sizeColorMap = new TempProductSizeColorMap();
-                        sizeColorMap.setId(null);
-                        sizeColorMap.setColorId(sizeColorMapDto.getColorId());
-                        sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
-                        sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
-                        sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
-                        sizeColorMap.setQuantity(sizeColorMapDto.getCount());
-                        sizeColorMap.setProductId(product1.getId());
-                        sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
-                        sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
-                        sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
-                        sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
-                        TempProductSizeColorMap sizeColorMap1 = tempProductSizeColorMapDao.save(sizeColorMap);
-                    }
-                }
-
-                //===========multiple image add==========//
-                List<ImageDto> imageDtos = productBean.getImageDtos();//>>>>>>>>>>>>
-                if (!imageDtos.isEmpty()) {
-                    for (ImageDto imageDto : imageDtos) {
-                        TempProductImg productImg = new TempProductImg();
-                        productImg.setId(null);
-                        productImg.setImgUrl(imageDto.getImgUrl());
-                        productImg.setProductId(product1.getId());
-                        tempProductImgDao.save(productImg);
-                    }
-                }
-                status = "success";
-            }
-        }
-        return status;
-    }
-
-    @Override
+    /*@Override
     public ColorAndSizeDto getColorSizeList() { // get color size category from database for add produc page on load.
         List<Sizee> sizees = sizeeDao.loadAll();
         List<Color> colors = colorDao.loadAll();
@@ -597,17 +383,28 @@ public class ProductServiceImpl implements ProductService {
         ColorAndSizeDto colorAndSizeDto = new ColorAndSizeDto();
         colorAndSizeDto.setSpecifications(specificationDtos);
         return colorAndSizeDto;
-    }
-
+    }*/
     @Override
     public ProductBeans getProductsByCategory(Long categoryId, int start, int limit) {
         List<Product> products = productDao.getProductsByCategoryIncludeChild(categoryId, start, limit);  // Find category wise product 
-        List<Long> productIds = new ArrayList<>();
+        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-            productIds.add(product.getId());
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
         }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapSizeColorMaps);
+//        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap);
         productBeans.setCategoryName(categoryDao.loadById(categoryId).getName());
         return productBeans;
     }
@@ -615,45 +412,80 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductBeans getProductsByRecentView(Long userId, int start, int limit) {
         List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit);    // Find recent view product 
-        List<Long> productIds = new ArrayList<>();
+        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-            productIds.add(product.getId());
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
         }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceRecentView(productIds);
-        return this.setProductBeans(products, mapSizeColorMaps);
+        //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
+        return this.setProductBeans(products, mapProductPropertiesMap);
     }
 
     @Override
     public ProductBeans getAllProducts(int start, int limit) {
         List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
-        List<Long> productIds = new ArrayList<>();
+        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-            productIds.add(product.getId());
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
         }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
-        return this.setProductBeans(products, mapSizeColorMaps);
+//        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
+        return this.setProductBeans(products, mapProductPropertiesMap);
     }
 
-    @Override
-    public ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit) {
-        List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
-        List<Long> productIds = new ArrayList<>();
-        for (Product product : products) {
-            productIds.add(product.getId());
-        }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapByProductIds(productIds);
-        return this.setProductBeans(products, mapSizeColorMaps);
-    }
-
+//    @Override
+//    public ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit) {
+//        List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
+//        List<Long> productIds = new ArrayList<>();
+//        for (Product product : products) {
+//            productIds.add(product.getId());
+//        }
+//        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapByProductIds(productIds);
+//        return this.setProductBeans(products, mapSizeColorMaps);
+//    }
     @Override
     public ProductBeans searchProducts(ProductRequistBean requistBean) {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
-        List<Long> productIds = new ArrayList<>();
+        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-            productIds.add(product.getId());
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
         }
-        HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapSizeColorMaps);
+//        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap);
         productBeans.setSearchString(requistBean.getName());
         return productBeans;
     }
@@ -663,48 +495,84 @@ public class ProductServiceImpl implements ProductService {
         ProductDetailBean productDetailBean = new ProductDetailBean();
         Product product = productDao.loadById(productId);
         if (product != null) {
+            List<Long> ids;
             Category category = categoryDao.loadById(product.getCategoryId());
             List<ProductImg> imgs = productImgDao.getProductImgsByProductId(productId);
-            List<ProductSizeColorMap> sizeColorMaps = productSizeColorMapDao.getSizeColorMapByProductId(productId);
-//            List<Sizee> sizees = sizeeDao.loadAll();
-//            HashMap<Long, Sizee> mapSize = new HashMap<>();
-//            for (Sizee sizee : sizees) {
-//                mapSize.put(sizee.getId(), sizee);
-//            }
-//            List<Color> colors = colorDao.loadAll();
-//            HashMap<Long, Color> mapColor = new HashMap<>();
-//            for (Color color : colors) {
-//                mapColor.put(color.getId(), color);
-//            }
-            List<Long> ids;
-            //==================Load color start====================//
-            ids = new ArrayList<>();
-            for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
-                if (sizeColorMap.getColorId() != null) {
-                    ids.add(sizeColorMap.getColorId());
+            double orginalPrice = 0.0;
+            double salesPrice = 0.0;
+            int c = 0;
+            //==================Load productPropertiesMaps start====================//
+            List<ProductPropertiesMapDto> productPropertiesMapDtos = new ArrayList();
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps()/*productPropertiesMapDao.getProductPropertiesMapsByProductId(productId)*/;
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                ProductPropertiesMapDto propertiesMapDto = new ProductPropertiesMapDto();
+                propertiesMapDto.setMapId(productPropertiesMap.getId());
+                propertiesMapDto.setProductId(productPropertiesMap.getProductId().getId());
+                propertiesMapDto.setPropertyvalueComposition(productPropertiesMap.getPropertyvalueComposition());
+                propertiesMapDto.setOrginalPrice(productPropertiesMap.getPrice());
+                propertiesMapDto.setSalesPrice(productPropertiesMap.getDiscount());
+                propertiesMapDto.setDiscount(this.getPercentage(productPropertiesMap.getPrice(), productPropertiesMap.getDiscount()));
+                propertiesMapDto.setQuantity(productPropertiesMap.getQuantity());
+                productPropertiesMapDtos.add(propertiesMapDto);
+                if (c == 0) {
+                    orginalPrice = productPropertiesMap.getPrice();
+                    salesPrice = productPropertiesMap.getDiscount();
+                    c++;
+                } else {
+                    if (salesPrice > productPropertiesMap.getDiscount()) {
+                        orginalPrice = productPropertiesMap.getPrice();
+                        salesPrice = productPropertiesMap.getDiscount();
+                    }
                 }
             }
-            List<Color> colors = colorDao.loadByIds(ids);
-            HashMap<Long, Color> mapColor = new HashMap<>();
-            for (Color color : colors) {
-                mapColor.put(color.getId(), color);
-            }
-            //==================Load Color end====================//
+            //==================Load productPropertiesMaps end====================//
 
-            //==================Load Size start====================//
-            ids = new ArrayList<>();
-            for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
-                if (sizeColorMap.getSizeId() != null) {
-                    ids.add(sizeColorMap.getSizeId());
+            //==================Load Propertieses start====================//
+            List<PropertyDto> properties = new ArrayList<>();
+            if (product.getProperties() != null) {
+                ids = new ArrayList<>();
+                Long id;
+                String[] propertyIds = new String[0];
+                propertyIds = product.getProperties().split("-");
+                System.out.println("propertyIds ===== " + propertyIds);
+                if (propertyIds.length > 0) {
+                    //------------------Load Property value start----------------//
+                    HashMap<Long, List<PropertyValueDto>> hashMap = new HashMap<>();
+                    List<ProductPropertyvalues> propertyvalueses = productPropertyvaluesDao.loadByProductId(product.getId());
+                    for (ProductPropertyvalues propertyvaluese : propertyvalueses) {
+                        PropertyValueDto propertyValueDto = new PropertyValueDto();
+                        propertyValueDto.setId(propertyvaluese.getId());
+                        propertyValueDto.setValue(propertyvaluese.getValueName());
+                        if (!hashMap.containsKey(propertyvaluese.getPropertyId())) {
+                            List<PropertyValueDto> list = new ArrayList<>();
+                            list.add(propertyValueDto);
+                            hashMap.put(propertyvaluese.getPropertyId(), list);
+                        } else {
+                            hashMap.get(propertyvaluese.getPropertyId()).add(propertyValueDto);
+                        }
+                    }
+                    //------------------Load Property value end------------------//
+                    for (String propertyId : propertyIds) {
+                        try {
+                            id = Long.valueOf(propertyId);
+                        } catch (NumberFormatException e) {
+                            id = 0l;
+                            ids.clear();
+                            break;
+                        }
+                        ids.add(id);
+                    }
+                    List<ProductProperties> productPropertieses = productPropertiesDao.loadByIds(ids);
+                    for (ProductProperties productProperties : productPropertieses) {
+                        PropertyDto propertyDto = new PropertyDto();
+                        propertyDto.setId(productProperties.getId());
+                        propertyDto.setProperty(productProperties.getPropertyName());
+                        propertyDto.setPropertyValues(hashMap.get(productProperties.getId()));
+                        properties.add(propertyDto);
+                    }
                 }
             }
-            List<Sizee> sizees = sizeeDao.loadByIds(ids);
-            HashMap<Long, Sizee> mapSize = new HashMap<>();
-            for (Sizee sizee : sizees) {
-                mapSize.put(sizee.getId(), sizee);
-            }
-            //==================Load Size end====================//
-
+            //==================Load Propertieses end====================//
             productDetailBean.setProductId(product.getId());
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
@@ -714,7 +582,9 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setVendorId(product.getVendorId());
             productDetailBean.setShippingCost(product.getShippingRate());
             productDetailBean.setShippingTime(product.getShippingTime());
-            //===============================add imgDto==============================
+            productDetailBean.setPropertiesMapDto(productPropertiesMapDtos);
+            productDetailBean.setProperties(properties);
+            //======================add imgDto start=========================//
             List<ImageDto> imgDtos = new ArrayList<>();
             ImageDto imgDto;
             imgDto = new ImageDto();
@@ -726,86 +596,8 @@ public class ProductServiceImpl implements ProductService {
                 imgDtos.add(imgDto);
             }
             productDetailBean.setImages(imgDtos);
-            //====================================add SizeDto========================
-            Set<SizeDto> sizeDtos = new HashSet<>();
-            Set<SizeDto> sizeDtos2 = new HashSet<>();
-            Set<ColorDto> colorDtos = new HashSet<>();
-            HashMap<Long, Object> check = new HashMap<>();
-            HashMap<Long, Object> check1 = new HashMap<>();
-            HashMap<Long, List<SizeColorMapDto>> mapSizeColorMapDto = new HashMap<>();
-            Double orginalPrice = 0.0;
-            Double salesPrice = 0.0;
-            int flg = 0;
-            for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
-                SizeDto sizeDto = new SizeDto();
-                if (mapSize.get(sizeColorMap.getSizeId()) != null) {
-                    sizeDto.setSizeId(sizeColorMap.getSizeId());
-                    sizeDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
-                }
-                if (!check.containsKey(sizeColorMap.getSizeId())) {
-                    sizeDtos.add(sizeDto);
-                    check.put(sizeColorMap.getSizeId(), null);
-                }
-
-                if (mapSizeColorMapDto.containsKey(sizeColorMap.getSizeId())) {
-                    SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-                    if (mapColor.get(sizeColorMap.getColorId()) != null) {
-                        sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                        sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
-                    }
-                    sizeColorMapDto.setMapId(sizeColorMap.getId());
-                    sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
-                    if (sizeColorMap.getPrice() < orginalPrice) {
-                        orginalPrice = sizeColorMap.getPrice();
-                        salesPrice = sizeColorMap.getDiscount();
-                    }
-                    sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
-                    sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
-                    sizeColorMapDto.setCount(sizeColorMap.getQuentity());
-                    mapSizeColorMapDto.get(sizeColorMap.getSizeId()).add(sizeColorMapDto);
-                } else {
-                    if (flg == 0) {
-                        orginalPrice = sizeColorMap.getPrice();
-                        salesPrice = sizeColorMap.getDiscount();
-                    }
-                    flg++;
-                    List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
-                    SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-                    if (mapColor.get(sizeColorMap.getColorId()) != null) {
-                        sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                        sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
-                    }
-                    sizeColorMapDto.setMapId(sizeColorMap.getId());
-                    sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
-                    if (sizeColorMap.getPrice() < orginalPrice) {
-                        orginalPrice = sizeColorMap.getPrice();
-                        salesPrice = sizeColorMap.getDiscount();
-                    }
-                    sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
-                    sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
-                    sizeColorMapDto.setCount(sizeColorMap.getQuentity());
-                    sizeColorMapDtos.add(sizeColorMapDto);
-                    mapSizeColorMapDto.put(sizeColorMap.getSizeId(), sizeColorMapDtos);
-                }
-
-                ColorDto colorDto = new ColorDto();
-                if (mapColor.get(sizeColorMap.getColorId()) != null) {
-                    colorDto.setColorId(sizeColorMap.getColorId());
-                    colorDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
-                }
-                if (!check1.containsKey(sizeColorMap.getColorId())) {
-                    colorDtos.add(colorDto);
-                    check1.put(sizeColorMap.getColorId(), null);
-                }
-            }
-            for (SizeDto sizeDto1 : sizeDtos) {
-                SizeDto sizeDto2 = new SizeDto();
-                sizeDto2.setSizeId(sizeDto1.getSizeId());
-                sizeDto2.setSizeText(sizeDto1.getSizeText());
-                sizeDto2.setSizeColorMap(mapSizeColorMapDto.get(sizeDto1.getSizeId()));
-                sizeDtos2.add(sizeDto2);
-            }
-//            ==========================load specification==================================//
+            //======================add imgDto end=========================//
+            //====================load specification start=================//
             String specifications = product.getSpecifications();
             if (specifications != null && !specifications.equals("")) {
                 String[] fiturs = specifications.split(",");
@@ -818,23 +610,65 @@ public class ProductServiceImpl implements ProductService {
             } else {
                 productDetailBean.setSpecifications(new HashMap<String, String>());
             }
-
-            productDetailBean.setSizes(sizeDtos2);
-            productDetailBean.setColors(colorDtos);
+            //====================load specification end=================//
+            orginalPrice += StatusConstants.PRICE_GREASE;
             productDetailBean.setOrginalPrice(orginalPrice);
             productDetailBean.setSalesPrice(salesPrice);
             productDetailBean.setDiscount(this.getPercentage(orginalPrice, salesPrice));
-            productDetailBean.setArrival("Not set yet..");
-            productDetailBean.setShippingCost(null);
-            productDetailBean.setRelatedProducts(new ProductBeans());
-            //==========================Save in recent view table===========================//
+//            productDetailBean.setArrival("Not set yet..");
+//            productDetailBean.setShippingCost(null);
+//            productDetailBean.setRelatedProducts(new ProductBeans());
+            //===================Save in recent view table start==================//
             if (userId != null) {
-                RecentView recentView = new RecentView();
-                recentView.setId(null);
+                RecentView recentView = recentViewDao.getRecentViewProductByUserIdProductId(userId, productId);
+                if (null != recentView) {
+                    long count = recentView.getVisitCount();
+                    recentView.setVisitCount(++count);
+                } else {
+                    recentView = new RecentView();
+                    recentView.setId(null);
+                    recentView.setVisitCount(1L);
+                }
                 recentView.setProductId(product.getId());
                 recentView.setUserId(userId);
                 recentView.setViewDate(new Date());
                 recentViewDao.save(recentView);
+            }
+            //===================Save in recent view table end==================//
+            List<Review> reviews = new ArrayList<>();
+             reviews = reviewDao.getAllByproductId(productId);
+           /* List<ReviewDto> reviewDtoList = new ArrayList<ReviewDto>();
+            if(Objects.nonNull(reviews) && !reviews.isEmpty()){
+            	for (Review review : reviews) {
+            		ReviewDto reviewDto = new ReviewDto();
+            		reviewDto.setComment(review.getComment());
+            		reviewDto.setDate(review.getDate());
+            		reviewDto.setRating(review.getRating());
+            		reviewDto.setSubject(review.getSubject());
+            		reviewDto.setUserName(review.getUserName());
+            		reviewDtoList.add(reviewDto);
+				}
+            }*/
+            productDetailBean.setReviews(reviews);
+            List<Object[]> ratingCount=new ArrayList<Object[]>();
+            ratingCount=reviewDao.getAllRatingCount(productId);
+            if(Objects.nonNull(ratingCount)){
+            	Map<String,BigInteger> ratingMap = new HashMap<String,BigInteger>();
+            	for (Object[] objects : ratingCount) {
+            		ratingMap.put("ret1", (BigInteger)objects[0]);
+            		ratingMap.put("ret2", (BigInteger)objects[1]);
+            		ratingMap.put("ret3", (BigInteger)objects[2]);
+            		ratingMap.put("ret4", (BigInteger)objects[3]);
+            		ratingMap.put("ret5", (BigInteger)objects[4]);
+            		ratingMap.put("ret", (BigInteger)objects[5]);
+            		Long divident =((BigInteger)objects[5]).longValue();
+            		Long count = new Long(0);
+            		if(divident !=0){
+            		count=(((BigInteger)objects[0]).longValue() * 1 + ((BigInteger)objects[1]).longValue()*2 + ((BigInteger)objects[2]).longValue() * 3 + ((BigInteger)objects[3]).longValue() * 4+((BigInteger)objects[4]).longValue() * 5) / ((BigInteger)objects[5]).longValue();
+            		}
+            		ratingMap.put("retAvg",new BigInteger(count.toString()));
+				}
+            	productDetailBean.setRatingCount(ratingMap);
             }
         } else {
             productDetailBean.setStatus("No Product Found");
@@ -845,31 +679,31 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public String addProductToCart(ProductRequistBean requistBean) {
         String status = "failure";
-        /*boolean flag = true;
-        ProductSizeColorMap productSizeColorMap = productSizeColorMapDao.loadById(requistBean.getMapId());
-        if (productSizeColorMap != null) {
-            if (productSizeColorMap.getQuentity() != 0L) {
-                Product product = productDao.loadById(productSizeColorMap.getProductId());
-                try {
-                    Document doc = Jsoup.connect(product.getExternalLink()).get();
-                    Elements detailMain = doc.select("#j-detail-page");
-                    if (detailMain.isEmpty()) {
-                        flag = false;
-                    }
-                } catch (IOException ex) {
-                    flag = false;
-                }
-                if (!flag) {
-                    productSizeColorMap.setQuentity(0L);
-                    productSizeColorMapDao.save(productSizeColorMap);
-                }
-            } else {
-                flag = false;
-            }
-        } else {
-            flag = false;
-        }
-        if (flag) {*/
+//        boolean flag = true;
+//        ProductSizeColorMap productSizeColorMap = productSizeColorMapDao.loadById(requistBean.getMapId());
+//        if (productSizeColorMap != null) {
+//            if (productSizeColorMap.getQuentity() != 0L) {
+//                Product product = productDao.loadById(productSizeColorMap.getProductId());
+//                try {
+//                    Document doc = Jsoup.connect(product.getExternalLink()).get();
+//                    Elements detailMain = doc.select("#j-detail-page");
+//                    if (detailMain.isEmpty()) {
+//                        flag = false;
+//                    }
+//                } catch (IOException ex) {
+//                    flag = false;
+//                }
+//                if (!flag) {
+//                    productSizeColorMap.setQuentity(0L);
+//                    productSizeColorMapDao.save(productSizeColorMap);
+//                }
+//            } else {
+//                flag = false;
+//            }
+//        } else {
+//            flag = false;
+//        }
+//        if (flag) {
         Cart cart2 = cartDao.loadByUserIdAndMapId(requistBean.getUserId(), requistBean.getMapId());
         if (cart2 != null) {
             status = "Product already added";
@@ -877,16 +711,17 @@ public class ProductServiceImpl implements ProductService {
             Cart cart = new Cart();
             cart.setId(null);
             cart.setLoadDate(new Date());
-            cart.setSizecolormapId(requistBean.getMapId());
+            cart.setProductPropertyMapId(requistBean.getMapId());
             cart.setUserId(requistBean.getUserId());
+            cart.setDiscountOfferPct(requistBean.getDiscountOfferPct());
             Cart cart1 = cartDao.save(cart);    // add product to cart.
             if (cart1 != null) {
                 status = "success";
             }
         }
-        /*} else {
-            status = "Product not exsist.";
-        }*/
+        //} else {
+        //    status = "Product not exsist.";
+        //}
         return status;
     }
 
@@ -905,35 +740,21 @@ public class ProductServiceImpl implements ProductService {
     public CartBean getCartForUser(Long userId) {
         CartBean cartBean = new CartBean();
         HashMap<Long, Cart> MapCart = new HashMap<>();
-        List<ProductSizeColorMap> sizeColorMaps = cartDao.getProductSizeColorMapByUserId(userId);   // Load user cart
-        if (!sizeColorMaps.isEmpty()) {
+        List<ProductPropertiesMap> propertiesMaps = cartDao.getProductPropertiesMapByUserId(userId);   // Load user cart
+        if (!propertiesMaps.isEmpty()) {
             List<Cart> carts = cartDao.getCartByUserId(userId);
-            for (Cart cart : carts) {
-                MapCart.put(cart.getSizecolormapId(), cart);
-            }
             List<Long> productIds = new ArrayList<>();
-            List<Long> colorIds = new ArrayList<>();
-            List<Long> sizeIds = new ArrayList<>();
-            for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
-                productIds.add(sizeColorMap.getProductId());
-                colorIds.add(sizeColorMap.getColorId());
-                sizeIds.add(sizeColorMap.getSizeId());
+            for (Cart cart : carts) {
+                MapCart.put(cart.getProductPropertyMapId(), cart);
+                Long productId = productPropertiesMapDao.loadById(cart.getProductPropertyMapId()).getProductId().getId();
+                productIds.add(productId);
             }
             List<Product> products = productDao.loadByIds(productIds);
             HashMap<Long, Product> MapProduct = new HashMap<>();
             for (Product product : products) {
                 MapProduct.put(product.getId(), product);
             }
-            List<Color> colors = colorDao.loadByIds(colorIds);
-            HashMap<Long, Color> MapColor = new HashMap<>();
-            for (Color color : colors) {
-                MapColor.put(color.getId(), color);
-            }
-            List<Sizee> sizees = sizeeDao.loadByIds(sizeIds);
-            HashMap<Long, Sizee> MapSizee = new HashMap<>();
-            for (Sizee sizee : sizees) {
-                MapSizee.put(sizee.getId(), sizee);
-            }
+
             //============================================================//
             List<ProductBean> productBeans = new ArrayList<>();
             double itemTotal = 0.0;         //2000
@@ -941,30 +762,47 @@ public class ProductServiceImpl implements ProductService {
             double discountTotal = 0.0;     //500
             double discountPctTotal = 0.0;  //25
             //=====================ready product bean====================//
-            for (ProductSizeColorMap sizeColorMap : sizeColorMaps) {
+            for (ProductPropertiesMap propertiesMap : propertiesMaps) {
+                HashMap<String, String> propertyMap = new HashMap<>();
                 boolean flag = true;
-                Product product = MapProduct.get(sizeColorMap.getProductId());
+                Product product = MapProduct.get(propertiesMap.getProductId().getId());
                 ProductBean productBean = new ProductBean();
-                productBean.setQty(sizeColorMap.getQuentity() == 0L ? "0" : "1");
-                productBean.setSizeColorMapId(sizeColorMap.getId());
-                productBean.setProductId(sizeColorMap.getProductId());
+                productBean.setQty(propertiesMap.getQuantity() == 0L ? "0" : "1");
+                productBean.setProductPropertiesMapId(propertiesMap.getId());
+                productBean.setProductId(propertiesMap.getProductId().getId());
                 productBean.setName(product.getName());
                 productBean.setDescription(product.getDescription());
-                if (MapSizee.get(sizeColorMap.getSizeId()) != null) {
-                    productBean.setSize(MapSizee.get(sizeColorMap.getSizeId()).getValu());
+                String[] propertyValueIds = new String[0];
+                propertyValueIds = propertiesMap.getPropertyvalueComposition().split("_");
+                if (propertyValueIds.length > 0) {
+                    for (String propertyValueId : propertyValueIds) {
+                        try {
+                            ProductPropertyvalues productPropertyvalues = productPropertyvaluesDao.loadById(Long.valueOf(propertyValueId));
+                            ProductProperties properties = productPropertiesDao.loadById(productPropertyvalues.getPropertyId());
+                            propertyMap.put(properties.getPropertyName(), productPropertyvalues.getValueName());
+                        } catch (Exception nfe) {
+                        }
+                    }
                 }
-                if (MapColor.get(sizeColorMap.getColorId()) != null) {
-                    productBean.setColor(MapColor.get(sizeColorMap.getColorId()).getName());
-                }
-//                productBean.setImgurl(MapProductImg.get(sizeColorMap.getProductImgId()).getImgUrl());
+                productBean.setPropertyMap(propertyMap);
+//                productBean.setImgurl(MapProductImg.get(propertiesMap.getProductImgId()).getImgUrl());
                 productBean.setImgurl(product.getImgurl());
-                productBean.setPrice(sizeColorMap.getPrice());
-                itemTotal = itemTotal + sizeColorMap.getPrice();
-                productBean.setDiscountedPrice(sizeColorMap.getDiscount());
-                orderTotal = orderTotal + sizeColorMap.getDiscount();
-                productBean.setDiscountPCT(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
-                productBean.setAvailable(Long.valueOf(sizeColorMap.getQuentity()).intValue());
-                productBean.setCartId(MapCart.get(sizeColorMap.getId()).getId());
+                productBean.setPrice(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE);
+                itemTotal = itemTotal + propertiesMap.getPrice() + StatusConstants.PRICE_GREASE;
+                double reDiscountPct = MapCart.get(propertiesMap.getId()).getDiscountOfferPct();
+                if (reDiscountPct > 0) {
+                    double reDiscount = propertiesMap.getDiscount();
+                    reDiscount = reDiscount - ((reDiscount * reDiscountPct) / 100);
+                    productBean.setDiscountedPrice(reDiscount);
+                    orderTotal = orderTotal + reDiscount;
+                    productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, reDiscount));
+                } else {
+                    productBean.setDiscountedPrice(propertiesMap.getDiscount());
+                    orderTotal = orderTotal + propertiesMap.getDiscount();
+                    productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, propertiesMap.getDiscount()));
+                }
+                productBean.setAvailable(Long.valueOf(propertiesMap.getQuantity()).intValue());
+                productBean.setCartId(MapCart.get(propertiesMap.getId()).getId());
                 if (StatusConstants.IS_SHIPMENT) {
                     productBean.setShippingRate(product.getShippingRate());
                     productBean.setShippingTime(product.getShippingTime());
@@ -973,27 +811,27 @@ public class ProductServiceImpl implements ProductService {
                     productBean.setShippingTime("21");
                 }
                 productBean.setVendorId(product.getVendorId());
-                productBean.setProductHeight(sizeColorMap.getProductHeight());
-                productBean.setProductLength(sizeColorMap.getProductLength());
-                productBean.setProductWeight(sizeColorMap.getProductWeight());
-                productBean.setProductWidth(sizeColorMap.getProductWidth());
+                productBean.setProductHeight(product.getProductHeight());
+                productBean.setProductLength(product.getProductLength());
+                productBean.setProductWeight(product.getProductWeight());
+                productBean.setProductWidth(product.getProductWidth());
                 //<editor-fold defaultstate="collapsed" desc="Check product availability in aliexpress.com">
-                /*if (Long.valueOf(sizeColorMap.getQuentity()).intValue() != 0) {
-                    try {
-                        Document doc = Jsoup.connect(product.getExternalLink()).get();
-                        Elements detailMain = doc.select("#j-detail-page");
-                        if (detailMain.isEmpty()) {
-                            flag = false;
-                        }
-                    } catch (IOException ex) {
-                        flag = false;
-                    }
-                    if (!flag) {
-                        sizeColorMap.setQuentity(0L);
-                        productBean.setAvailable(0);
-                        productSizeColorMapDao.save(sizeColorMap);
-                    }
-                }*/
+//                if (Long.valueOf(propertiesMap.getQuentity()).intValue() != 0) {
+//                    try {
+//                        Document doc = Jsoup.connect(product.getExternalLink()).get();
+//                        Elements detailMain = doc.select("#j-detail-page");
+//                        if (detailMain.isEmpty()) {
+//                            flag = false;
+//                        }
+//                    } catch (IOException ex) {
+//                        flag = false;
+//                    }
+//                    if (!flag) {
+//                        propertiesMap.setQuentity(0L);
+//                        productBean.setAvailable(0);
+//                        productSizeColorMapDao.save(propertiesMap);
+//                    }
+//                }
 //</editor-fold>
                 productBeans.add(productBean);
             }
@@ -1010,7 +848,7 @@ public class ProductServiceImpl implements ProductService {
         return cartBean;
     }
 
-    @Override
+    /*@Override
     public String saveProduct(ProductBean productBean) {
         String status = "ERROR: Product can not be saved!!";
         if (productBean != null) {
@@ -1170,17 +1008,18 @@ public class ProductServiceImpl implements ProductService {
             return "Color saved..";
         }
     }
-
+     */
     @Override
     public Long getCartCountFoAUser(Long userId) {
         return cartDao.getCartCountByUserId(userId);    //number of item in cart fo a user.
     }
 
+    /*
     @Override
     public String saveProductImage(ProductBean productBean) {
         return FileUploader.uploadImage(productBean.getFrontImage()).getUrl();
     }
-
+     */
     @Override
     public CategorysBean getChildById(Long parentId) {
         CategorysBean categorysBean = new CategorysBean();
@@ -1195,13 +1034,18 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setIsLeaf(false);
                 categoryDto.setCategoryId(category.getId());
                 categoryDto.setCategoryName(category.getName());
+                categoryDto.setImgUrl(category.getImgUrl());
+                categoryDto.setDisplayText(category.getDisplayText());
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
                 }
 //                if (productDao.isAnyProductInCategoryId(category.getId())) {
-                categoryDtos.add(categoryDto);
+//                categoryDtos.add(categoryDto);
 //                }
+                if (!(category.getImgUrl().equals("-"))) {
+                    categoryDtos.add(categoryDto);
+                }
             }
 
             categorysBean.setCategoryDtos(categoryDtos);
@@ -1221,44 +1065,6 @@ public class ProductServiceImpl implements ProductService {
     public OrderDetailsBean getOrderDetails(Long userId, int start, int limit) {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         List<OrderDetailsDto> orderdetailsDtos = new ArrayList<>();
-
-        //*****************free product start********************//
-        if (start == 0) {
-            OfferProductUsed offerProductUsed = offerProductUsedDao.loadByUserId(userId);
-            if (offerProductUsed != null && offerProductUsed.getId() != null) {
-                OrderDetailsDto freeOrderDetailsDto = new OrderDetailsDto();
-                UserAddress address = userAddressDao.loadById(offerProductUsed.getAddressId());
-                freeOrderDetailsDto.setAddressDto(this.setAddressDto(address));
-                ProductSizeColorMap productSizeColorMap = productSizeColorMapDao.loadById(offerProductUsed.getMapId());
-                if (productSizeColorMap != null && address != null) {
-                    Product freeProduct = productDao.loadById(productSizeColorMap.getProductId());
-                    if (productSizeColorMap.getColorId() != null) {
-                        freeOrderDetailsDto.setColor(colorDao.loadById(productSizeColorMap.getColorId()).getName());
-                    }
-                    if (productSizeColorMap.getSizeId() != null) {
-                        freeOrderDetailsDto.setSize(sizeeDao.loadById(productSizeColorMap.getSizeId()).getValu());
-                    }
-                    freeOrderDetailsDto.setOrderId("Free Product");
-                    freeOrderDetailsDto.setDeliveryDate("-");
-                    freeOrderDetailsDto.setEmail(address.getEmail());
-                    freeOrderDetailsDto.setMapId(offerProductUsed.getMapId());
-                    freeOrderDetailsDto.setOrderDate(DateFormater.formate(offerProductUsed.getOfferAcceptedOn()));
-                    freeOrderDetailsDto.setPaymentAmount(0.0);
-                    freeOrderDetailsDto.setPaymentKey("Free Product");
-                    freeOrderDetailsDto.setPhone(address.getPhone());
-                    freeOrderDetailsDto.setProductName(freeProduct.getName());
-                    freeOrderDetailsDto.setStatus("approved");
-                    freeOrderDetailsDto.setProdImg(freeProduct.getImgurl());
-                    freeOrderDetailsDto.setPrice(productSizeColorMap.getPrice());
-                    freeOrderDetailsDto.setDiscount(this.getPercentage(productSizeColorMap.getPrice(), 0.0));
-                    freeOrderDetailsDto.setQuty(1l);
-                    freeOrderDetailsDto.setReturnStatus("-");
-                    orderdetailsDtos.add(freeOrderDetailsDto);
-                }
-            }
-        }
-        //******************free product end********************//
-
         List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId, start, limit);
         if (!objects.isEmpty()) {
             Object[] od = objects.get(0);
@@ -1270,45 +1076,34 @@ public class ProductServiceImpl implements ProductService {
                 mapUserAddress.put(userAddress.getId(), userAddress);
             }
             List<Long> productIds = new ArrayList();
-            List<Long> sizeIds = new ArrayList();
-            List<Long> colorIds = new ArrayList();
             for (Object[] object : objects) {
-                ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) object[1];
-                productIds.add(sizeColorMap.getProductId());
-                if (sizeColorMap.getSizeId() != null) {
-                    sizeIds.add(sizeColorMap.getSizeId());
-                }
-                if (sizeColorMap.getColorId() != null) {
-                    colorIds.add(sizeColorMap.getColorId());
-                }
+                ProductPropertiesMap propertyMap = (ProductPropertiesMap) object[1];
+                productIds.add(propertyMap.getProductId().getId());
             }
             List<Product> products = productDao.loadByIds(productIds);
             HashMap<Long, Product> mapProduct = new HashMap<>();
             for (Product product : products) {
                 mapProduct.put(product.getId(), product);
             }
-            List<Sizee> sizees = sizeeDao.loadByIds(sizeIds);
-            HashMap<Long, Sizee> mapSize = new HashMap<>();
-            for (Sizee sizee : sizees) {
-                mapSize.put(sizee.getId(), sizee);
-            }
-            List<Color> colors = colorDao.loadByIds(colorIds);
-            HashMap<Long, Color> mapColor = new HashMap<>();
-            for (Color color : colors) {
-                mapColor.put(color.getId(), color);
-            }
-
             for (Object[] object : objects) {
                 OrderDetails orderDetailse = (OrderDetails) object[0];//********************
-                ProductSizeColorMap sizeColorMap = (ProductSizeColorMap) object[1];//***********
+                ProductPropertiesMap propertyMap = (ProductPropertiesMap) object[1];//***********
                 OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
                 orderDetailsDto.setAddressDto(this.setAddressDto(mapUserAddress.get(orderDetailse.getAddressId())));
-                if (mapColor.containsKey(sizeColorMap.getColorId())) {
-                    orderDetailsDto.setColor(mapColor.get(sizeColorMap.getColorId()).getName());
+                String[] propertyValueIds = new String[0];
+                propertyValueIds = propertyMap.getPropertyvalueComposition().split("_");
+                HashMap<String, String> propertiesMap = new HashMap<>();
+                if (propertyValueIds.length > 0) {
+                    for (String propertyValueId : propertyValueIds) {
+                        try {
+                            ProductPropertyvalues productPropertyvalues = productPropertyvaluesDao.loadById(Long.valueOf(propertyValueId));
+                            ProductProperties properties = productPropertiesDao.loadById(productPropertyvalues.getPropertyId());
+                            propertiesMap.put(properties.getPropertyName(), productPropertyvalues.getValueName());
+                        } catch (Exception nfe) {
+                        }
+                    }
                 }
-                if (mapSize.containsKey(sizeColorMap.getSizeId())) {
-                    orderDetailsDto.setSize(mapSize.get(sizeColorMap.getSizeId()).getValu());
-                }
+                orderDetailsDto.setPropertyMap(propertiesMap);
                 orderDetailsDto.setOrderId(orderDetailse.getOrderId());
                 orderDetailsDto.setDeliveryDate(DateFormater.formate(orderDetailse.getDeliveryDate()));
                 orderDetailsDto.setEmail(mapUserAddress.get(orderDetailse.getAddressId()).getEmail());
@@ -1317,15 +1112,15 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
                 orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
                 orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
-                orderDetailsDto.setProductName(mapProduct.get(sizeColorMap.getProductId()).getName());
+                orderDetailsDto.setProductName(mapProduct.get(propertyMap.getProductId().getId()).getName());
                 if (orderDetailse.getReturnStatus() != null && orderDetailse.getReturnStatus().equals(StatusConstants.REQUEST_FOR_RETURN)) {
                     orderDetailsDto.setStatus("returned");
                 } else {
                     orderDetailsDto.setStatus(orderDetailse.getStatus());
                 }
-                orderDetailsDto.setProdImg(mapProduct.get(sizeColorMap.getProductId()).getImgurl());
-                orderDetailsDto.setPrice(sizeColorMap.getPrice());
-                orderDetailsDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), orderDetailse.getPaymentAmount()));
+                orderDetailsDto.setProdImg(mapProduct.get(propertyMap.getProductId().getId()).getImgurl());
+                orderDetailsDto.setPrice(propertyMap.getPrice() + StatusConstants.PRICE_GREASE);
+                orderDetailsDto.setDiscount(this.getPercentage(propertyMap.getPrice() + StatusConstants.PRICE_GREASE, orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
                 orderDetailsDto.setReturnStatus(orderDetailse.getReturnStatus());
                 ShipmentTable shipmentTable = orderDetailse.getShipmentId() != null ? shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId()) : null;
@@ -1358,6 +1153,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    /*
     @Override
     public String updateProduct(ProductBean productBean) {
         String status = "ERROR: Product can not be update!!";
@@ -1378,20 +1174,20 @@ public class ProductServiceImpl implements ProductService {
             product.setShippingRate(productBean.getShippingRate());
 
             Product product1 = productDao.save(product);
-            /*if (product1 != null) {
-                //===========multiple image add==========//
-                List<ImageDto> imageDtos = productBean.getImageDtos();
-                if (!imageDtos.isEmpty()) {
-                    for (ImageDto imageDto : imageDtos) {
-                        ProductImg productImg = new ProductImg();
-                        productImg.setId(null);
-                        productImg.setImgUrl(imageDto.getImgUrl());
-                        productImg.setProductId(product1.getId());
-                        productImgDao.save(productImg);
-                    }
-                    status = "Product saved.";
-                }
-            }*/
+//            if (product1 != null) {
+//                //===========multiple image add==========//
+//                List<ImageDto> imageDtos = productBean.getImageDtos();
+//                if (!imageDtos.isEmpty()) {
+//                    for (ImageDto imageDto : imageDtos) {
+//                        ProductImg productImg = new ProductImg();
+//                        productImg.setId(null);
+//                        productImg.setImgUrl(imageDto.getImgUrl());
+//                        productImg.setProductId(product1.getId());
+//                        productImgDao.save(productImg);
+//                    }
+//                    status = "Product saved.";
+//                }
+//            }
         }
         return status;
     }
@@ -1550,297 +1346,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<StatusBean> getTempProducts(String link) {
-        Elements productUrlList = null;
-//        Elements productInfo = null;
-        List<StatusBean> statusBeans = new ArrayList<>();
-
-        Elements nexturl = null;
-        boolean contd = true;
-        String productList = link /*"https://www.aliexpress.com/wholesale?minPrice=&maxPrice=&isBigSale=n&isFreeShip=y&isFavorite=all&isMobileExclusive=n&isLocalReturn=n&shipFromCountry=&shipCompanies=&SearchText=jwelry+for+women&CatId=1509&g=y&initiative_id=SB_20170330225112&needQuery=n&isrefine=y"*/;
-        Temtproductlinklist temtproductlinklist;
-        Temtproductlinklist savedTemtproductlinklist;
-        try {
-
-            while (contd) {
-                Document doc = Jsoup.connect(productList).get();
-//                productUrlList = doc.select("#hs-below-list-items .list-item .pic a[href]");//for search page
-                productUrlList = doc.select(".son-list .list-item .pic a[href]");
-//                productInfo = doc.select("#hs-below-list-items .list-item .info");
-                for (Element element : productUrlList) {
-                    StatusBean statusBean = new StatusBean();
-                    temtproductlinklist = new Temtproductlinklist();
-                    temtproductlinklist.setLink(element.attr("abs:href"));
-                    temtproductlinklist.setStatus(0);
-//                    System.out.println("element.toString()" + element.attr("abs:href"));
-                    savedTemtproductlinklist = temtproductlinklistDao.save(temtproductlinklist);
-                    statusBean.setStatus(String.valueOf(savedTemtproductlinklist.getStatus()));
-                    statusBean.setStatusCode(savedTemtproductlinklist.getLink());
-                    statusBean.setId(savedTemtproductlinklist.getId());
-                    statusBeans.add(statusBean);
-                }
-                nexturl = doc.select(".ui-pagination-next");
-//                System.out.println("nexturl" + nexturl.toString());
-                if (nexturl.hasClass("page-next")) {
-                    productList = nexturl.attr("abs:href");
-                    System.out.println("productList == " + productList);
-                } else if (nexturl.hasClass("page-end")) {
-                    System.out.println("productList2 ==== ");
-                    contd = false;
-                }
-            }
-        } catch (IOException ex) {
-            System.out.println("exexexexexexexexexexexex " + ex.getLocalizedMessage());
-        }
-        return statusBeans;
-    }
-
-    @Override
-    public List<StatusBean> getTempProductList(int start, int limit) {
-//        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getUnprocessedTempProduct();
-        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getAllTempProduct(start, limit);
-        List<StatusBean> statusBeans = new ArrayList<>();
-        for (Temtproductlinklist temtproductlinklist : temtproductlinklists) {
-            StatusBean statusBean = new StatusBean();
-            statusBean.setStatus(String.valueOf(temtproductlinklist.getStatus()));
-            statusBean.setStatusCode(temtproductlinklist.getLink());
-            statusBean.setId(temtproductlinklist.getId());
-            statusBeans.add(statusBean);
-        }
-        return statusBeans;
-    }
-
-    @Override
-    public List<StatusBean> loadTempProducts(List<StatusBean> statusBeans) {
-//        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getUnprocessedTempProduct();
-        String status = "failure";
-        for (StatusBean statusBean : statusBeans) {
-            status = "failure";
-            Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
-            if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
-                TempProduct tempProduct = tempProductDao.getProductByExternelLink(temtproductlinklist.getLink());
-                if (tempProduct == null) {
-                    ProductBean productBean = null;
-                    String value = "";
-                    Elements detailMain;
-                    Elements detailSub;
-                    Elements specifics;
-                    double votes = 0.0;
-                    double stars = 0.0;
-                    double feedback = 0.0;
-                    String url = temtproductlinklist.getLink();
-                    try {
-                        productBean = new ProductBean();
-                        Document doc = Jsoup.connect(url).get();
-                        detailMain = doc.select(".rantings-num");
-                        if (!detailMain.isEmpty()) {
-                            votes = Double.valueOf(detailMain.text().split(" votes")[0].split("\\(")[1]);
-                        }
-                        detailMain = doc.select(".percent-num");
-                        if (!detailMain.isEmpty()) {
-                            stars = Double.valueOf(detailMain.text());
-                        }
-                        detailMain = doc.select("ul.ui-tab-nav li[data-trigger='feedback'] a");
-                        if (!detailMain.isEmpty()) {
-                            feedback = Double.valueOf(detailMain.text().split("\\(")[1].split("\\)")[0]);
-                        }
-                        if (votes > 20.0 && stars > 4.8 && feedback > 4.0) {
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setName(detailMain.text().substring(0, Math.min(detailMain.text().length(), 50)));
-
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setDescription(detailMain.text());
-
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setDescription(detailMain.text());
-
-                            productBean.setVendorId(3l);//??????????????????????
-                            detailMain = doc.select("div.ui-breadcrumb div.container a");
-                            String newCategory = detailMain.last().text();
-                            System.out.println("newCategory == " + newCategory);
-                            Category category = categoryDao.getCategoryByName(newCategory);
-                            if (category != null) {
-                                productBean.setCategoryId(category.getId());
-                            } else {
-                                Category parentCategory = categoryDao.getCategoryByName("Jewellery");
-                                category = new Category();
-                                category.setId(null);
-                                category.setName(newCategory);
-                                category.setParentId(parentCategory.getId());
-                                category.setParentPath(parentCategory.getParentPath() + parentCategory.getId() + "=");
-                                Category category2 = categoryDao.save(category);
-                                productBean.setCategoryId(category2.getId());
-                            }
-
-                            productBean.setExternalLink(url);
-
-                            detailMain = doc.select(".product-property-list .property-item");
-                            String specifications = "";
-                            for (Element element : detailMain) {
-                                specifications = specifications + element.select(".propery-title").get(0).text().replace(",", "/").replace(":", "-") + ":" + element.select(".propery-des").get(0).text().replace(",", "/").replace(":", "-") + ",";//TODO:, check
-                            }
-                            productBean.setSpecifications(specifications);
-
-                            detailMain = doc.select(".shipping-days[data-role='delivery-days']");
-                            System.out.println("value detailMain" + detailMain.toString());
-                            value = detailMain.text();
-//            productBean.setShippingTime(value);
-                            productBean.setShippingTime("45");
-
-                            detailMain = doc.select(".logistics-cost");
-                            value = detailMain.text();
-                            double discountPrice = 0.0;
-                            double actualPrice = 0.0;
-                            double markupPrice = 0.0;
-                            if (!value.equalsIgnoreCase("Free Shipping")) {
-//                f = Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1"));
-                            }
-                            productBean.setShippingRate(0.0);
-
-                            //====multiple ProductSizeColorMap added=======//
-                            //---------------------
-                            int flag = 0;
-                            specifics = doc.select("#j-product-info-sku dl.p-property-item");
-                            List<String> arrPropIds = new ArrayList<>();
-                            List<String> arrPropIds2 = new ArrayList<>();
-                            HashMap<String, AxpProductDto> AxpProductMap = new HashMap();
-                            String id = "";
-                            for (Element specific : specifics) {
-                                detailSub = specific.select("dd ul li");
-                                System.out.println("head  ==== " + specific.select("dt").text());
-                                for (Element element : detailSub) {
-                                    if (flag > 0) {
-                                        id = element.select("a[data-sku-id]").attr("data-sku-id").trim();
-
-                                        Iterator<String> iter = arrPropIds.iterator();
-                                        while (iter.hasNext()) {
-                                            String arrPropId = iter.next();
-                                            iter.remove();
-                                            arrPropId = arrPropId + "," + id;
-                                            arrPropIds2.add(arrPropId);
-                                        }
-                                        arrPropIds.addAll(arrPropIds2);
-                                        arrPropIds2.removeAll(arrPropIds);
-                                        break;
-                                    } else {
-                                        arrPropIds.add(element.select("a[data-sku-id]").attr("data-sku-id").trim());
-                                        if (element.hasClass("item-sku-image")) {
-//                            System.out.println("img== " + element.select("a img").attr("title"));
-                                        } else {
-//                            System.out.println("span== " + element.select("a span").toString());
-                                        }
-                                    }
-                                }
-                                flag++;
-                            }
-                            List<AxpProductDto> axpProductDtos = new ArrayList<>();
-                            Elements scripts = doc.select("script"); // Get the script part
-                            for (Element script : scripts) {
-                                if (script.html().contains("var skuProducts=")) {
-                                    String jsonData = "";
-                                    jsonData = script.html().split("var skuProducts=")[1].split("var GaData")[0].trim();
-                                    jsonData = jsonData.substring(0, jsonData.length() - 1);
-                                    //System.out.println("script ======= " + jsonData);
-                                    Gson gsonObj = new Gson();
-                                    axpProductDtos = Arrays.asList(gsonObj.fromJson(jsonData, AxpProductDto[].class));
-                                    for (AxpProductDto axpProductDto : axpProductDtos) {
-                                        if (arrPropIds.contains(axpProductDto.getSkuPropIds())) {//if prisent in id list
-                                            AxpProductMap.put(axpProductDto.getSkuPropIds(), axpProductDto);
-                                        }
-                                    }
-                                }
-                            }
-                            //---------------------
-                            List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
-                            for (HashMap.Entry<String, AxpProductDto> entry : AxpProductMap.entrySet()) {
-                                String thisId = entry.getKey();
-                                AxpProductDto thisAxpProductDto = entry.getValue();
-                                SkuVal skuVal = thisAxpProductDto.getSkuVal();
-                                if (skuVal.getActSkuCalPrice() != null) {
-                                    value = skuVal.getActSkuCalPrice().trim();
-                                    discountPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    value = skuVal.getSkuCalPrice().trim();
-                                    actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    markupPrice = discountPrice * 0.15 + 100;
-                                    discountPrice = Math.ceil((discountPrice + markupPrice) / 10) * 10;;
-                                    actualPrice = Math.round(actualPrice + markupPrice);
-                                } else {
-                                    discountPrice = 0.0;
-                                    value = skuVal.getSkuCalPrice().trim();
-                                    actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    markupPrice = actualPrice * 0.15 + 100;
-                                    discountPrice = Math.round(actualPrice + markupPrice);
-                                    actualPrice = Math.round(actualPrice + markupPrice);
-                                }
-
-                                SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-
-                                if (thisAxpProductDto.getSkuAttr().split("#").length > 1) {
-                                    Color color = new Color();
-                                    color.setName(thisAxpProductDto.getSkuAttr().split("#")[1].split(";")[0]);
-                                    color.setCode(" ");
-                                    sizeColorMapDto.setColorId(colorDao.save(color).getId()/*null*/);//?????????????????????
-                                } else {
-                                    sizeColorMapDto.setColorId(null);//?????????????????????
-                                }
-                                sizeColorMapDto.setSizeId(null);//??????????????????????
-//            TimeUnit.SECONDS.sleep(10);
-                                detailMain = doc.select("#j-sku-price");
-                                System.out.println("value2 detailMain" + detailMain.text());
-                                /*value = detailMain.text();/////??????????????????????*/
-//                value = "0.25";
-                                sizeColorMapDto.setSalesPrice(discountPrice);
-                                sizeColorMapDto.setOrginalPrice(actualPrice);
-                                sizeColorMapDto.setCount(1l);
-                                sizeColorMapDto.setProductWidth(1.0);
-                                sizeColorMapDto.setProductLength(1.0);
-                                sizeColorMapDto.setProductWeight(1.0);
-                                sizeColorMapDto.setProductHeight(1.0);
-                                sizeColorMapDtos.add(sizeColorMapDto);
-                            }
-                            productBean.setSizeColorMaps(sizeColorMapDtos);
-
-                            //===========multiple image add==========//
-                            List<ImageDto> imageDtos = new ArrayList<>();//loop
-                            detailMain = doc.select("ul.image-thumb-list span.img-thumb-item img[src]");
-                            int flg = 0;
-                            for (Element element : detailMain) {
-                                if (flg == 0) {
-                                    flg++;
-                                    productBean.setImgurl(element.absUrl("src").split(".jpg")[0] + ".jpg");
-                                } else {
-                                    ImageDto imageDto = new ImageDto();
-                                    imageDto.setImgUrl(element.absUrl("src").split(".jpg")[0] + ".jpg");
-                                    imageDtos.add(imageDto);
-                                }
-                            }
-                            productBean.setImageDtos(imageDtos);
-                            if (this.saveTempProduct(productBean).equals("success")) {
-                                temtproductlinklist.setStatus(1);//
-                                temtproductlinklistDao.save(temtproductlinklist);
-                                status = "success";
-                            }
-                        } else {
-                            temtproductlinklist.setStatus(2);//
-                            temtproductlinklistDao.save(temtproductlinklist);
-                            status = "criteria mismatch";
-                        }
-                    } catch (Exception ex) {
-                        System.out.println("Exception === " + ex);
-                        java.util.logging.Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    temtproductlinklist.setStatus(3);//
-                    temtproductlinklistDao.save(temtproductlinklist);
-                    status = "product exsist";
-                }
-            }
-            statusBean.setStatus(status);
-        }
-        return statusBeans;
-    }
-
-    @Override
     public ProductBeans getAllTempProductsIncloudeZeroAvailable(int start, int limit) {
         List<TempProduct> products = tempProductDao.getAllAvailableProduct(start, limit);   // Find all products 
         List<Long> productIds = new ArrayList<>();
@@ -1850,287 +1355,58 @@ public class ProductServiceImpl implements ProductService {
         HashMap<Long, TempProductSizeColorMap> mapSizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductIds(productIds);
         return this.setTempProductBeans(products, mapSizeColorMaps);
     }
-
-    @Override
-    public ProductBean getTempProductInventoryById(Long productId) {
-        List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
-        ProductBean productBean = new ProductBean();
-        productBean.setProductId(productId);
-        List<TempProductSizeColorMap> sizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductId(productId);
-//        List<Sizee> sizees = sizeeDao.loadAll();
-//        HashMap<Long, Sizee> mapSize = new HashMap<>();
-//        for (Sizee sizee : sizees) {
-//            mapSize.put(sizee.getId(), sizee);
-//        }
-//        List<Color> colors = colorDao.loadAll();
-//        HashMap<Long, Color> mapColor = new HashMap<>();
-//        for (Color color : colors) {
-//            mapColor.put(color.getId(), color);
-//        }
-        List<Long> ids;
-        //==================Load color start====================//
-        ids = new ArrayList<>();
-        for (TempProductSizeColorMap sizeColorMap : sizeColorMaps) {
-            if (sizeColorMap.getColorId() != null) {
-                ids.add(sizeColorMap.getColorId());
-            }
-        }
-        List<Color> colors = colorDao.loadByIds(ids);
-        HashMap<Long, Color> mapColor = new HashMap<>();
-        for (Color color : colors) {
-            mapColor.put(color.getId(), color);
-        }
-        //==================Load Color end====================//
-
-        //==================Load Size start====================//
-        ids = new ArrayList<>();
-        for (TempProductSizeColorMap sizeColorMap : sizeColorMaps) {
-            if (sizeColorMap.getSizeId() != null) {
-                ids.add(sizeColorMap.getSizeId());
-            }
-        }
-        List<Sizee> sizees = sizeeDao.loadByIds(ids);
-        HashMap<Long, Sizee> mapSize = new HashMap<>();
-        for (Sizee sizee : sizees) {
-            mapSize.put(sizee.getId(), sizee);
-        }
-        //==================Load Size end====================//
-        for (TempProductSizeColorMap sizeColorMap : sizeColorMaps) {
-            SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-            if (mapSize.get(sizeColorMap.getSizeId()) != null) {
-                sizeColorMapDto.setSizeId(sizeColorMap.getSizeId());
-                sizeColorMapDto.setSizeText(mapSize.get(sizeColorMap.getSizeId()).getValu());
-            }
-            if (mapColor.get(sizeColorMap.getColorId()) != null) {
-                sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                sizeColorMapDto.setColorText(mapColor.get(sizeColorMap.getColorId()).getName());
-            }
-            sizeColorMapDto.setMapId(sizeColorMap.getId());
-            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
-            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
-            sizeColorMapDto.setDiscount(sizeColorMap.getDiscount());
-            sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
-            sizeColorMapDto.setDiscount(this.getPercentage(sizeColorMap.getPrice(), sizeColorMap.getDiscount()));
-            sizeColorMapDto.setCount(sizeColorMap.getQuantity());
-            sizeColorMapDto.setProductLength(sizeColorMap.getProductLength());
-            sizeColorMapDto.setProductHeight(sizeColorMap.getProductHeight());
-            sizeColorMapDto.setProductWidth(sizeColorMap.getProductWidth());
-            sizeColorMapDto.setProductWeight(sizeColorMap.getProductWeight());
-            sizeColorMapDtos.add(sizeColorMapDto);
-        }
-        productBean.setSizeColorMaps(sizeColorMapDtos);
-        List<ImageDto> imageDtos = new ArrayList<>();
-        List<TempProductImg> productImgs = tempProductImgDao.getProductImgsByProductId(productId);
-        for (TempProductImg productImg : productImgs) {
-            ImageDto imageDto = new ImageDto();
-            imageDto.setId(productImg.getId());
-            imageDto.setImgUrl(productImg.getImgUrl());
-            imageDtos.add(imageDto);
-        }
-        productBean.setImageDtos(imageDtos);
-        return productBean;
-    }
-
-    @Override
-    public String updateTempProduct(ProductBean productBean) {
-        String status = "ERROR: Product can not be update!!";
-        TempProduct product = tempProductDao.loadById(productBean.getProductId());
-        if (product != null) {
-            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());
-            product.setName(productBean.getName());
-            product.setImgurl(productBean.getImgurl());
-            product.setCategoryId(productBean.getCategoryId());
-            product.setDescription(productBean.getDescription());
-            product.setLastUpdate(new Date());
-            product.setVendorId(productBean.getVendorId());     //>>>>>>>>
-            product.setParentPath(parentCategory.getParentPath());
-            product.setExternalLink(productBean.getExternalLink());
-            product.setSpecifications(productBean.getSpecifications());
-
-            product.setShippingTime(productBean.getShippingTime());
-            product.setShippingRate(productBean.getShippingRate());
-
-            TempProduct product1 = tempProductDao.save(product);
-            /*if (product1 != null) {
-                //===========multiple image add==========//
-                List<ImageDto> imageDtos = productBean.getImageDtos();
-                if (!imageDtos.isEmpty()) {
-                    for (ImageDto imageDto : imageDtos) {
-                        ProductImg productImg = new ProductImg();
-                        productImg.setId(null);
-                        productImg.setImgUrl(imageDto.getImgUrl());
-                        productImg.setProductId(product1.getId());
-                        productImgDao.save(productImg);
-                    }
-                    status = "Product saved.";
-                }
-            }*/
-        }
-        return status;
-    }
-
-    @Override
-    public String updateTempProductInventory(ProductBean productBean) {
-        String status = "ERROR: Product Inventory can not be update!!";
-        TempProduct product = tempProductDao.loadById(productBean.getProductId());
-        if (product != null) {
-            //====multiple ProductSizeColorMap added=======//
-            List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();
-            if (!sizeColorMapDtos.isEmpty()) {
-                for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
-                    TempProductSizeColorMap sizeColorMap;
-                    if (sizeColorMapDto.getMapId() != null) {
-                        sizeColorMap = tempProductSizeColorMapDao.loadById(sizeColorMapDto.getMapId());
-                    } else {
-                        sizeColorMap = new TempProductSizeColorMap();
-                        sizeColorMap.setId(null);
-                    }
-                    sizeColorMap.setColorId(sizeColorMapDto.getColorId());
-                    sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
-                    sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
-                    sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
-                    sizeColorMap.setQuantity(sizeColorMapDto.getCount());
-                    sizeColorMap.setProductId(product.getId());
-                    sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
-                    sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
-                    sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
-                    sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
-                    TempProductSizeColorMap sizeColorMap1 = tempProductSizeColorMapDao.save(sizeColorMap);
-                }
-            }
-            List<ImageDto> imageDtos = productBean.getImageDtos();
-            if (imageDtos != null) {
-                for (ImageDto imageDto : imageDtos) {
-                    TempProductImg productImg;
-                    if (imageDto.getId() != null) {
-                        productImg = tempProductImgDao.loadById(imageDto.getId());
-                    } else {
-                        productImg = new TempProductImg();
-                        productImg.setId(null);
-                    }
-                    productImg.setProductId(product.getId());
-                    productImg.setImgUrl(imageDto.getImgUrl());
-                    tempProductImgDao.save(productImg);
-                }
-            }
-            status = "Product Inventory update.";
-        }
-        return status;
-    }
-
-    @Override
-    public List<StatusBean> moveTempProductToProduct(List<StatusBean> statusBeans) {
-        String status = "failure";
-        for (StatusBean statusBean : statusBeans) {
-            status = "failure";
-            try {
-                TempProduct product = tempProductDao.loadById(statusBean.getId());
-                List<TempProductSizeColorMap> productSizeColorMaps = tempProductSizeColorMapDao.getSizeColorMapByProductId(statusBean.getId());
-                if (product != null && !productSizeColorMaps.isEmpty()) {
-                    Product hasProduct = productDao.getProductByExternelLink(product.getExternalLink());
-                    String imgUrl;
-                    if (hasProduct == null) {
-                        List<TempProductImg> productImgs = tempProductImgDao.getProductImgsByProductId(statusBean.getId());
-                        ProductBean productBean = new ProductBean();
-                        productBean.setCategoryId(product.getCategoryId());
-                        productBean.setName(product.getName());
-                        imgUrl = "";
-                        if (product.getImgurl().contains("cloudinary.com/duqhan")) {
-                            imgUrl = product.getImgurl();
-                        } else {
-                            imgUrl = FileUploader.uploadImage(product.getImgurl()).getUrl();
-                        }
-                        productBean.setImgurl(imgUrl);
-                        productBean.setDescription(product.getDescription());
-                        productBean.setVendorId(product.getVendorId());
-                        productBean.setExternalLink(product.getExternalLink());
-                        productBean.setSpecifications(product.getSpecifications());
-                        productBean.setShippingTime(product.getShippingTime());
-                        productBean.setShippingRate(product.getShippingRate());
-                        //====multiple ProductSizeColorMap added=======//
-                        List<SizeColorMapDto> sizeColorMapDtos = new ArrayList();
-                        for (TempProductSizeColorMap sizeColorMap : productSizeColorMaps) {
-                            SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
-                            sizeColorMapDto.setColorId(sizeColorMap.getColorId());
-                            sizeColorMapDto.setSizeId(sizeColorMap.getSizeId());
-                            sizeColorMapDto.setSalesPrice(sizeColorMap.getDiscount());
-                            sizeColorMapDto.setOrginalPrice(sizeColorMap.getPrice());
-                            sizeColorMapDto.setCount(sizeColorMap.getQuantity());
-                            sizeColorMapDto.setProductHeight(sizeColorMap.getProductHeight());
-                            sizeColorMapDto.setProductLength(sizeColorMap.getProductLength());
-                            sizeColorMapDto.setProductWeight(sizeColorMap.getProductWeight());
-                            sizeColorMapDto.setProductWidth(sizeColorMap.getProductWidth());
-                            sizeColorMapDtos.add(sizeColorMapDto);
-                        }
-                        productBean.setSizeColorMaps(sizeColorMapDtos);
-                        //===========multiple image add==========//
-                        List<ImageDto> imageDtos = new ArrayList();
-                        imgUrl = "";
-                        for (TempProductImg productImg : productImgs) {
-                            ImageDto imageDto = new ImageDto();
-                            if (productImg.getImgUrl().contains("cloudinary.com/duqhan")) {
-                                imgUrl = productImg.getImgUrl();
-                            } else {
-                                imgUrl = FileUploader.uploadImage(productImg.getImgUrl()).getUrl();
-                            }
-                            imageDto.setImgUrl(imgUrl);
-                            imageDtos.add(imageDto);
-                        }
-                        productBean.setImageDtos(imageDtos);
-                        status = this.saveProduct(productBean);
-                        if (status.equals("Product saved.")) {
-                            status = "success";
-                            for (TempProductSizeColorMap sizeColorMap : productSizeColorMaps) {
-                                tempProductSizeColorMapDao.delete(sizeColorMap);
-                            }
-                            for (TempProductImg productImg : productImgs) {
-                                tempProductImgDao.delete(productImg);
-                            }
-                            tempProductDao.delete(product);
-                        }
-
-                    } else {
-                        status = "product exists";
-                    }
-                }
-            } catch (Exception e) {
-                System.out.println("eeeeeeeeeeee=========== " + e.getLocalizedMessage());
-                status = "failure";
-            }
-            statusBean.setStatus(status);
-        }
-        return statusBeans;
-    }
-
+     */
     @Override
     public void test() {   // to category wise product quantity.
-        List<Product> products = productDao.loadAll();
         List<Category> categorys = categoryDao.loadAll();
         HashMap<Long, Integer> categoryMap = new HashMap<>();
         for (Category category : categorys) {
             categoryMap.put(category.getId(), 0);
         }
-        for (Product product : products) {
-            int count = 0;
-            String[] categoryArray = product.getParentPath().split("=");
-            List<ProductSizeColorMap> productSizeColorMaps = productSizeColorMapDao.test(product.getId());
-            for (ProductSizeColorMap productSizeColorMap : productSizeColorMaps) {
-                count += productSizeColorMap.getQuentity();
+        int start = 1;
+        int limit = 5000;
+        for (int i = 0; i < 20; i++) {
+            start = i * limit;
+            List<Product> products = productDao.loadAllByLimit(start, limit);
+            if (products.isEmpty()) {
+                break;
             }
-            int proCount = categoryMap.get(product.getCategoryId());
-            categoryMap.put(product.getCategoryId(), proCount + count);
-            for (String string : categoryArray) {
-                try {
-                    proCount = categoryMap.get(Long.valueOf(string));
-                    categoryMap.put(Long.valueOf(string), proCount + count);
-                } catch (NumberFormatException | NullPointerException e) {
+            for (Product product : products) {
+                int count = 0;
+                String[] categoryArray = product.getParentPath().split("=");
+                List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps()/*productPropertiesMapDao.getPropertyMapByProductId(product.getId())*/;
+                for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                    double filter = StatusConstants.PRICE_FILTER;
+                    if (product.getParentPath().contains("25")) {
+                        filter = StatusConstants.PRICE_FILTER_BAG;
+                    }
+                    if (productPropertiesMap.getDiscount() < filter) {
+                        count += productPropertiesMap.getQuantity();
+                    }
+                }
+                int proCount = categoryMap.get(product.getCategoryId());
+                categoryMap.put(product.getCategoryId(), proCount + count);
+                for (String string : categoryArray) {
+                    try {
+                        proCount = categoryMap.get(Long.valueOf(string));
+                        categoryMap.put(Long.valueOf(string), proCount + count);
+                    } catch (NumberFormatException | NullPointerException e) {
+                    }
                 }
             }
         }
-        System.out.println("==============================\n" + products.size());
-        System.out.println("==============================\n" + categoryMap);
+//        System.out.println("==============================\n" + products.size());
+//        System.out.println("==============================\n" + categoryMap);
+        for (Map.Entry<Long, Integer> entry : categoryMap.entrySet()) {
+            Long key = entry.getKey();
+            Integer value = entry.getValue();
+            Category category = categoryDao.loadById(key);
+            category.setQuantity(value);
+            categoryDao.save(category);
+        }
     }
 
+    /*
     @Override
     public List<Map<String, Object>> getTestOrderDetails(List<String> orderids) {
         List<Map<String, Object>> detailList = new ArrayList<>();
@@ -2153,17 +1429,29 @@ public class ProductServiceImpl implements ProductService {
         }
         return detailList;
     }
-
+     */
     @Override
     public ProductBeans getFreeProducts() {
         List<Product> offerProducts = offerProductsDao.getAllOfferProduct();
         if (!offerProducts.isEmpty()) {
-            List<Long> productIds = new ArrayList<>();
+            HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
             for (Product product : offerProducts) {
-                productIds.add(product.getId());
+                List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+                for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                    Long productId = productPropertiesMap.getProductId().getId();
+                    if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                        if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                            mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                            mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                            mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                        }
+                    } else {    // else add new
+                        mapProductPropertiesMap.put(productId, productPropertiesMap);
+                    }
+                }
             }
-            HashMap<Long, ProductSizeColorMap> mapSizeColorMaps = productSizeColorMapDao.getSizeColorMapbyMinPriceIfAvailable(productIds);
-            ProductBeans productBeans = this.setProductBeans(offerProducts, mapSizeColorMaps);
+//            HashMap<Long, ProductPropertiesMap> mapPropertyMaps = productPropertiesMapDao.getProductPropertiesMapbyMinPriceIfAvailable(productIds);
+            ProductBeans productBeans = this.setProductBeans(offerProducts, mapProductPropertiesMap);
             return productBeans;
         } else {
             return new ProductBeans();
@@ -2172,53 +1460,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void acceptFreeProduct(Users users, CartBean cartBean) {
-        ProductSizeColorMap sizeColorMap = productSizeColorMapDao.loadById(cartBean.getUserId());  //cartBean.getUserId() = product_size_color_map id
-        OfferProductUsed offerProductUsed = offerProductUsedDao.loadByUserId(users.getId());
-        if (offerProductUsed == null) {
-            if (sizeColorMap != null) {
-                Long addressId = null;
-                if (cartBean.getDeliveryAddressId() != null) {
-                    addressId = cartBean.getDeliveryAddressId();
-                } else {
-                    AddressDto address = cartBean.getAddressDto();
-                    if (address == null) {
-                        return;
-                    }
-                    UserAddress newAddress = new UserAddress();
-                    newAddress.setId(null);
-                    newAddress.setCity(address.getCity());
-                    newAddress.setCompanyName(address.getCompanyName());
-                    newAddress.setContactName(address.getContactName());
-                    newAddress.setCountry(address.getCountry());
-                    newAddress.setEmail(address.getEmail());
-                    newAddress.setPhone(address.getPhone());
-                    newAddress.setResidential(address.getIsResidential());
-                    newAddress.setState(address.getState());
-                    newAddress.setStatus(2l);
-                    newAddress.setStreetOne(address.getStreetOne());
-                    newAddress.setStreetTwo(address.getStreetTwo());
-                    newAddress.setUserId(address.getUserId());
-                    newAddress.setZipCode(address.getZipCode());
-                    UserAddress newAddress1 = userAddressDao.save(newAddress);
-                    addressId = newAddress1.getId();
-                }
-                offerProductUsed = new OfferProductUsed();
-                offerProductUsed.setActualPrice(sizeColorMap.getDiscount());
-                offerProductUsed.setAddressId(addressId);
-                offerProductUsed.setMapId(sizeColorMap.getId());
-                offerProductUsed.setOfferAcceptedOn(new Date());
-                offerProductUsed.setProductId(sizeColorMap.getProductId());
-                offerProductUsed.setUserId(users.getId());
-                OfferProductUsed savedOfferProductUsed = offerProductUsedDao.save(offerProductUsed);
-                if (savedOfferProductUsed != null) {
-                    users.setFreeOfferAccepted(true);
-                    usersDao.save(users);
-                    mailService.sendPurchaseMailToAdmin(offerProductUsed);
-                    mailService.sendPurchaseMailToUser(offerProductUsed);
-                    cartBean.setStatusCode("200");
-                } else {
-                    cartBean.setStatusCode("500");
-                }
+        ProductPropertiesMap propertyMap = productPropertiesMapDao.loadById(cartBean.getUserId());  //cartBean.getUserId() = product_size_color_map id
+        if (!users.getFreeOfferAccepted()) {
+            if (propertyMap != null) {
+                users.setFreeOfferAccepted(true);
+                usersDao.save(users);
+                cartBean.setStatusCode("200");
             } else {
                 cartBean.setStatusCode("500");
             }
@@ -2226,9 +1473,41 @@ public class ProductServiceImpl implements ProductService {
             cartBean.setStatusCode("208");
         }
     }
+    
+    @Override
+    public ReviewBean saveReview(ReviewDto reviewDto) {
+    	ReviewBean reviewBean = new ReviewBean();
+    	Review review = new Review();
+    	Review review1 = new Review();
+    	List<Review> reviewList = new ArrayList<Review>();
+    	reviewList =reviewDao.getAllByproductId(reviewDto.getProductId());
+    	review.setDate(new Date());
+    	review.setProductId(reviewDto.getProductId());
+    	review.setRating(reviewDto.getRating());
+    	review.setSubject(reviewDto.getSubject());
+    	review.setComment(reviewDto.getComment());
+    	review.setUserId(reviewDto.getUserId());
+    	review.setUserName(reviewDto.getUserName());
+    	review.setId(null);
+    	try {
+    		review1=reviewDao.save(review);
+    		reviewList.add(review1);
+    		reviewBean.setReviews(reviewList);
+    		reviewBean.setStatus("Success review save");
+    		reviewBean.setStatusCode("200");
+            return reviewBean;
+        } catch (Exception e) {
+        	reviewBean.setReviews(null);
+        	reviewBean.setStatus("Review can not be added.");
+        	reviewBean.setStatusCode("500");
+            return reviewBean;
+		}
+    	
+    	
+    }
+
 
     public static void main(String[] args) {
 
     }
-
 }

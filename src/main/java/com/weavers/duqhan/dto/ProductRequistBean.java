@@ -22,6 +22,7 @@ public class ProductRequistBean {
     private String orderId;
     private int start;
     private int limit;
+    private double discountOfferPct;
 
     /**
      * @return the productId
@@ -175,6 +176,20 @@ public class ProductRequistBean {
      */
     public void setLimit(int limit) {
         this.limit = limit;
+    }
+
+    /**
+     * @return the discountOfferPct
+     */
+    public double getDiscountOfferPct() {
+        return discountOfferPct;
+    }
+
+    /**
+     * @param discountOfferPct the discountOfferPct to set
+     */
+    public void setDiscountOfferPct(double discountOfferPct) {
+        this.discountOfferPct = discountOfferPct;
     }
 
 }
