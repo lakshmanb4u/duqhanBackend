@@ -1480,7 +1480,6 @@ public class ProductServiceImpl implements ProductService {
     	Review review = new Review();
     	Review review1 = new Review();
     	List<Review> reviewList = new ArrayList<Review>();
-    	reviewList =reviewDao.getAllByproductId(reviewDto.getProductId());
     	review.setDate(new Date());
     	review.setProductId(reviewDto.getProductId());
     	review.setRating(reviewDto.getRating());
@@ -1491,7 +1490,7 @@ public class ProductServiceImpl implements ProductService {
     	review.setId(null);
     	try {
     		review1=reviewDao.save(review);
-    		reviewList.add(review1);
+    		reviewList =reviewDao.getAllByproductId(reviewDto.getProductId());
     		reviewBean.setReviews(reviewList);
     		reviewBean.setStatus("Success review save");
     		reviewBean.setStatusCode("200");
