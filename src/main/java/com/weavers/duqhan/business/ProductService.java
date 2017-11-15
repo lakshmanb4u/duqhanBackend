@@ -119,4 +119,6 @@ public interface ProductService {
     void acceptFreeProduct(Users users, CartBean cartBean);
 
 	ReviewBean saveReview(ReviewDto review);
+
+	CategorysBean getChildByIdAndActive(Long parentId);
 }

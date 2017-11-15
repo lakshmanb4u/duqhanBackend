@@ -35,9 +35,14 @@
       <!-- <property name="hibernate.connection.username" value="myuser"/>
       <property name="hibernate.connection.password" value="mypass"/>
       <property name="hibernate.connection.url" value="jdbc:mysql://139.162.5.110:3306/duqhandb"/> -->
-      <property name="hibernate.connection.username" value="stagingdb"/>
+      <!-- staging -->
+      <!-- <property name="hibernate.connection.username" value="stagingdb"/>
       <property name="hibernate.connection.password" value="staging123"/>
-      <property name="hibernate.connection.url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp"/>
+      <property name="hibernate.connection.url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp"/> -->
+      <!-- development -->
+      <property name="hibernate.connection.username" value="duqhunDbAdmin"/> 
+      <property name="hibernate.connection.password" value="wgJncDU2M-=vMkEU"/>
+      <property name="hibernate.connection.url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/tmp"/>
       <property name="hibernate.hbm2ddl.auto" value="create-update"/>
       <property name="hibernate.ejb.autodetection" value="class"/>
     </properties>

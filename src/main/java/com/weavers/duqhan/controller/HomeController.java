@@ -97,7 +97,7 @@ public class HomeController {
 
     @RequestMapping(value = "/get-child-category", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategory(@RequestBody ProductRequistBean requistBean) {
-        CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
+        CategorysBean categorysBean = productService.getChildByIdAndActive(requistBean.getCategoryId());
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return categorysBean;
     }

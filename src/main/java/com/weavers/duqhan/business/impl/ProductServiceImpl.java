@@ -1060,6 +1060,47 @@ public class ProductServiceImpl implements ProductService {
         }
         return categorysBean;
     }
+    
+    @Override
+    public CategorysBean getChildByIdAndActive(Long parentId) {
+        CategorysBean categorysBean = new CategorysBean();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<Category> categorys = categoryDao.getChildByParentIdAndActive(parentId);
+        if (categorys.isEmpty()) {
+            categorysBean.setStatus("No child category found");
+            categorysBean.setStatusCode("403");
+        } else {
+            for (Category category : categorys) {
+                CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setIsLeaf(false);
+                categoryDto.setCategoryId(category.getId());
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setImgUrl(category.getImgUrl());
+                categoryDto.setDisplayText(category.getDisplayText());
+                List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
+                if (categorys2.isEmpty()) {
+                    categoryDto.setIsLeaf(true);
+                }
+//                if (productDao.isAnyProductInCategoryId(category.getId())) {
+//                categoryDtos.add(categoryDto);
+//                }
+                if (!(category.getImgUrl().equals("-"))) {
+                    categoryDtos.add(categoryDto);
+                }
+            }
+
+            categorysBean.setCategoryDtos(categoryDtos);
+            categorysBean.setChildCount(categoryDtos.size());
+            List<Product> products = productDao.getProductsByCategory(parentId);
+            categorysBean.setProductCount(0);
+            if (!products.isEmpty()) {
+                categorysBean.setProductCount(products.size());
+            }
+            categorysBean.setStatus("success");
+            categorysBean.setStatusCode("200");
+        }
+        return categorysBean;
+    }
 
     @Override
     public OrderDetailsBean getOrderDetails(Long userId, int start, int limit) {

@@ -60,14 +60,17 @@
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         
         <!-- Local Configuration -->
+        <!-- Development -->
        
-        
-        
-      <property name="url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp"/>
+      <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/tmp"/>
+      <property name="username" value="duqhunDbAdmin"/> 
+      <property name="password" value="wgJncDU2M-=vMkEU"/> 
+        <!-- Staging -->
+      <!-- <property name="url" value="jdbc:mysql://duqhandbstaging.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhantmp"/>
         <property name="username" value="stagingdb"/>
-      <property name="password" value="staging123"/>
+      <property name="password" value="staging123"/> -->
         
-        <!--                <property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />
+        <!--<property name="url" value="jdbc:mysql://duqhandb.c1mlv6dykivx.us-east-1.rds.amazonaws.com:3306/duqhandb" />
         <property name="username" value="duqhunDbAdmin" />
         <property name="password" value="wgJncDU2M-=vMkEU" />-->
         

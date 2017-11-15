@@ -45,7 +45,8 @@ public class Category extends BaseDomain {
     @Size(max = 255)
     @Column(name = "display_text")
     private String displayText;
-
+    @Column(name = "is_display")
+    private boolean isDisplay;
     public String getName() {
         return name;
     }
@@ -93,4 +94,14 @@ public class Category extends BaseDomain {
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
     }
+
+	public boolean isDisplay() {
+		return isDisplay;
+	}
+
+	public void setDisplay(boolean isDisplay) {
+		this.isDisplay = isDisplay;
+	}
+    
+    
 }
