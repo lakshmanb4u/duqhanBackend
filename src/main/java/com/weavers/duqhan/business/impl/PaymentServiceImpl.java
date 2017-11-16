@@ -19,7 +19,7 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.core.rest.APIContext;
 import com.paypal.core.rest.PayPalRESTException;
 import com.paypal.core.rest.PayPalResource;
-import com.paytm.pg.merchant.CheckSumServiceHelper;
+import com.paytm.merchant.CheckSumServiceHelper;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.NotificationService;
 import com.weavers.duqhan.business.PaymentService;
