@@ -101,6 +101,18 @@ public class Product extends BaseDomain {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "productId", cascade = CascadeType.ALL)
     private List<ProductPropertiesMap> ProductPropertiesMaps;
 
+    @Column(name = "thumb_img")
+    private String thumbImg;
+
+	public String getThumbImg() {
+		 return thumbImg;
+	 }
+	
+	public void setThumbImg(String thumbImg) {
+		 this.thumbImg = thumbImg;
+	 }
+	 
+
     public String getName() {
         return name;
     }

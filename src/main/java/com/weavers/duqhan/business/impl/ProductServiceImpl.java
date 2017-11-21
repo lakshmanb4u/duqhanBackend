@@ -170,7 +170,13 @@ public class ProductServiceImpl implements ProductService {
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
-                bean.setImgurl(product.getImgurl());
+                if(product.getThumbImg()==null){
+                	bean.setImgurl(product.getImgurl());
+                  }else if (product.getThumbImg().equals("-")) {
+                	  bean.setImgurl(null);
+                  }else{
+                	bean.setImgurl(product.getThumbImg());
+					}
                 bean.setDescription(product.getDescription());
                 bean.setCategoryId(product.getCategoryId());
                 bean.setCategoryName(mapCategory.get(product.getCategoryId()));
@@ -386,7 +392,12 @@ public class ProductServiceImpl implements ProductService {
     }*/
     @Override
     public ProductBeans getProductsByCategory(Long categoryId, int start, int limit) {
-        List<Product> products = productDao.getProductsByCategoryIncludeChild(categoryId, start, limit);  // Find category wise product 
+    	List<Product> products = new ArrayList<Product>();
+    	if(categoryId.equals(25L)){
+        	products=productDao.getProductsByCategory25(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER); 
+        }else{
+    	    products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER);  // Find category wise product 
+        }
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
@@ -434,7 +445,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductBeans getAllProducts(int start, int limit) {
-        List<Product> products = productDao.getAllAvailableProduct(start, limit);   // Find all products 
+        List<Product> products = productDao.getAllAvailableProductByCategories(start, limit);   // Find all products 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();

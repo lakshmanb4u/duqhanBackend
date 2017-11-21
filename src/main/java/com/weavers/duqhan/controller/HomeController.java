@@ -101,6 +101,13 @@ public class HomeController {
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return categorysBean;
     }
+    
+    @RequestMapping(value = "/get-child-category-byid", method = RequestMethod.POST) // get child category
+    public CategorysBean getChildCategoryById(@RequestBody ProductRequistBean requistBean) {
+        CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
+//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        return categorysBean;
+    }
     /*
     @RequestMapping(value = "/test", method = RequestMethod.GET) // for test
     public String test() {

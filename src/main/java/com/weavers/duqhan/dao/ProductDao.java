@@ -33,4 +33,12 @@ public interface ProductDao extends BaseDao<Product> {
     boolean isAnyProductInCategoryId(Long categoryId);
 
     List<Product> loadAllByLimit(int start, int limit);
+
+	List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,
+			Double PRICE_FILTER_BAG, Double PRICE_FILTER);
+
+	List<Product> getProductsByCategory25(Long categoryId, int start, int limit, Double PRICE_FILTER_BAG,
+			Double PRICE_FILTER);
+
+	List<Product> getAllAvailableProductByCategories(int start, int limit);
 }
