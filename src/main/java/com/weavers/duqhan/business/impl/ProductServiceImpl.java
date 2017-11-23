@@ -172,7 +172,7 @@ public class ProductServiceImpl implements ProductService {
                 bean.setName(product.getName());
                 if(product.getThumbImg()==null){
                 	bean.setImgurl(product.getImgurl());
-                  }else if (product.getThumbImg().equals("-")) {
+                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
                 	  bean.setImgurl(null);
                   }else{
                 	bean.setImgurl(product.getThumbImg());
@@ -194,7 +194,7 @@ public class ProductServiceImpl implements ProductService {
                 if (product.getParentPath().contains("25")) {
                     filter = StatusConstants.PRICE_FILTER_BAG;
                 }
-                if (bean.getDiscountedPrice() < filter && !product.getParentPath().contains("43")) {
+                if (bean.getDiscountedPrice() < filter) {
                     isAdd = true;
                     allImages.add(product.getImgurl());
                 }
@@ -393,11 +393,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductBeans getProductsByCategory(Long categoryId, int start, int limit) {
     	List<Product> products = new ArrayList<Product>();
-    	if(categoryId.equals(25L)){
-        	products=productDao.getProductsByCategory25(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER); 
-        }else{
-    	    products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER);  // Find category wise product 
-        }
+    	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER);  // Find category wise product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
