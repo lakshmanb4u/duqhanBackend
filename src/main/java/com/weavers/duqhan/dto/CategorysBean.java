@@ -18,6 +18,7 @@ public class CategorysBean {
     private int productCount;
     private String statusCode;
     private String status;
+    private Object breadcrums;
 
     /**
      * @return the categoryDtos
@@ -88,4 +89,14 @@ public class CategorysBean {
     public void setProductCount(int productCount) {
         this.productCount = productCount;
     }
+
+	public Object getBreadcrums() {
+		return breadcrums;
+	}
+
+	public void setBreadcrums(Object breadcrums) {
+		this.breadcrums = breadcrums;
+	}
+    
+    
 }

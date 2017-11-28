@@ -1036,6 +1036,16 @@ public class ProductServiceImpl implements ProductService {
             categorysBean.setStatus("No child category found");
             categorysBean.setStatusCode("403");
         } else {
+        	
+        	String parentPath = categorys.get(0).getParentPath();
+        	String[] categoryList = parentPath.split("=");
+        	List<Long> categoryId = new ArrayList<>();
+        	for(int i=1;i<categoryList.length;i++){
+        		categoryId.add(new Long(categoryList[i]));
+        	}
+        	
+        	categorysBean.setBreadcrums(categoryDao.getCategoryNameAndIds(categoryId));
+        	
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
                 categoryDto.setIsLeaf(false);
