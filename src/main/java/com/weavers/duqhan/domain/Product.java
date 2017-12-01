@@ -100,6 +100,9 @@ public class Product extends BaseDomain {
     private double productWidth;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "productId", cascade = CascadeType.ALL)
     private List<ProductPropertiesMap> ProductPropertiesMaps;
+    
+    @Column(name = "like_unlike_count")
+    private long likeUnlikeCount;
 
     @Column(name = "thumb_img")
     private String thumbImg;
@@ -254,5 +257,15 @@ public class Product extends BaseDomain {
     public void setProductPropertiesMaps(List<ProductPropertiesMap> ProductPropertiesMaps) {
         this.ProductPropertiesMaps = ProductPropertiesMaps;
     }
+
+	public long getLikeUnlikeCount() {
+		return likeUnlikeCount;
+	}
+
+	public void setLikeUnlikeCount(long likeUnlikeCount) {
+		this.likeUnlikeCount = likeUnlikeCount;
+	}
+    
+    
 
 }

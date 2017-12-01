@@ -29,6 +29,7 @@
     <bean id="userAouthDao" class="com.weavers.duqhan.dao.jpa.UserAouthDaoJpa" />
     <bean id="usersDao" class="com.weavers.duqhan.dao.jpa.UsersDaoJpa" />
     <bean id="vendorDao" class="com.weavers.duqhan.dao.jpa.VendorDaoJpa" />
+    <bean id="likeUnlikeProductDao" class="com.weavers.duqhan.dao.jpa.LikeUnlikeProductDaoJpa" />
     <bean id="requestReturnDao" class="com.weavers.duqhan.dao.jpa.RequestReturnDaoJpa" />
     
     <bean

@@ -9,6 +9,7 @@ import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Product;
 
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
 
     @Override
-    public List<Product> getAllRecentViewProduct(Long userid, int start, int limit) {
+    public List<Product> getAllRecentViewProduct(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice) {
         //SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)
         Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv WHERE p.id = rv.productId AND rv.userId=:userId ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
@@ -97,7 +98,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }*/
     
     @Override
-    public List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER ) {
+    public List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER ,Integer lowPrice, Integer highPrice, String orderByPrice) {
     	Query q = getEntityManager().createQuery("SELECT c FROM Category AS c WHERE c.id=:categoryId");
     	q.setParameter("categoryId", categoryId);
     	List<Category> categoryList=q.getResultList();
@@ -107,20 +108,28 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 		} 
     	if(categoryId.equals(25L) || parentPath.contains("25")){		
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount < :discount AND "
+        			+ " on p=map.productId.id WHERE map.discount between :firstV and :secondV AND "
         			+ "(p.parentPath like :parentPath OR p.categoryId=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
+        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC,map.discount "+orderByPrice)
         			.setFirstResult(start).setMaxResults(limit);
             query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("discount", PRICE_FILTER_BAG);
+            query.setParameter("firstV", Double.parseDouble(lowPrice.toString()));
+            if(highPrice ==null)
+            	query.setParameter("secondV", PRICE_FILTER_BAG);
+            else
+            	query.setParameter("secondV", Double.parseDouble(highPrice.toString()));
             return query.getResultList();
     	}else{		
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount < :discount AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        			+ " on p=map.productId.id WHERE map.discount between :firstV and :secondV  AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC,map.discount "+orderByPrice).setFirstResult(start).setMaxResults(limit);
             query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("discount", PRICE_FILTER);
+            query.setParameter("firstV", Double.parseDouble(lowPrice.toString()));
+            if(highPrice ==null)
+            	query.setParameter("secondV", Integer.parseInt(PRICE_FILTER.toString()));
+            else
+            	query.setParameter("secondV", Double.parseDouble(highPrice.toString()));
             return query.getResultList();
     	}
     	
@@ -134,7 +143,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
     
     @Override
-    public List<Product> getAllAvailableProductByCategories(int start, int limit) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
+    public List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderbyPrice) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
     	List<Product> allTypesList = new ArrayList<>();
     	List<BigInteger> productIdList = new ArrayList<>();
     	
@@ -148,11 +157,18 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 			Query query = getEntityManager().createNativeQuery("SELECT distinct(p.id) FROM product p,product_properties_map ppm"
 					+ " WHERE (p.parent_path LIKE :likepath OR p.category_id=:categoryId) AND "
 					+ " ppm.product_id = p.id AND "
-					+ " ppm.discount < 300 ORDER BY p.last_update DESC")
+					+ " ppm.discount between :firstV and :secondV ORDER BY p.last_update DESC,ppm.discount "+orderbyPrice)
 					.setFirstResult((start/20)*catLimit)
 					.setMaxResults(catLimit);
 			query.setParameter("likepath", "%="+cat+"=%");
 			query.setParameter("categoryId", cat);
+			//query.setParameter("orderByPrice", orderbyPrice);
+			query.setParameter("firstV", lowPrice);
+			if(highPrice == null)
+				query.setParameter("secondV", 300);
+			else
+				query.setParameter("secondV", highPrice);
+			
 			productIdList.addAll(query.getResultList());
 			/*Query query = getEntityManager()
 					.createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map"
@@ -173,6 +189,10 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	}
     	
     	System.out.println("product list --"+ productIdList);
+    	if(productIDList.size() == 0){
+    		return allTypesList;
+    	}
+    	
     	Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE p.id IN (:productIdList)");
     		query.setParameter("productIdList",productIDList);
     		allTypesList.addAll(query.getResultList());	

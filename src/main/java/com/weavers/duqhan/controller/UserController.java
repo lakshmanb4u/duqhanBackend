@@ -19,6 +19,8 @@ import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
+import com.weavers.duqhan.dto.LikeUnlikeProductBean;
+import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
@@ -334,19 +336,27 @@ public class UserController {
             if (isRecent == null) {
                 isRecent = Boolean.FALSE;
             }
+            
+            if(requistBean.getPriceOrderBy() == null){
+            	requistBean.setPriceOrderBy("ASC");
+            }
+            
+            if(requistBean.getPriceLt() == null){
+            	requistBean.setPriceLt(0);
+            }
 
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
                 if (categoryId.equals(1l)) {
                     categoryId = 12l;
                 }
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit());
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean);
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
-                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit());
+                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean);
             } else if (categoryId == null && !isRecent) {
                 //******************all******************//
-                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit());
+                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit(), requistBean);
             }
         } else {
             response.setStatus(401);
@@ -776,5 +786,24 @@ public class UserController {
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
         return reviewBean;
+    }
+    
+    
+    @RequestMapping(value = "/likeUlike", method = RequestMethod.POST)
+    public LikeUnlikeProductBean updateLikeUnlike(HttpServletResponse response, HttpServletRequest request, @RequestBody LikeUnlikeProductDto likeUnlikeProductDto) {
+    	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+    	LikeUnlikeProductBean likeUnlikeProductBean = new LikeUnlikeProductBean();
+    	if (users != null) {
+    		likeUnlikeProductDto.setUserId(users.getId());
+            productService.updateLikeUnlike(likeUnlikeProductDto);
+            likeUnlikeProductBean.setStatusCode("200");
+            likeUnlikeProductBean.setStatus("Update Succefully.....");
+        } else {
+            response.setStatus(401);
+            likeUnlikeProductBean.setStatusCode("401");
+            likeUnlikeProductBean.setStatus("Invalid Token.");
+        }
+    	
+    	return likeUnlikeProductBean;
     }
 }

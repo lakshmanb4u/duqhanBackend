@@ -10,6 +10,7 @@ import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
+import com.weavers.duqhan.dao.LikeUnlikeProductDao;
 import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
@@ -26,6 +27,7 @@ import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
+import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.Product;
@@ -44,6 +46,8 @@ import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.ImageDto;
+import com.weavers.duqhan.dto.LikeUnlikeProductBean;
+import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderDetailsDto;
 import com.weavers.duqhan.dto.OrderReturnDto;
@@ -114,6 +118,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     ReviewDao reviewDao;
     @Autowired
+    LikeUnlikeProductDao likeUnlikeProductDao;
+	@Autowired
     RequestReturnDao requestReturnDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
@@ -398,9 +404,9 @@ public class ProductServiceImpl implements ProductService {
         return colorAndSizeDto;
     }*/
     @Override
-    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit) {
+    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean) {
     	List<Product> products = new ArrayList<Product>();
-    	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER);  // Find category wise product 
+    	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());  // Find category wise product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
@@ -424,8 +430,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getProductsByRecentView(Long userId, int start, int limit) {
-        List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit);    // Find recent view product 
+    public ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean) {
+        List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());    // Find recent view product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
@@ -447,8 +453,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getAllProducts(int start, int limit) {
-        List<Product> products = productDao.getAllAvailableProductByCategories(start, limit);   // Find all products 
+    public ProductBeans getAllProducts(int start, int limit, ProductRequistBean requestBean) {
+    	if(requestBean.getPriceLt() == null){
+    		requestBean.setPriceLt(0);
+    	}
+        List<Product> products = productDao.getAllAvailableProductByCategories(start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());   // Find all products 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
@@ -629,11 +638,13 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setOrginalPrice(orginalPrice);
             productDetailBean.setSalesPrice(salesPrice);
             productDetailBean.setDiscount(this.getPercentage(orginalPrice, salesPrice));
+            productDetailBean.setLikeUnlikeCount(product.getLikeUnlikeCount());
 //            productDetailBean.setArrival("Not set yet..");
 //            productDetailBean.setShippingCost(null);
 //            productDetailBean.setRelatedProducts(new ProductBeans());
             //===================Save in recent view table start==================//
             if (userId != null) {
+            	productDetailBean.setLikeUnlikeDetails(likeUnlikeProductDao.getProductLikeUnlike(productId, userId));	
                 RecentView recentView = recentViewDao.getRecentViewProductByUserIdProductId(userId, productId);
                 if (null != recentView) {
                     long count = recentView.getVisitCount();
@@ -1587,4 +1598,31 @@ public class ProductServiceImpl implements ProductService {
     public static void main(String[] args) {
 
     }
+
+	@Override
+	public void updateLikeUnlike(LikeUnlikeProductDto likeUnlikeProductDto) {
+		LikeUnlikeProduct likeUnlikeProduct = likeUnlikeProductDao.getProductLikeUnlike(likeUnlikeProductDto.getProductId(), likeUnlikeProductDto.getUserId());
+		if(likeUnlikeProduct == null){
+			LikeUnlikeProduct likeunlikeproduct = new LikeUnlikeProduct();
+			likeunlikeproduct.setLikeUnlike(likeUnlikeProductDto.isLikeUnlike());
+			likeunlikeproduct.setProductId(likeUnlikeProductDto.getProductId());
+			likeunlikeproduct.setUserId(likeUnlikeProductDto.getUserId());
+			likeUnlikeProductDao.save(likeunlikeproduct);
+		}else {
+			likeUnlikeProduct.setLikeUnlike(likeUnlikeProductDto.isLikeUnlike());
+			likeUnlikeProductDao.save(likeUnlikeProduct);
+		}
+		
+		Product product = productDao.loadById(likeUnlikeProductDto.getProductId());
+		long count = product.getLikeUnlikeCount();
+		if(likeUnlikeProductDto.isLikeUnlike()){
+			count++;
+			product.setLikeUnlikeCount(count);
+			productDao.save(product);
+		}else{
+			count--;
+			product.setLikeUnlikeCount(count);
+			productDao.save(product);
+		}
+	}
 }

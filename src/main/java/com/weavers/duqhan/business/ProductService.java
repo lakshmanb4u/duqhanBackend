@@ -5,10 +5,13 @@
  */
 package com.weavers.duqhan.business;
 
+import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
+import com.weavers.duqhan.dto.LikeUnlikeProductBean;
+import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
@@ -44,11 +47,11 @@ public interface ProductService {
 //
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
-    ProductBeans getProductsByCategory(Long categoryId, int start, int limit);
+    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean);
 
-    ProductBeans getProductsByRecentView(Long userId, int start, int limit);
+    ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean);
 
-    ProductBeans getAllProducts(int start, int limit);
+    ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean);
 
 //    ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
@@ -123,6 +126,10 @@ public interface ProductService {
     void acceptFreeProduct(Users users, CartBean cartBean);
 
 	ReviewBean saveReview(ReviewDto review);
+	
+	void updateLikeUnlike(LikeUnlikeProductDto likeUnlikeProductDto);
+	
+	//LikeUnlikeProductBean saveLikeUnlike(LikeUnlikeProductDto likeUnlike);
 
 	CategorysBean getChildByIdAndActive(Long parentId);
 }

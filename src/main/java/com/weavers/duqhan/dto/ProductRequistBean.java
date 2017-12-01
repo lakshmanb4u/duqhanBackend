@@ -23,6 +23,9 @@ public class ProductRequistBean {
     private int start;
     private int limit;
     private double discountOfferPct;
+    private String priceOrderBy;
+    private Integer priceGt;
+    private Integer priceLt;
 
     /**
      * @return the productId
@@ -192,4 +195,30 @@ public class ProductRequistBean {
         this.discountOfferPct = discountOfferPct;
     }
 
+	public String getPriceOrderBy() {
+		return priceOrderBy;
+	}
+
+	public void setPriceOrderBy(String priceOrderBy) {
+		this.priceOrderBy = priceOrderBy;
+	}
+
+	public Integer getPriceGt() {
+		return priceGt;
+	}
+
+	public void setPriceGt(Integer priceGt) {
+		this.priceGt = priceGt;
+	}
+
+	public Integer getPriceLt() {
+		return priceLt;
+	}
+
+	public void setPriceLt(Integer priceLt) {
+		this.priceLt = priceLt;
+	}
+
+	
+   
 }

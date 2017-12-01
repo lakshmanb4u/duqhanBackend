@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.Review;
 
 /**
@@ -39,7 +40,9 @@ public class ProductDetailBean {
     private List<ProductPropertiesMapDto> propertiesMapDtos;
     private List<PropertyDto> properties;
     private List<Review> reviews;
+    private LikeUnlikeProduct likeUnlikeDetails;
     private Map<String,BigInteger> ratingCount;
+    private long likeUnlikeCount;
 
     /**
      * @return the productId
@@ -335,6 +338,22 @@ public class ProductDetailBean {
 
 	public void setRatingCount(Map<String, BigInteger> ratingCount) {
 		this.ratingCount = ratingCount;
+	}
+
+	public LikeUnlikeProduct getLikeUnlikeDetails() {
+		return likeUnlikeDetails;
+	}
+
+	public void setLikeUnlikeDetails(LikeUnlikeProduct likeUnlikeDetails) {
+		this.likeUnlikeDetails = likeUnlikeDetails;
+	}
+
+	public long getLikeUnlikeCount() {
+		return likeUnlikeCount;
+	}
+
+	public void setLikeUnlikeCount(long likeUnlikeCount) {
+		this.likeUnlikeCount = likeUnlikeCount;
 	}
     
     
