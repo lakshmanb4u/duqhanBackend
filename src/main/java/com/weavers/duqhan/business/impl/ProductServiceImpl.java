@@ -19,6 +19,7 @@ import com.weavers.duqhan.dao.ProductPropertiesDao;
 import com.weavers.duqhan.dao.ProductPropertiesMapDao;
 import com.weavers.duqhan.dao.ProductPropertyvaluesDao;
 import com.weavers.duqhan.dao.RecentViewDao;
+import com.weavers.duqhan.dao.RequestReturnDao;
 import com.weavers.duqhan.dao.ReviewDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
@@ -33,6 +34,7 @@ import com.weavers.duqhan.domain.ProductProperties;
 import com.weavers.duqhan.domain.ProductPropertiesMap;
 import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.RecentView;
+import com.weavers.duqhan.domain.RequestReturn;
 import com.weavers.duqhan.domain.Review;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
@@ -44,6 +46,7 @@ import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.ImageDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderDetailsDto;
+import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
@@ -54,6 +57,7 @@ import com.weavers.duqhan.dto.PropertyValueDto;
 import com.weavers.duqhan.dto.ReviewBean;
 import com.weavers.duqhan.dto.ReviewDto;
 import com.weavers.duqhan.util.DateFormater;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 import com.weavers.duqhan.util.StatusConstants;
 
 import java.math.BigInteger;
@@ -67,6 +71,7 @@ import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -108,6 +113,8 @@ public class ProductServiceImpl implements ProductService {
     UsersDao usersDao;
     @Autowired
     ReviewDao reviewDao;
+    @Autowired
+    RequestReturnDao requestReturnDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -1203,14 +1210,27 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void cancelOrder(String orderId, Long userId) {
-        OrderDetails orderDetails = orderDetailsDao.getOrderDetailsByUserIdAndOrderId(userId, orderId);
+        OrderDetails orderDetails = orderDetailsDao.getOrderDetailsByUserIdAndOrderId(userId, orderId);       
         if (orderDetails != null) {
-            orderDetails.setReturnStatus(StatusConstants.REQUEST_FOR_RETURN);
+            //orderDetails.setReturnStatus(StatusConstants.REQUEST_FOR_RETURN);
+        	orderDetails.setStatus("order cancel");
             orderDetailsDao.save(orderDetails);
             mailService.returnRequestToAdmin(orderDetails);
         }
     }
 
+    @Override
+    public void returnOrder(OrderReturnDto orderReturnDto,MultipartFile file) {
+    	RequestReturn obj = new RequestReturn();
+    	obj.setOrderId(orderReturnDto.getOrderId());
+    	obj.setUserId(orderReturnDto.getUserId());
+    	obj.setReturnText(orderReturnDto.getReturnText());
+    	obj.setRequestDate(new Date());
+    	obj.setImageUrl(GoogleBucketFileUploader.uploadReturnImage(file, orderReturnDto.getUserId()));
+        //System.out.println("image uploaded.......................................");
+    	requestReturnDao.save(obj);
+    	//System.out.println(orderReturnDto.getOrderId()+"  "+orderReturnDto.getReturnText());
+    }
     /*
     @Override
     public String updateProduct(ProductBean productBean) {

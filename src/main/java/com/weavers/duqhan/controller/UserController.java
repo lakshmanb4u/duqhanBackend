@@ -17,6 +17,7 @@ import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
+import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
@@ -648,6 +649,32 @@ public class UserController {
         double timeTaken = (endTime - startTime) / 1000.0;
         //awsCloudWatchHelper.logCount("Cancel Order", "cancel order count", "cancel-order API hit counter");
         //awsCloudWatchHelper.logTimeSecounds("Cancel Order", "cancel order response", "cancel-order API response time", timeTaken);
+        return statusBean;
+    }
+    
+    @RequestMapping(value = "/order/request_return", method = RequestMethod.POST)   //return order
+    public StatusBean requestReturn(HttpServletResponse response, HttpServletRequest request, @RequestParam("orderId") String orderId,@RequestParam("returnText") String returnText, @RequestParam("file") MultipartFile file) {
+        long startTime = System.currentTimeMillis();
+        StatusBean statusBean = new StatusBean();
+        //System.out.println("file name is......................"+orderId+returnText+file.getOriginalFilename());
+        //productService.returnOrder(orderReturnDto,file);
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        //Users users = aouthService.getUserById(4L);
+        if (users != null) {
+        	OrderReturnDto orderReturnDto = new OrderReturnDto();
+            orderReturnDto.setOrderId(orderId);
+            orderReturnDto.setUserId(users.getId());
+            orderReturnDto.setReturnText(returnText);
+            productService.returnOrder(orderReturnDto,file);
+            statusBean.setStatusCode("200");
+            statusBean.setStatus("Success");
+        } else {
+            statusBean.setStatusCode("401");
+            statusBean.setStatus("Invalid Token.");
+        }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
         return statusBean;
     }
 //</editor-fold>

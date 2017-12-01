@@ -10,6 +10,7 @@ import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
+import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
@@ -21,6 +22,7 @@ import com.weavers.duqhan.dto.StatusBean;
 import java.util.List;
 import java.util.Map;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -83,6 +85,8 @@ public interface ProductService {
     OrderDetailsBean getOrderDetails(Long userId, int start, int limit);
 //
     void cancelOrder(String orderId, Long userId);
+    
+    void returnOrder(OrderReturnDto orderReturnDto, MultipartFile file);
 //
 //    String updateProduct(ProductBean productBean);
 //
