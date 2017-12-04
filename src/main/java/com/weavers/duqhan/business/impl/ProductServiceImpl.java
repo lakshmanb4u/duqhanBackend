@@ -1226,7 +1226,7 @@ public class ProductServiceImpl implements ProductService {
             //orderDetails.setReturnStatus(StatusConstants.REQUEST_FOR_RETURN);
         	orderDetails.setStatus("order cancel");
             orderDetailsDao.save(orderDetails);
-            mailService.returnRequestToAdmin(orderDetails);
+            //mailService.returnRequestToAdmin(orderDetails);
         }
     }
 
