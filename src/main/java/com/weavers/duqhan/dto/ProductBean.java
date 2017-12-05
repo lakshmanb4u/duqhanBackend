@@ -59,6 +59,7 @@ public class ProductBean {
     private String status;
     private Long productPropertiesMapId;
     private HashMap<String, String> propertyMap;
+    private long likeUnlikeCount;
 
     /**
      * @return the productId
@@ -452,5 +453,13 @@ public class ProductBean {
     public void setPropertyMap(HashMap<String, String> propertyMap) {
         this.propertyMap = propertyMap;
     }
+
+	public long getLikeUnlikeCount() {
+		return likeUnlikeCount;
+	}
+
+	public void setLikeUnlikeCount(long likeUnlikeCount) {
+		this.likeUnlikeCount = likeUnlikeCount;
+	}
 
 }
