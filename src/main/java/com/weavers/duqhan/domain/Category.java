@@ -47,6 +47,9 @@ public class Category extends BaseDomain {
     private String displayText;
     @Column(name = "is_display")
     private boolean isDisplay;
+    @Size(max = 255)
+    @Column(name = "menu_icon")
+    private String menuIcon;
     public String getName() {
         return name;
     }
@@ -101,6 +104,14 @@ public class Category extends BaseDomain {
 
 	public void setDisplay(boolean isDisplay) {
 		this.isDisplay = isDisplay;
+	}
+
+	public String getMenuIcon() {
+		return menuIcon;
+	}
+
+	public void setMenuIcon(String menuIcon) {
+		this.menuIcon = menuIcon;
 	}
     
     

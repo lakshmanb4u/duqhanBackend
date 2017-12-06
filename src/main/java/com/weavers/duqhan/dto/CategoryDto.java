@@ -17,6 +17,7 @@ public class CategoryDto {
     private boolean isLeaf;
     private String imgUrl;
     private String displayText;
+    private String menuIcon;
 
     /**
      * @return the categoryId
@@ -101,4 +102,14 @@ public class CategoryDto {
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
     }
+
+	public String getMenuIcon() {
+		return menuIcon;
+	}
+
+	public void setMenuIcon(String menuIcon) {
+		this.menuIcon = menuIcon;
+	}
+    
+    
 }

@@ -1071,6 +1071,7 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setCategoryName(category.getName());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
@@ -1112,6 +1113,7 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setCategoryName(category.getName());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
