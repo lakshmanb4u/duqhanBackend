@@ -47,7 +47,7 @@ public interface ProductService {
 //
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
-    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean);
+    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime);
 
     ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean);
 

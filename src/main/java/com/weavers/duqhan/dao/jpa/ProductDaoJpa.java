@@ -17,6 +17,8 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
+import org.springframework.scheduling.annotation.Scheduled;
+
 /**
  *
  * @author Android-3
@@ -98,7 +100,8 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }*/
     
     @Override
-    public List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER ,Integer lowPrice, Integer highPrice, String orderByPrice) {
+    public List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER , long startTime) {
+    	System.out.println("Start Of Query for category==========================="+(startTime-System.currentTimeMillis()));
     	Query q = getEntityManager().createQuery("SELECT c FROM Category AS c WHERE c.id=:categoryId");
     	q.setParameter("categoryId", categoryId);
     	List<Category> categoryList=q.getResultList();
@@ -106,30 +109,26 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	for (Category category : categoryList) {
 			parentPath=category.getParentPath(); 
 		} 
-    	if(categoryId.equals(25L) || parentPath.contains("25")){		
+    	System.out.println("End Of Query for Category==========================="+(startTime-System.currentTimeMillis()));
+    	if(categoryId.equals(25L) || parentPath.contains("25")){
+    		System.out.println("Start Of Query for product==========================="+(startTime-System.currentTimeMillis()));
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount between :firstV and :secondV AND "
+        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND "
         			+ "(p.parentPath like :parentPath OR p.categoryId=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC,map.discount "+orderByPrice)
+        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
         			.setFirstResult(start).setMaxResults(limit);
+        	if(categoryId.equals(25L))
+        	categoryId=26L;		
             query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("firstV", Double.parseDouble(lowPrice.toString()));
-            if(highPrice ==null)
-            	query.setParameter("secondV", PRICE_FILTER_BAG);
-            else
-            	query.setParameter("secondV", Double.parseDouble(highPrice.toString()));
+            query.setParameter("discountPrice", PRICE_FILTER_BAG);
             return query.getResultList();
     	}else{		
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount between :firstV and :secondV  AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC,map.discount "+orderByPrice).setFirstResult(start).setMaxResults(limit);
+        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
             query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("firstV", Double.parseDouble(lowPrice.toString()));
-            if(highPrice ==null)
-            	query.setParameter("secondV", Integer.parseInt(PRICE_FILTER.toString()));
-            else
-            	query.setParameter("secondV", Double.parseDouble(highPrice.toString()));
+            query.setParameter("discountPrice", PRICE_FILTER);
             return query.getResultList();
     	}
     	
@@ -141,7 +140,6 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         		+ " on p=map.productId.id WHERE map.discount < 300 AND p.parentPath NOT LIKE'0=42%' GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         return query.getResultList();
     }
-    
     @Override
     public List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderbyPrice) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
     	List<Product> allTypesList = new ArrayList<>();
@@ -153,21 +151,17 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	for (String string : list2) {
 			String[] list3=string.split(":");
 			Long cat = new Long(list3[0]);
-			int catLimit = new Integer(list3[1]);
+			int catLimit= new Integer(list3[1]);
 			Query query = getEntityManager().createNativeQuery("SELECT distinct(p.id) FROM product p,product_properties_map ppm"
 					+ " WHERE (p.parent_path LIKE :likepath OR p.category_id=:categoryId) AND "
 					+ " ppm.product_id = p.id AND "
-					+ " ppm.discount between :firstV and :secondV ORDER BY p.last_update DESC,ppm.discount "+orderbyPrice)
+					+ " ppm.discount <:discountPrice ORDER BY p.last_update DESC")
 					.setFirstResult((start/20)*catLimit)
-					.setMaxResults(catLimit);
+					.setMaxResults(catLimit*15);
 			query.setParameter("likepath", "%="+cat+"=%");
 			query.setParameter("categoryId", cat);
 			//query.setParameter("orderByPrice", orderbyPrice);
-			query.setParameter("firstV", lowPrice);
-			if(highPrice == null)
-				query.setParameter("secondV", 300);
-			else
-				query.setParameter("secondV", highPrice);
+			query.setParameter("discountPrice", 300);
 			
 			productIdList.addAll(query.getResultList());
 			/*Query query = getEntityManager()
@@ -180,8 +174,8 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 			query.setParameter("key", "%="+cat+"=%");
 			query.setParameter("categoryId", cat);
 	        allTypesList.addAll(query.getResultList());*/
-	        if(productIdList.size() >= 20)
-	        	break;
+	        /*if(productIdList.size() >= 20)    new code for cacheeeeeeee
+	        	break;*/
     	}
     	List<Long> productIDList = new ArrayList<>();
     	for(BigInteger p: productIdList){
@@ -196,12 +190,12 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE p.id IN (:productIdList)");
     		query.setParameter("productIdList",productIDList);
     		allTypesList.addAll(query.getResultList());	
-    	if(allTypesList.size() >= 20) {
+    	/*if(allTypesList.size() >= 20) {                                new code for cacheee
     	return (new ArrayList<Product>(allTypesList.subList(0, 19)));
     	}else {
     	return allTypesList;
-    	}
-    	
+    	}*/
+    	return allTypesList;
     }
 
     @Override

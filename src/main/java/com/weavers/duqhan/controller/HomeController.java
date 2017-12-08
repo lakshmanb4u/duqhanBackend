@@ -70,10 +70,11 @@ public class HomeController {
 
         long loginStartTime = System.currentTimeMillis();
         UserBean userBean = null;
-        userBean = usersService.userLogin(loginBean);
+        userBean = usersService.userLogin(loginBean,loginStartTime);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         long loginEndTime = System.currentTimeMillis();
-        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000.0;
+        double timeTakenToLogin = (loginEndTime - loginStartTime);
+        System.out.println("Time for login api======="+timeTakenToLogin);
         //awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
         //awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
 

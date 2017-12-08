@@ -8,6 +8,7 @@ package com.weavers.duqhan.business.impl;
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.controller.CacheController;
 import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OtpTableDao;
 import com.weavers.duqhan.dao.UserActivityDao;
@@ -141,6 +142,7 @@ public class UsersServiceImpl implements UsersService {
         userBean.setIsFirstLogin(false);
 
         if (user != null) { // if user already exist
+        	CacheController.emptyUserCacheList(user);
             activity.setUserId(user.getId());
             activity.setActivity(StatusConstants.LOGIN);
             userBean.setName(user.getName());
@@ -211,12 +213,14 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public UserBean userLogin(LoginBean loginBean) {
+    public UserBean userLogin(LoginBean loginBean,long loginStartTime) {
         String pass = Crypting.encrypt(loginBean.getPassword());
         Users user = usersDao.loadByEmailAndPass(loginBean.getEmail(), pass);
+        System.out.println("after first data base connectivity"+(loginStartTime-System.currentTimeMillis()));
         UserBean userBean = new UserBean();
         Date newDate = new Date();
         if (user != null) {
+        	CacheController.emptyUserCacheList(user);
             UserActivity activity = new UserActivity();
             activity.setId(null);
             activity.setUserId(user.getId());
@@ -227,6 +231,7 @@ public class UsersServiceImpl implements UsersService {
             activity.setLongitude(loginBean.getLongitude());
             activity.setUserAgent(loginBean.getUserAgent());
             userActivityDao.save(activity);
+            System.out.println("after second data base connectivity"+(loginStartTime-System.currentTimeMillis()));
             userBean.setName(user.getName());
             userBean.setEmail(user.getEmail());
             userBean.setDob(DateFormater.formate(user.getDob()));
@@ -240,7 +245,9 @@ public class UsersServiceImpl implements UsersService {
             user.setLongitude(loginBean.getLongitude());
             user.setUserAgent(loginBean.getUserAgent());
             Users user2 = usersDao.save(user);
+            System.out.println("after third data base connectivity"+(loginStartTime-System.currentTimeMillis()));
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
+            System.out.println("after Token authen data base connectivity"+(loginStartTime-System.currentTimeMillis()));
             userBean.setAuthtoken(aouthBean.getAouthToken());
             userBean.setFreeProductEligibility(false);
             if (!user.getFreeOfferAccepted()) {
@@ -253,6 +260,7 @@ public class UsersServiceImpl implements UsersService {
             userBean.setStatusCode("403");
             userBean.setStatus("Wrong email or password");
         }
+        System.out.println("After Verfication in coad"+(loginStartTime-System.currentTimeMillis()));
         return userBean;
     }
 

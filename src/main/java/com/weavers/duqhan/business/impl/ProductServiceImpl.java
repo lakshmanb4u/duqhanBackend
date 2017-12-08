@@ -159,7 +159,7 @@ public class ProductServiceImpl implements ProductService {
 // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="setProductBeans">
-    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps) {
+    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime) {
         ProductBeans productBeans = new ProductBeans();
         List<String> allImages = new ArrayList<>();
         List<ProductBean> beans = new ArrayList<>();
@@ -170,7 +170,9 @@ public class ProductServiceImpl implements ProductService {
         for (Product product : products) {
             ids.add(product.getCategoryId());
         }
+        System.out.println("Start Of Query for category load by Id==========================="+(startTime-System.currentTimeMillis()));
         List<Category> categorys = categoryDao.loadByIds(ids);
+        System.out.println("End Of Query for category load by Id==========================="+(startTime-System.currentTimeMillis()));
         HashMap<Long, String> mapCategory = new HashMap<>();
         for (Category category : categorys) {
             mapCategory.put(category.getId(), category.getName());
@@ -238,6 +240,7 @@ public class ProductServiceImpl implements ProductService {
         productBeans.setTotalProducts(i);
         productBeans.setProducts(beans);
         productBeans.setAllImages(allImages);
+        System.out.println("End Of Older Logic==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
 // </editor-fold>
@@ -404,10 +407,11 @@ public class ProductServiceImpl implements ProductService {
         return colorAndSizeDto;
     }*/
     @Override
-    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean) {
+    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime) {
     	List<Product> products = new ArrayList<Product>();
-    	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());  // Find category wise product 
-        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
+    	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER,startTime);  // Find category wise product 
+    	System.out.println("End Of Query for product==========================="+(startTime-System.currentTimeMillis()));
+    	HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
             for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
@@ -423,9 +427,12 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
+        System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime);
+        System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         productBeans.setCategoryName(categoryDao.loadById(categoryId).getName());
+        System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
 
@@ -449,7 +456,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
-        return this.setProductBeans(products, mapProductPropertiesMap);
+        return this.setProductBeans(products, mapProductPropertiesMap,25L);
     }
 
     @Override
@@ -457,6 +464,12 @@ public class ProductServiceImpl implements ProductService {
     	if(requestBean.getPriceLt() == null){
     		requestBean.setPriceLt(0);
     	}
+    	if(requestBean.getPriceOrderBy() == null){
+    		requestBean.setPriceOrderBy("ASC");
+        }
+        
+        
+        
         List<Product> products = productDao.getAllAvailableProductByCategories(start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());   // Find all products 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -475,7 +488,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        return this.setProductBeans(products, mapProductPropertiesMap);
+        return this.setProductBeans(products, mapProductPropertiesMap,25L);
     }
 
 //    @Override
@@ -508,7 +521,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,25L);
         productBeans.setSearchString(requistBean.getName());
         return productBeans;
     }
@@ -1542,7 +1555,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 //            HashMap<Long, ProductPropertiesMap> mapPropertyMaps = productPropertiesMapDao.getProductPropertiesMapbyMinPriceIfAvailable(productIds);
-            ProductBeans productBeans = this.setProductBeans(offerProducts, mapProductPropertiesMap);
+            ProductBeans productBeans = this.setProductBeans(offerProducts, mapProductPropertiesMap,25L);
             return productBeans;
         } else {
             return new ProductBeans();

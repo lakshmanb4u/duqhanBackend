@@ -6,6 +6,7 @@
 package com.weavers.duqhan.controller;
 
 import com.easypost.model.Shipment;
+import com.easypost.model.User;
 import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
@@ -18,6 +19,7 @@ import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
+import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
@@ -32,11 +34,13 @@ import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.social.linkedin.api.Product;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -66,7 +70,6 @@ public class UserController {
     @Autowired
     ShippingService shippingService;
     
-
     private final Logger logger = Logger.getLogger(UserController.class);
 //</editor-fold>
 
@@ -326,7 +329,9 @@ public class UserController {
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
+        System.out.println("Start Of User auth==========================="+(startTime-System.currentTimeMillis()));
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
             Long categoryId = null;
@@ -350,13 +355,14 @@ public class UserController {
                 if (categoryId.equals(1l)) {
                     categoryId = 12l;
                 }
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean);
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime);
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
                 productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean);
             } else if (categoryId == null && !isRecent) {
                 //******************all******************//
-                productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getLimit(), requistBean);
+               // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
+            	productBeans = this.getProductV1(users,requistBean);
             }
         } else {
             response.setStatus(401);
@@ -366,11 +372,31 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
+        System.out.println("Total time taken for api==========================="+timeTaken);
         //awsCloudWatchHelper.logCount("Get Product", "get product count", "get-product API hit counter");
         //awsCloudWatchHelper.logTimeSecounds("Get Product", "get product response", "get-product API response time", timeTaken);
         return productBeans;
     }
-
+    
+    //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
+    public ProductBeans getProductV1(Users users,ProductRequistBean requistBean) {
+        ProductBeans productBeans = new ProductBeans();
+        	CacheController cache=new CacheController();
+        	try {	
+        	if(!CacheController.isProductBeanListAvailableForUser(users)) {
+        		CacheController.buildProductBeanList(users);
+        	} 
+        	
+        	List<ProductBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
+        	 productBeans.setTotalProducts(300);
+             productBeans.setProducts(productbeans);
+        	} catch (Exception e) {
+        		
+        	}
+        
+        return productBeans;
+    }
+    
     @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
     public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();

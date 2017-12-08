@@ -34,7 +34,7 @@ public interface ProductDao extends BaseDao<Product> {
 
     List<Product> loadAllByLimit(int start, int limit);
 
-	List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG, Double PRICE_FILTER, Integer lowPrice, Integer highPrice, String orderByPrice);
+	List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG, Double PRICE_FILTER,  long startTime);
 
 	List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice);
 }

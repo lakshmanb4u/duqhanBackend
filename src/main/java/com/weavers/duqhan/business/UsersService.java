@@ -27,7 +27,7 @@ public interface UsersService {
 
     UserBean fbUserLogin(LoginBean loginBean);
 
-    UserBean userLogin(LoginBean loginBean);
+    UserBean userLogin(LoginBean loginBean, long loginStartTime);
 
     String userLogout(LoginBean loginBean);
 
