@@ -5,11 +5,13 @@
  */
 package com.weavers.duqhan.business.impl;
 
+import com.easypost.model.User;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
+import com.weavers.duqhan.dao.ImpressionsDao;
 import com.weavers.duqhan.dao.LikeUnlikeProductDao;
 import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
@@ -20,6 +22,7 @@ import com.weavers.duqhan.dao.ProductPropertiesDao;
 import com.weavers.duqhan.dao.ProductPropertiesMapDao;
 import com.weavers.duqhan.dao.ProductPropertyvaluesDao;
 import com.weavers.duqhan.dao.RecentViewDao;
+import com.weavers.duqhan.dao.RecordedActionsDao;
 import com.weavers.duqhan.dao.RequestReturnDao;
 import com.weavers.duqhan.dao.ReviewDao;
 import com.weavers.duqhan.dao.UserAddressDao;
@@ -27,6 +30,7 @@ import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
+import com.weavers.duqhan.domain.Impressions;
 import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
@@ -36,6 +40,7 @@ import com.weavers.duqhan.domain.ProductProperties;
 import com.weavers.duqhan.domain.ProductPropertiesMap;
 import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.RecentView;
+import com.weavers.duqhan.domain.RecordedActions;
 import com.weavers.duqhan.domain.RequestReturn;
 import com.weavers.duqhan.domain.Review;
 import com.weavers.duqhan.domain.ShipmentTable;
@@ -121,6 +126,10 @@ public class ProductServiceImpl implements ProductService {
     LikeUnlikeProductDao likeUnlikeProductDao;
 	@Autowired
     RequestReturnDao requestReturnDao;
+	@Autowired
+    ImpressionsDao impressionsDao;
+	@Autowired
+    RecordedActionsDao recordedActionsDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -159,7 +168,98 @@ public class ProductServiceImpl implements ProductService {
 // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="setProductBeans">
-    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime) {
+    private ProductBeans setProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users) {
+        ProductBeans productBeans = new ProductBeans();
+        List<String> allImages = new ArrayList<>();
+        List<ProductBean> beans = new ArrayList<>();
+        List<Long> ids;
+
+        //==================Load Category start====================//
+        ids = new ArrayList<>();
+        for (Product product : products) {
+            ids.add(product.getCategoryId());
+        }
+        System.out.println("Start Of Query for category load by Id==========================="+(startTime-System.currentTimeMillis()));
+        List<Category> categorys = categoryDao.loadByIds(ids);
+        System.out.println("End Of Query for category load by Id==========================="+(startTime-System.currentTimeMillis()));
+        HashMap<Long, String> mapCategory = new HashMap<>();
+        for (Category category : categorys) {
+            mapCategory.put(category.getId(), category.getName());
+        }
+        //==================Load Category end====================//
+        int i = 0;
+        for (Product product : products) {
+            if (mapProductPropertiesMaps.containsKey(product.getId())) {
+                ProductBean bean = new ProductBean();
+                double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
+                bean.setProductId(product.getId());
+                bean.setName(product.getName());
+                if(product.getThumbImg()==null){
+                	bean.setImgurl(product.getImgurl());
+                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
+                	  bean.setImgurl(null);
+                  }else{
+                	bean.setImgurl(product.getThumbImg());
+					}
+                /*LikeUnlikeProduct likeUnlikeProduct=likeUnlikeProductDao.getProductLikeUnlike(product.getId(),users.getId() );
+                if(Objects.nonNull(likeUnlikeProduct)){
+                bean.setLikeUnlike(likeUnlikeProduct.isLikeUnlike());}
+                else{
+                	bean.setLikeUnlike(false);}*/
+                bean.setDescription(product.getDescription());
+                bean.setCategoryId(product.getCategoryId());
+                bean.setCategoryName(mapCategory.get(product.getCategoryId()));
+                bean.setPrice(price);
+                bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                Long qunty = mapProductPropertiesMaps.get(product.getId()).getQuantity();
+                bean.setAvailable(qunty.intValue());
+                bean.setVendorId(product.getVendorId());
+                bean.setShippingRate(product.getShippingRate());
+                bean.setShippingTime(product.getShippingTime());
+                bean.setExternalLink(product.getExternalLink());
+                boolean isAdd = false;
+                double filter = StatusConstants.PRICE_FILTER;
+                if (product.getParentPath().contains("25")) {
+                    filter = StatusConstants.PRICE_FILTER_BAG;
+                }
+                if (bean.getDiscountedPrice() < filter) {
+                    isAdd = true;
+                    allImages.add(product.getImgurl());
+                }
+
+                //==========================load specification start==============================//
+                String specifications = product.getSpecifications();
+                bean.setSpecifications(specifications);
+                if (specifications != null && !specifications.equals("")) {
+                    String[] fiturs = specifications.split(",");
+                    HashMap<String, String> map = new HashMap<>();
+                    for (String fitur : fiturs) {
+                        map.put(fitur.split(":")[0], fitur.split(":")[1]);
+                    }
+                    bean.setSpecificationsMap(map);
+                } else {
+                    bean.setSpecificationsMap(new HashMap<String, String>());
+                }
+                //==========================load specification end==============================//
+
+                //==========================Price filter start==============================//
+                if (isAdd) {
+                    i = i + qunty.intValue();   // count total product
+                    beans.add(bean);
+                }
+                //==========================Price filter end==============================//
+            }
+        }
+        productBeans.setTotalProducts(i);
+        productBeans.setProducts(beans);
+        productBeans.setAllImages(allImages);
+        System.out.println("End Of Older Logic==========================="+(startTime-System.currentTimeMillis()));
+        return productBeans;
+    }
+    
+    
+    private ProductBeans setCacheProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime) {
         ProductBeans productBeans = new ProductBeans();
         List<String> allImages = new ArrayList<>();
         List<ProductBean> beans = new ArrayList<>();
@@ -407,7 +507,7 @@ public class ProductServiceImpl implements ProductService {
         return colorAndSizeDto;
     }*/
     @Override
-    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime) {
+    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users) {
     	List<Product> products = new ArrayList<Product>();
     	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER,startTime);  // Find category wise product 
     	System.out.println("End Of Query for product==========================="+(startTime-System.currentTimeMillis()));
@@ -421,15 +521,21 @@ public class ProductServiceImpl implements ProductService {
                         mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
                         mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
                         mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                        
                     }
                 } else {    // else add new
                     mapProductPropertiesMap.put(productId, productPropertiesMap);
                 }
             }
+            Impressions impressions = new Impressions();
+            impressions.setDate(new Date());
+            impressions.setProductId(product.getId());
+            impressions.setUserId(users.getId());
+            impressionsDao.save(impressions);
         }
         System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
         System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         productBeans.setCategoryName(categoryDao.loadById(categoryId).getName());
         System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
@@ -437,7 +543,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean) {
+    public ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users) {
         List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());    // Find recent view product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -454,13 +560,18 @@ public class ProductServiceImpl implements ProductService {
                     mapProductPropertiesMap.put(productId, productPropertiesMap);
                 }
             }
+            Impressions impressions = new Impressions();
+            impressions.setDate(new Date());
+            impressions.setProductId(product.getId());
+            impressions.setUserId(users.getId());
+            impressionsDao.save(impressions);
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
-        return this.setProductBeans(products, mapProductPropertiesMap,25L);
+        return this.setProductBeans(products, mapProductPropertiesMap,25L,users);
     }
 
     @Override
-    public ProductBeans getAllProducts(int start, int limit, ProductRequistBean requestBean) {
+    public ProductBeans getAllCacheProducts(int start, int limit, ProductRequistBean requestBean) {
     	if(requestBean.getPriceLt() == null){
     		requestBean.setPriceLt(0);
     	}
@@ -488,8 +599,10 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        return this.setProductBeans(products, mapProductPropertiesMap,25L);
+        return this.setCacheProductBeans(products, mapProductPropertiesMap,25L);
     }
+    
+    
 
 //    @Override
 //    public ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit) {
@@ -502,7 +615,7 @@ public class ProductServiceImpl implements ProductService {
 //        return this.setProductBeans(products, mapSizeColorMaps);
 //    }
     @Override
-    public ProductBeans searchProducts(ProductRequistBean requistBean) {
+    public ProductBeans searchProducts(ProductRequistBean requistBean,Users users) {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -521,7 +634,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,25L);
+        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,25L,users);
         productBeans.setSearchString(requistBean.getName());
         return productBeans;
     }
@@ -708,6 +821,12 @@ public class ProductServiceImpl implements ProductService {
 				}
             	productDetailBean.setRatingCount(ratingMap);
             }
+            RecordedActions actions = new RecordedActions();
+            actions.setDate(new Date());
+            actions.setProductId(productId);
+            actions.setUserId(userId);
+            actions.setAction("overview");
+            recordedActionsDao.save(actions);
         } else {
             productDetailBean.setStatus("No Product Found");
         }
@@ -755,6 +874,12 @@ public class ProductServiceImpl implements ProductService {
             Cart cart1 = cartDao.save(cart);    // add product to cart.
             if (cart1 != null) {
                 status = "success";
+                RecordedActions actions = new RecordedActions();
+                actions.setDate(new Date());
+                actions.setProductId(requistBean.getProductId());
+                actions.setUserId(requistBean.getUserId());
+                actions.setAction("addToCart");
+                recordedActionsDao.save(actions);
             }
         }
         //} else {
@@ -1092,9 +1217,10 @@ public class ProductServiceImpl implements ProductService {
 //                if (productDao.isAnyProductInCategoryId(category.getId())) {
 //                categoryDtos.add(categoryDto);
 //                }
-                if (!(category.getImgUrl().equals("-"))) {
+                /*if (!(category.getImgUrl().equals("-"))) {
                     categoryDtos.add(categoryDto);
-                }
+                }*/
+                categoryDtos.add(categoryDto);
             }
 
             categorysBean.setCategoryDtos(categoryDtos);
@@ -1134,9 +1260,10 @@ public class ProductServiceImpl implements ProductService {
 //                if (productDao.isAnyProductInCategoryId(category.getId())) {
 //                categoryDtos.add(categoryDto);
 //                }
-                if (!(category.getImgUrl().equals("-"))) {
+                /*if (!(category.getImgUrl().equals("-"))) {
                     categoryDtos.add(categoryDto);
-                }
+                }*/
+                categoryDtos.add(categoryDto);
             }
 
             categorysBean.setCategoryDtos(categoryDtos);
@@ -1555,7 +1682,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
 //            HashMap<Long, ProductPropertiesMap> mapPropertyMaps = productPropertiesMapDao.getProductPropertiesMapbyMinPriceIfAvailable(productIds);
-            ProductBeans productBeans = this.setProductBeans(offerProducts, mapProductPropertiesMap,25L);
+            ProductBeans productBeans = this.setCacheProductBeans(offerProducts, mapProductPropertiesMap,25L);
             return productBeans;
         } else {
             return new ProductBeans();

@@ -44,7 +44,7 @@ public class CacheController {
 	@Scheduled(fixedRate=900000)
 	public void sheduledCache(){
 		try {
-			cacheProductList = new ObjectMapper().writeValueAsString(productService.getAllProducts(0, 300, new ProductRequistBean()));
+			cacheProductList = new ObjectMapper().writeValueAsString(productService.getAllCacheProducts(0, 300, new ProductRequistBean()));
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -54,7 +54,7 @@ public class CacheController {
 	@RequestMapping(value = "/build-product-cache", method = RequestMethod.POST)  
 	public  void getCacheProductList(HttpServletResponse response, HttpServletRequest request) throws JsonProcessingException {
 		//cacheProductList = productService.getAllProducts(0, 300, new ProductRequistBean()).getProducts();
-		cacheProductList = new ObjectMapper().writeValueAsString(productService.getAllProducts(0, 300, new ProductRequistBean()));
+		cacheProductList = new ObjectMapper().writeValueAsString(productService.getAllCacheProducts(0, 300, new ProductRequistBean()));
 		
 	}
 	

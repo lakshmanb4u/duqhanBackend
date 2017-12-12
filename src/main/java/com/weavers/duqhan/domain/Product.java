@@ -265,7 +265,5 @@ public class Product extends BaseDomain {
 	public void setLikeUnlikeCount(long likeUnlikeCount) {
 		this.likeUnlikeCount = likeUnlikeCount;
 	}
-    
-    
 
 }

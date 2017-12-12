@@ -12,6 +12,11 @@ import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.dao.ImpressionsDao;
+import com.weavers.duqhan.dao.LikeUnlikeProductDao;
+import com.weavers.duqhan.dao.RecordedActionsDao;
+import com.weavers.duqhan.domain.Impressions;
+import com.weavers.duqhan.domain.RecordedActions;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
@@ -35,6 +40,7 @@ import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,6 +75,12 @@ public class UserController {
     PaymentService paymentService;
     @Autowired
     ShippingService shippingService;
+    @Autowired
+    RecordedActionsDao recordedActionsDao;
+    @Autowired
+    LikeUnlikeProductDao likeUnlikeProductDao;
+    @Autowired
+    ImpressionsDao impressionsDao;
     
     private final Logger logger = Logger.getLogger(UserController.class);
 //</editor-fold>
@@ -355,10 +367,10 @@ public class UserController {
                 if (categoryId.equals(1l)) {
                     categoryId = 12l;
                 }
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime);
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users);
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
-                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean);
+                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users);
             } else if (categoryId == null && !isRecent) {
                 //******************all******************//
                // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
@@ -381,14 +393,22 @@ public class UserController {
     //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductBeans getProductV1(Users users,ProductRequistBean requistBean) {
         ProductBeans productBeans = new ProductBeans();
-        	CacheController cache=new CacheController();
         	try {	
         	if(!CacheController.isProductBeanListAvailableForUser(users)) {
         		CacheController.buildProductBeanList(users);
         	} 
         	
         	List<ProductBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
-        	 productBeans.setTotalProducts(300);
+        	
+        	for (ProductBean productBean : productbeans) {
+        		Impressions impressions = new Impressions();
+                impressions.setDate(new Date());
+                impressions.setProductId(productBean.getProductId());
+                impressions.setUserId(users.getId());
+                impressionsDao.save(impressions);	
+			}
+        	
+        	productBeans.setTotalProducts(300);
              productBeans.setProducts(productbeans);
         	} catch (Exception e) {
         		
@@ -404,7 +424,7 @@ public class UserController {
         ProductBeans productBeans = new ProductBeans();
         if (users != null) {
             requistBean.setUserId(users.getId());
-            productBeans = productService.searchProducts(requistBean);
+            productBeans = productService.searchProducts(requistBean,users);
         } else {
             response.setStatus(401);
             productBeans.setStatusCode("401");
@@ -417,7 +437,7 @@ public class UserController {
         //awsCloudWatchHelper.logTimeSecounds("Search Product", "search product response", "search-product API response time", timeTaken);
         return productBeans;
     }
-
+    
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
     public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
@@ -461,6 +481,32 @@ public class UserController {
         return statusBean;
     }
 
+    @RequestMapping(value = "/set-property-record", method = RequestMethod.POST)    // add product to cart by user.
+    public StatusBean setPropertyRecord(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    	 long startTime = System.currentTimeMillis();
+         StatusBean statusBean = new StatusBean();
+         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+         if (users != null) {
+        	 RecordedActions actions = new RecordedActions();
+        	 actions.setDate(new Date());
+             actions.setProductId(requistBean.getProductId());
+             actions.setUserId(users.getId());
+             actions.setAction(requistBean.getName());
+             RecordedActions act=recordedActionsDao.save(actions);
+             if(act != null)
+            	 statusBean.setStatus("success");
+             requistBean.setUserId(users.getId());
+             statusBean.setStatus(productService.removeProductFromCart(requistBean));
+         } else {
+             response.setStatus(401);
+             statusBean.setStatusCode("401");
+             statusBean.setStatus("Invalid Token.");
+         }
+
+         long endTime = System.currentTimeMillis();
+         double timeTaken = (endTime - startTime) / 1000.0;
+         return statusBean;
+    }
     @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
     public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
         long startTime = System.currentTimeMillis();
@@ -614,7 +660,17 @@ public class UserController {
             paymentBean.setStatusCode("401");
             paymentBean.setStatus("Invalid Token.");
         }
-
+        /*if(!paymentBean.getStatusCode().equals("401") && !paymentBean.getStatusCode().equals("500") ){
+        	RecordedActions actions = new RecordedActions();
+        	List<ProductBean> b=cartBean.getProducts();
+        	for (ProductBean productBean : b) {
+        		actions.setDate(new Date());
+                actions.setProductId(productBean.getProductId());
+                actions.setUserId(cartBean.getUserId());
+                actions.setAction("overview");
+                recordedActionsDao.save(actions);
+			}
+        }*/
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
         //awsCloudWatchHelper.logCount("Checkout", "checkout count", "checkout API hit counter");

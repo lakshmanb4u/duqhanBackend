@@ -60,7 +60,7 @@ public class ProductBean {
     private Long productPropertiesMapId;
     private HashMap<String, String> propertyMap;
     private long likeUnlikeCount;
-
+    private boolean likeUnlike;
     /**
      * @return the productId
      */
@@ -461,5 +461,15 @@ public class ProductBean {
 	public void setLikeUnlikeCount(long likeUnlikeCount) {
 		this.likeUnlikeCount = likeUnlikeCount;
 	}
+
+	public boolean isLikeUnlike() {
+		return likeUnlike;
+	}
+
+	public void setLikeUnlike(boolean likeUnlike) {
+		this.likeUnlike = likeUnlike;
+	}
+	
+	
 
 }

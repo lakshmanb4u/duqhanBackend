@@ -47,15 +47,15 @@ public interface ProductService {
 //
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
-    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime);
+    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users);
 
-    ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean);
+    ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users);
 
-    ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean);
+   // ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean,Users users );
 
 //    ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
-    ProductBeans searchProducts(ProductRequistBean requistBean);
+    ProductBeans searchProducts(ProductRequistBean requistBean, Users users);
 
     ProductDetailBean getProductDetailsById(Long productId, Long userId);
 
@@ -132,4 +132,6 @@ public interface ProductService {
 	//LikeUnlikeProductBean saveLikeUnlike(LikeUnlikeProductDto likeUnlike);
 
 	CategorysBean getChildByIdAndActive(Long parentId);
+
+	ProductBeans getAllCacheProducts(int i, int j, ProductRequistBean productRequistBean);
 }

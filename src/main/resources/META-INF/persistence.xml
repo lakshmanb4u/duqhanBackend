@@ -28,6 +28,8 @@
     <class>com.weavers.duqhan.domain.ProductPropertyvalues</class>
     <class>com.weavers.duqhan.domain.UserAouth</class>
     <class>com.weavers.duqhan.domain.ProductProperties</class>
+    <class>com.weavers.duqhan.domain.Impressions</class>
+    <class>com.weavers.duqhan.domain.RecordedActions</class>
     
     <properties>
       <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
