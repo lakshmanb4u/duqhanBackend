@@ -58,6 +58,10 @@ public interface ProductService {
     ProductBeans searchProducts(ProductRequistBean requistBean, Users users);
 
     ProductDetailBean getProductDetailsById(Long productId, Long userId);
+    
+    ProductDetailBean getProductReviewsById(Long productId, Long userId);
+    
+    ProductDetailBean saveRecentRecord(Long productId, Long userId);
 
     Long getCartCountFoAUser(Long userId);
 //

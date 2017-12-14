@@ -439,7 +439,7 @@ public class UserController {
     }
     
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
-    public ProductDetailBean getProductDettails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    public ProductDetailBean getProductDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductDetailBean productDetailBean = new ProductDetailBean();
@@ -457,7 +457,48 @@ public class UserController {
         //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
         return productDetailBean;
     }
-//</editor-fold>
+    
+    @RequestMapping(value = "/get-product-reviews", method = RequestMethod.POST) // product details by product id.
+    public ProductDetailBean getProductReviews(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    	long startTime = System.currentTimeMillis();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        if (users != null) {
+            productDetailBean = productService.getProductReviewsById(requistBean.getProductId(), users.getId());
+        } else {
+            response.setStatus(401);
+            productDetailBean.setStatusCode("401");
+            productDetailBean.setStatus("Invalid Token.");
+        }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Product Detail", "product detail count", "get-product-detail API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
+        return productDetailBean;
+    }
+    
+    @RequestMapping(value = "/save-recent-record", method = RequestMethod.POST) // product details by product id.
+    public ProductDetailBean saveRecentRecord(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    	long startTime = System.currentTimeMillis();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        if (users != null) {
+            productDetailBean = productService.saveRecentRecord(requistBean.getProductId(), users.getId());
+        } else {
+            response.setStatus(401);
+            productDetailBean.setStatusCode("401");
+            productDetailBean.setStatus("Invalid Token.");
+        }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        //awsCloudWatchHelper.logCount("Product Detail", "product detail count", "get-product-detail API hit counter");
+        //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
+        return productDetailBean;
+    }
+    	//</editor-fold>
+    	
 
     //<editor-fold defaultstate="collapsed" desc="Cart Module">
     @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.

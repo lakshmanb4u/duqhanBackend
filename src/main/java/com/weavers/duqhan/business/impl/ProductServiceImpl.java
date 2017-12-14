@@ -638,6 +638,73 @@ public class ProductServiceImpl implements ProductService {
         productBeans.setSearchString(requistBean.getName());
         return productBeans;
     }
+    
+    @Override
+    public ProductDetailBean saveRecentRecord(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        Product product = productDao.loadById(productId);
+        if (product != null) {
+        	if (userId != null) {	
+                RecentView recentView = recentViewDao.getRecentViewProductByUserIdProductId(userId, productId);
+                if (null != recentView) {
+                    long count = recentView.getVisitCount();
+                    recentView.setVisitCount(++count);
+                } else {
+                    recentView = new RecentView();
+                    recentView.setId(null);
+                    recentView.setVisitCount(1L);
+                }
+                recentView.setProductId(product.getId());
+                recentView.setUserId(userId);
+                recentView.setViewDate(new Date());
+                recentViewDao.save(recentView);
+            }
+            //===================Save in recent view table end==================//
+            RecordedActions actions = new RecordedActions();
+            actions.setDate(new Date());
+            actions.setProductId(productId);
+            actions.setUserId(userId);
+            actions.setAction("overview");
+            recordedActionsDao.save(actions);
+        } else {
+            productDetailBean.setStatus("No Product Found");
+        }
+        return productDetailBean;
+    }
+    @Override
+    public ProductDetailBean getProductReviewsById(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
+        ProductDetailBean productDetailBean = new ProductDetailBean();
+        Product product = productDao.loadById(productId);
+        if (product != null) {
+        	List<Review> reviews = new ArrayList<>();
+            reviews = reviewDao.getAllByproductId(productId);
+            
+           productDetailBean.setReviews(reviews);
+           /*List<Object[]> ratingCount=new ArrayList<Object[]>();
+           ratingCount=reviewDao.getAllRatingCount(productId);
+           if(Objects.nonNull(ratingCount)){
+           	Map<String,BigInteger> ratingMap = new HashMap<String,BigInteger>();
+           	for (Object[] objects : ratingCount) {
+           		ratingMap.put("ret1", (BigInteger)objects[0]);
+           		ratingMap.put("ret2", (BigInteger)objects[1]);
+           		ratingMap.put("ret3", (BigInteger)objects[2]);
+           		ratingMap.put("ret4", (BigInteger)objects[3]);
+           		ratingMap.put("ret5", (BigInteger)objects[4]);
+           		ratingMap.put("ret", (BigInteger)objects[5]);
+           		Long divident =((BigInteger)objects[5]).longValue();
+           		Long count = new Long(0);
+           		if(divident !=0){
+           		count=(((BigInteger)objects[0]).longValue() * 1 + ((BigInteger)objects[1]).longValue()*2 + ((BigInteger)objects[2]).longValue() * 3 + ((BigInteger)objects[3]).longValue() * 4+((BigInteger)objects[4]).longValue() * 5) / ((BigInteger)objects[5]).longValue();
+           		}
+           		ratingMap.put("retAvg",new BigInteger(count.toString()));
+				}
+           	productDetailBean.setRatingCount(ratingMap);
+           }*/
+        }else{
+        	productDetailBean.setStatus("No Product Found");
+        }
+        return productDetailBean;
+    }
 
     @Override
     public ProductDetailBean getProductDetailsById(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
@@ -771,62 +838,7 @@ public class ProductServiceImpl implements ProductService {
             //===================Save in recent view table start==================//
             if (userId != null) {
             	productDetailBean.setLikeUnlikeDetails(likeUnlikeProductDao.getProductLikeUnlike(productId, userId));	
-                RecentView recentView = recentViewDao.getRecentViewProductByUserIdProductId(userId, productId);
-                if (null != recentView) {
-                    long count = recentView.getVisitCount();
-                    recentView.setVisitCount(++count);
-                } else {
-                    recentView = new RecentView();
-                    recentView.setId(null);
-                    recentView.setVisitCount(1L);
-                }
-                recentView.setProductId(product.getId());
-                recentView.setUserId(userId);
-                recentView.setViewDate(new Date());
-                recentViewDao.save(recentView);
             }
-            //===================Save in recent view table end==================//
-            List<Review> reviews = new ArrayList<>();
-             reviews = reviewDao.getAllByproductId(productId);
-           /* List<ReviewDto> reviewDtoList = new ArrayList<ReviewDto>();
-            if(Objects.nonNull(reviews) && !reviews.isEmpty()){
-            	for (Review review : reviews) {
-            		ReviewDto reviewDto = new ReviewDto();
-            		reviewDto.setComment(review.getComment());
-            		reviewDto.setDate(review.getDate());
-            		reviewDto.setRating(review.getRating());
-            		reviewDto.setSubject(review.getSubject());
-            		reviewDto.setUserName(review.getUserName());
-            		reviewDtoList.add(reviewDto);
-				}
-            }*/
-            productDetailBean.setReviews(reviews);
-            List<Object[]> ratingCount=new ArrayList<Object[]>();
-            ratingCount=reviewDao.getAllRatingCount(productId);
-            if(Objects.nonNull(ratingCount)){
-            	Map<String,BigInteger> ratingMap = new HashMap<String,BigInteger>();
-            	for (Object[] objects : ratingCount) {
-            		ratingMap.put("ret1", (BigInteger)objects[0]);
-            		ratingMap.put("ret2", (BigInteger)objects[1]);
-            		ratingMap.put("ret3", (BigInteger)objects[2]);
-            		ratingMap.put("ret4", (BigInteger)objects[3]);
-            		ratingMap.put("ret5", (BigInteger)objects[4]);
-            		ratingMap.put("ret", (BigInteger)objects[5]);
-            		Long divident =((BigInteger)objects[5]).longValue();
-            		Long count = new Long(0);
-            		if(divident !=0){
-            		count=(((BigInteger)objects[0]).longValue() * 1 + ((BigInteger)objects[1]).longValue()*2 + ((BigInteger)objects[2]).longValue() * 3 + ((BigInteger)objects[3]).longValue() * 4+((BigInteger)objects[4]).longValue() * 5) / ((BigInteger)objects[5]).longValue();
-            		}
-            		ratingMap.put("retAvg",new BigInteger(count.toString()));
-				}
-            	productDetailBean.setRatingCount(ratingMap);
-            }
-            RecordedActions actions = new RecordedActions();
-            actions.setDate(new Date());
-            actions.setProductId(productId);
-            actions.setUserId(userId);
-            actions.setAction("overview");
-            recordedActionsDao.save(actions);
         } else {
             productDetailBean.setStatus("No Product Found");
         }
