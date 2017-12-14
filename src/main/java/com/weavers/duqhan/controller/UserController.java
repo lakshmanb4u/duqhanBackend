@@ -26,6 +26,7 @@ import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
+import com.weavers.duqhan.dto.LikeDto;
 import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.ProductBeans;
@@ -400,14 +401,14 @@ public class UserController {
         	
         	List<ProductBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
         	
-        	for (ProductBean productBean : productbeans) {
+        	/*for (ProductBean productBean : productbeans) {
         		Impressions impressions = new Impressions();
                 impressions.setDate(new Date());
                 impressions.setProductId(productBean.getProductId());
                 impressions.setUserId(users.getId());
                 impressionsDao.save(impressions);	
 			}
-        	
+        	*/
         	productBeans.setTotalProducts(300);
              productBeans.setProducts(productbeans);
         	} catch (Exception e) {
@@ -452,9 +453,6 @@ public class UserController {
         }
 
         long endTime = System.currentTimeMillis();
-        double timeTaken = (endTime - startTime) / 1000.0;
-        //awsCloudWatchHelper.logCount("Product Detail", "product detail count", "get-product-detail API hit counter");
-        //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
         return productDetailBean;
     }
     
@@ -492,10 +490,24 @@ public class UserController {
         }
 
         long endTime = System.currentTimeMillis();
-        double timeTaken = (endTime - startTime) / 1000.0;
-        //awsCloudWatchHelper.logCount("Product Detail", "product detail count", "get-product-detail API hit counter");
-        //awsCloudWatchHelper.logTimeSecounds("Product Detail", "product detail response", "get-product-detail API response time", timeTaken);
         return productDetailBean;
+    }
+    
+    @RequestMapping(value = "/get-like-unlike", method = RequestMethod.POST) // product details by product id.
+    public LikeDto getLikeUnlike(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    	long startTime = System.currentTimeMillis();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        LikeDto likeDto = new LikeDto();
+        if (users != null) {
+        	likeDto = productService.getLikeUnlike(requistBean.getProductId(), users.getId());
+        } else {
+            response.setStatus(401);
+            likeDto.setStatusCode("401");
+            likeDto.setStatus("Invalid Token.");
+        }
+
+        long endTime = System.currentTimeMillis();
+        return likeDto;
     }
     	//</editor-fold>
     	

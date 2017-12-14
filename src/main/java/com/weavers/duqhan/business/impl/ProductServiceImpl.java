@@ -51,6 +51,7 @@ import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.ImageDto;
+import com.weavers.duqhan.dto.LikeDto;
 import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
@@ -527,11 +528,11 @@ public class ProductServiceImpl implements ProductService {
                     mapProductPropertiesMap.put(productId, productPropertiesMap);
                 }
             }
-            Impressions impressions = new Impressions();
+            /*Impressions impressions = new Impressions();
             impressions.setDate(new Date());
             impressions.setProductId(product.getId());
             impressions.setUserId(users.getId());
-            impressionsDao.save(impressions);
+            impressionsDao.save(impressions);*/
         }
         System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
@@ -560,11 +561,11 @@ public class ProductServiceImpl implements ProductService {
                     mapProductPropertiesMap.put(productId, productPropertiesMap);
                 }
             }
-            Impressions impressions = new Impressions();
+            /*Impressions impressions = new Impressions();
             impressions.setDate(new Date());
             impressions.setProductId(product.getId());
             impressions.setUserId(users.getId());
-            impressionsDao.save(impressions);
+            impressionsDao.save(impressions);*/
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
         return this.setProductBeans(products, mapProductPropertiesMap,25L,users);
@@ -640,6 +641,14 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
+    public LikeDto getLikeUnlike(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
+    	LikeDto likeDto = new LikeDto();
+    	if (userId != null) {
+    		likeDto.setLikeUnlikeDetails(likeUnlikeProductDao.getProductLikeUnlike(productId, userId));	
+        }
+    	return likeDto;
+    }
+    @Override
     public ProductDetailBean saveRecentRecord(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
         ProductDetailBean productDetailBean = new ProductDetailBean();
         Product product = productDao.loadById(productId);
@@ -712,7 +721,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productDao.loadById(productId);
         if (product != null) {
             List<Long> ids;
-            Category category = categoryDao.loadById(product.getCategoryId());
+           // Category category = categoryDao.loadById(product.getCategoryId());
             List<ProductImg> imgs = productImgDao.getProductImgsByProductId(productId);
             double orginalPrice = 0.0;
             double salesPrice = 0.0;
@@ -792,8 +801,8 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setProductId(product.getId());
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
-            productDetailBean.setCategoryId(category.getId());
-            productDetailBean.setCategoryName(category.getName());
+           /* productDetailBean.setCategoryId(category.getId());
+            productDetailBean.setCategoryName(category.getName());*/
             productDetailBean.setProductImg(product.getImgurl());
             productDetailBean.setVendorId(product.getVendorId());
             productDetailBean.setShippingCost(product.getShippingRate());
@@ -836,9 +845,6 @@ public class ProductServiceImpl implements ProductService {
 //            productDetailBean.setShippingCost(null);
 //            productDetailBean.setRelatedProducts(new ProductBeans());
             //===================Save in recent view table start==================//
-            if (userId != null) {
-            	productDetailBean.setLikeUnlikeDetails(likeUnlikeProductDao.getProductLikeUnlike(productId, userId));	
-            }
         } else {
             productDetailBean.setStatus("No Product Found");
         }

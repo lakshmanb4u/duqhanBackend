@@ -10,6 +10,7 @@ import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
+import com.weavers.duqhan.dto.LikeDto;
 import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
@@ -62,7 +63,9 @@ public interface ProductService {
     ProductDetailBean getProductReviewsById(Long productId, Long userId);
     
     ProductDetailBean saveRecentRecord(Long productId, Long userId);
-
+    
+    LikeDto getLikeUnlike(Long productId, Long userId);
+    
     Long getCartCountFoAUser(Long userId);
 //
     String addProductToCart(ProductRequistBean requistBean);
