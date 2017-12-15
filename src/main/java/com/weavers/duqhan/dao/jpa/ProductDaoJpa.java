@@ -118,7 +118,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
         			.setFirstResult(start).setMaxResults(limit);
         	if(categoryId.equals(25L))
-        	categoryId=26L;		
+        	categoryId=27L;		
             query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
             query.setParameter("discountPrice", PRICE_FILTER_BAG);

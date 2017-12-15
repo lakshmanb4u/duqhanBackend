@@ -31,6 +31,8 @@ import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
+import com.weavers.duqhan.dto.ProductNewBean;
+import com.weavers.duqhan.dto.ProductNewBeans;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.ReviewBean;
 import com.weavers.duqhan.dto.ReviewDto;
@@ -340,12 +342,12 @@ public class UserController {
 
     //<editor-fold defaultstate="collapsed" desc="Find Product">
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    public ProductNewBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
         System.out.println("Start Of User auth==========================="+(startTime-System.currentTimeMillis()));
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
-        ProductBeans productBeans = new ProductBeans();
+        ProductNewBeans productBeans = new ProductNewBeans();
         if (users != null) {
             Long categoryId = null;
             Boolean isRecent = null;
@@ -392,14 +394,14 @@ public class UserController {
     }
     
     //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductBeans getProductV1(Users users,ProductRequistBean requistBean) {
-        ProductBeans productBeans = new ProductBeans();
+    public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean) {
+        ProductNewBeans productBeans = new ProductNewBeans();
         	try {	
         	if(!CacheController.isProductBeanListAvailableForUser(users)) {
         		CacheController.buildProductBeanList(users);
         	} 
         	
-        	List<ProductBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
+        	List<ProductNewBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
         	
         	/*for (ProductBean productBean : productbeans) {
         		Impressions impressions = new Impressions();
@@ -409,7 +411,7 @@ public class UserController {
                 impressionsDao.save(impressions);	
 			}
         	*/
-        	productBeans.setTotalProducts(300);
+        	//productBeans.setTotalProducts(300);
              productBeans.setProducts(productbeans);
         	} catch (Exception e) {
         		

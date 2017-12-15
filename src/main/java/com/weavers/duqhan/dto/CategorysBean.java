@@ -18,6 +18,7 @@ public class CategorysBean {
     private int productCount;
     private String statusCode;
     private String status;
+    private String categoryName;
     private Object breadcrums;
 
     /**
@@ -96,6 +97,14 @@ public class CategorysBean {
 
 	public void setBreadcrums(Object breadcrums) {
 		this.breadcrums = breadcrums;
+	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
 	}
     
     

@@ -60,6 +60,8 @@ import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
+import com.weavers.duqhan.dto.ProductNewBean;
+import com.weavers.duqhan.dto.ProductNewBeans;
 import com.weavers.duqhan.dto.ProductPropertiesMapDto;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.PropertyDto;
@@ -69,7 +71,6 @@ import com.weavers.duqhan.dto.ReviewDto;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.GoogleBucketFileUploader;
 import com.weavers.duqhan.util.StatusConstants;
-
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -166,6 +167,32 @@ public class ProductServiceImpl implements ProductService {
         addressDto.setZipCode(userAddress.getZipCode());
         return addressDto;
     }
+    
+    private ProductNewBeans setNewProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users) {
+        ProductNewBeans productNewBeans = new ProductNewBeans();
+        List<ProductNewBean> beans = new ArrayList<>();
+        for (Product product : products) {
+            if (mapProductPropertiesMaps.containsKey(product.getId())) {
+                ProductNewBean bean = new ProductNewBean();
+                double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
+                bean.setProductId(product.getId());
+                if(product.getThumbImg()==null){
+                	bean.setImgurl(product.getImgurl());
+                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
+                	  bean.setImgurl(null);
+                  }else{
+                	bean.setImgurl(product.getThumbImg());
+					}
+                bean.setPrice(price);
+                bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                beans.add(bean);
+            }
+        }
+        productNewBeans.setProducts(beans);
+        return productNewBeans;
+    
+    }
 // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="setProductBeans">
@@ -259,6 +286,31 @@ public class ProductServiceImpl implements ProductService {
         return productBeans;
     }
     
+    private ProductNewBeans setNewCacheProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime) {
+        ProductNewBeans productNewBeans = new ProductNewBeans();
+        List<ProductNewBean> beans = new ArrayList<>();
+        for (Product product : products) {
+            if (mapProductPropertiesMaps.containsKey(product.getId())) {
+                ProductNewBean bean = new ProductNewBean();
+                double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
+                bean.setProductId(product.getId());
+                if(product.getThumbImg()==null){
+                	bean.setImgurl(product.getImgurl());
+                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
+                	  bean.setImgurl(null);
+                  }else{
+                	bean.setImgurl(product.getThumbImg());
+					}
+                bean.setPrice(price);
+                bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                beans.add(bean);
+            }
+        }
+        productNewBeans.setProducts(beans);
+        return productNewBeans;
+    
+    }
     
     private ProductBeans setCacheProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime) {
         ProductBeans productBeans = new ProductBeans();
@@ -508,7 +560,7 @@ public class ProductServiceImpl implements ProductService {
         return colorAndSizeDto;
     }*/
     @Override
-    public ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users) {
+    public ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users) {
     	List<Product> products = new ArrayList<Product>();
     	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER,startTime);  // Find category wise product 
     	System.out.println("End Of Query for product==========================="+(startTime-System.currentTimeMillis()));
@@ -536,15 +588,15 @@ public class ProductServiceImpl implements ProductService {
         }
         System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
+        //ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
+        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users);
         System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
-        productBeans.setCategoryName(categoryDao.loadById(categoryId).getName());
         System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
 
     @Override
-    public ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users) {
+    public ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users) {
         List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());    // Find recent view product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -568,11 +620,11 @@ public class ProductServiceImpl implements ProductService {
             impressionsDao.save(impressions);*/
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
-        return this.setProductBeans(products, mapProductPropertiesMap,25L,users);
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
     }
 
     @Override
-    public ProductBeans getAllCacheProducts(int start, int limit, ProductRequistBean requestBean) {
+    public ProductNewBeans getAllCacheProducts(int start, int limit, ProductRequistBean requestBean) {
     	if(requestBean.getPriceLt() == null){
     		requestBean.setPriceLt(0);
     	}
@@ -600,7 +652,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        return this.setCacheProductBeans(products, mapProductPropertiesMap,25L);
+        return this.setNewCacheProductBeans(products, mapProductPropertiesMap,25L);
     }
     
     
@@ -1206,6 +1258,7 @@ public class ProductServiceImpl implements ProductService {
         CategorysBean categorysBean = new CategorysBean();
         List<CategoryDto> categoryDtos = new ArrayList<>();
         List<Category> categorys = categoryDao.getChildByParentId(parentId);
+        categorysBean.setCategoryName(categoryDao.loadById(parentId).getName());
         if (categorys.isEmpty()) {
             categorysBean.setStatus("No child category found");
             categorysBean.setStatusCode("403");
@@ -1243,11 +1296,12 @@ public class ProductServiceImpl implements ProductService {
 
             categorysBean.setCategoryDtos(categoryDtos);
             categorysBean.setChildCount(categoryDtos.size());
-            List<Product> products = productDao.getProductsByCategory(parentId);
+            
+            /*List<Product> products = productDao.getProductsByCategory(parentId);
             categorysBean.setProductCount(0);
             if (!products.isEmpty()) {
                 categorysBean.setProductCount(products.size());
-            }
+            }*/
             categorysBean.setStatus("success");
             categorysBean.setStatusCode("200");
         }
@@ -1286,11 +1340,11 @@ public class ProductServiceImpl implements ProductService {
 
             categorysBean.setCategoryDtos(categoryDtos);
             categorysBean.setChildCount(categoryDtos.size());
-            List<Product> products = productDao.getProductsByCategory(parentId);
+            /*List<Product> products = productDao.getProductsByCategory(parentId);
             categorysBean.setProductCount(0);
             if (!products.isEmpty()) {
                 categorysBean.setProductCount(products.size());
-            }
+            }*/
             categorysBean.setStatus("success");
             categorysBean.setStatusCode("200");
         }

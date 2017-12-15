@@ -27,6 +27,8 @@ import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
+import com.weavers.duqhan.dto.ProductNewBean;
+import com.weavers.duqhan.dto.ProductNewBeans;
 import com.weavers.duqhan.dto.ProductRequistBean;
 
 @CrossOrigin
@@ -36,7 +38,7 @@ import com.weavers.duqhan.dto.ProductRequistBean;
 @RequestMapping("/buildController/**")
 public class CacheController {
 	public static String cacheProductList = null;
-	public static Map<Long,List<ProductBean>> userProductCacheMap = new HashMap<Long,List<ProductBean>>();
+	public static Map<Long,List<ProductNewBean>> userProductCacheMap = new HashMap<Long,List<ProductNewBean>>();
 	
 	@Autowired
     ProductService productService;
@@ -67,15 +69,15 @@ public class CacheController {
 	}
 	
 	public static void buildProductBeanList(Users u) throws JsonParseException, JsonMappingException, IOException {
-		ProductBeans productBeans = new ObjectMapper().readValue(cacheProductList, ProductBeans.class);
-		List<ProductBean> listOfProduct = productBeans.getProducts();
+		ProductNewBeans productBeans = new ObjectMapper().readValue(cacheProductList, ProductNewBeans.class);
+		List<ProductNewBean> listOfProduct = productBeans.getProducts();
 		Collections.shuffle(listOfProduct);
 		userProductCacheMap.put(u.getId(), listOfProduct);
 	}
 	
 	
-	public static List<ProductBean> getProductBeanList(Users u, int start , int limit) throws JsonParseException, JsonMappingException, IOException {
-		List<ProductBean> listOfProduct = new ArrayList<ProductBean>();
+	public static List<ProductNewBean> getProductBeanList(Users u, int start , int limit) throws JsonParseException, JsonMappingException, IOException {
+		List<ProductNewBean> listOfProduct = new ArrayList<ProductNewBean>();
 		listOfProduct = userProductCacheMap.get(u.getId());
 		if(listOfProduct.size()>(start + limit))
 		return listOfProduct.subList(start, start + limit);

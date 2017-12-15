@@ -18,6 +18,7 @@ import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
+import com.weavers.duqhan.dto.ProductNewBeans;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.ReviewBean;
 import com.weavers.duqhan.dto.ReviewDto;
@@ -48,9 +49,9 @@ public interface ProductService {
 //
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
-    ProductBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users);
+    ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users);
 
-    ProductBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users);
+    ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users);
 
    // ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean,Users users );
 
@@ -140,5 +141,5 @@ public interface ProductService {
 
 	CategorysBean getChildByIdAndActive(Long parentId);
 
-	ProductBeans getAllCacheProducts(int i, int j, ProductRequistBean productRequistBean);
+	ProductNewBeans getAllCacheProducts(int i, int j, ProductRequistBean productRequistBean);
 }
