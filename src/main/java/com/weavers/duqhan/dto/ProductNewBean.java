@@ -8,6 +8,7 @@ public class ProductNewBean {
 
     private Long productId;
     private String imgurl;
+    private String name;
     private Double price;
     private Double discountedPrice;
     private Double discountPCT;
@@ -40,6 +41,12 @@ public class ProductNewBean {
 	}
 	public void setDiscountPCT(Double discountPCT) {
 		this.discountPCT = discountPCT;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
     
     

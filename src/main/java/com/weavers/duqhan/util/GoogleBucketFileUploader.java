@@ -34,6 +34,7 @@ public class GoogleBucketFileUploader {
     private static final String RETURN_BUCKET_NAME = "duqhan-images-poc";
     private static final String PRODUCT_BUCKET_NAME = "PRODUCT_BUCKET_NAME";
     private static final String JSON_PATH = "/DUQHAN-e19d56eacc29.json";
+    private static final String PROFILE_USER_IMAGE = "duqhan-users";
 
     private Storage authentication() {
         Storage storage = null;
@@ -69,7 +70,7 @@ public class GoogleBucketFileUploader {
                     final String fileName = "img_" + userId.toString() + dtString + ".jpg";
                     // the inputstream is closed by default, so we don't need to close it here
                     BlobInfo blobInfo = storage.create(BlobInfo
-                            .newBuilder(USER_BUCKET_NAME, fileName)
+                            .newBuilder(PROFILE_USER_IMAGE, fileName)
                             .setContentType("image/jpeg")
                             // Modify access list to allow all users with link to read file
                             .setAcl(new ArrayList<>(Arrays.asList(Acl.of(Acl.User.ofAllUsers(), Acl.Role.OWNER))))
@@ -77,7 +78,7 @@ public class GoogleBucketFileUploader {
                             targetStream);
                     // return the public view link
 //                    System.out.println("https://storage.googleapis.com/duqhan-users/" + blobInfo.getName());
-                    imgUrl = "https://storage.googleapis.com/duqhan-users/" + blobInfo.getName();
+                    imgUrl = "https://storage.googleapis.com/"+PROFILE_USER_IMAGE+"/" + blobInfo.getName();
                 }
             } catch (IOException ex) {
                 Logger.getLogger(GoogleBucketFileUploader.class.getName()).log(Level.SEVERE, null, ex);

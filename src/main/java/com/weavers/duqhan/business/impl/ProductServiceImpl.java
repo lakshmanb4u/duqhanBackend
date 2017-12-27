@@ -176,17 +176,20 @@ public class ProductServiceImpl implements ProductService {
                 ProductNewBean bean = new ProductNewBean();
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
-                if(product.getThumbImg()==null){
-                	bean.setImgurl(product.getImgurl());
-                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
-                	  bean.setImgurl(null);
-                  }else{
-                	bean.setImgurl(product.getThumbImg());
-					}
+                bean.setName(product.getName());
                 bean.setPrice(price);
                 bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
-                beans.add(bean);
+                if(product.getThumbImg()!=null || !(product.getThumbImg().equals("-")) || !(product.getThumbImg().equals("failure"))){
+                	bean.setImgurl(product.getThumbImg());
+                	beans.add(bean);
+                  }else{
+                	if(!(product.getImgurl().equals("-")) || product.getImgurl() !=null){
+                		bean.setImgurl(product.getImgurl());
+                		beans.add(bean);
+                	}
+                }
+                
             }
         }
         productNewBeans.setProducts(beans);
@@ -294,6 +297,7 @@ public class ProductServiceImpl implements ProductService {
                 ProductNewBean bean = new ProductNewBean();
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
+                bean.setName(product.getName());
                 if(product.getThumbImg()==null){
                 	bean.setImgurl(product.getImgurl());
                   }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
@@ -1260,8 +1264,17 @@ public class ProductServiceImpl implements ProductService {
         List<Category> categorys = categoryDao.getChildByParentId(parentId);
         categorysBean.setCategoryName(categoryDao.loadById(parentId).getName());
         if (categorys.isEmpty()) {
-            categorysBean.setStatus("No child category found");
+        	categorysBean.setStatus("No child category found");
             categorysBean.setStatusCode("403");
+        	List<Category> categorysParent=categoryDao.getById(parentId);
+        	String parentPath=categorysParent.get(0).getParentPath();
+        	String[] categoryList = parentPath.split("=");
+        	List<Long> categoryId = new ArrayList<>();
+        	for(int i=1;i<categoryList.length;i++){
+        	categoryId.add(new Long(categoryList[i]));
+        	}
+        	categoryId.add(parentId);
+         categorysBean.setBreadcrums(categoryDao.getCategoryNameAndIds(categoryId));
         } else {
         	
         	String parentPath = categorys.get(0).getParentPath();
@@ -1399,6 +1412,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setEmail(mapUserAddress.get(orderDetailse.getAddressId()).getEmail());
                 orderDetailsDto.setMapId(orderDetailse.getMapId());
                 orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
+                orderDetailsDto.setOrderDateTime(orderDetailse.getOrderDate());
                 orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
                 orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
                 orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());

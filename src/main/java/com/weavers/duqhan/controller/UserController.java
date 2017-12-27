@@ -51,6 +51,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.linkedin.api.Product;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -159,12 +160,13 @@ public class UserController {
         }
         return userBean1;
     }*/
-    @RequestMapping(value = "/update-profile-image", method = RequestMethod.POST)   // Update profile image.
-    public UserBean updateProfileImage(HttpServletResponse response, @RequestParam MultipartFile file, @RequestParam Long userId) {
+    @RequestMapping(value = "/update-profile-image/{userId}", method = RequestMethod.POST)   // Update profile image.
+    public UserBean updateProfileImage(HttpServletResponse response, @RequestParam MultipartFile file, @PathVariable("userId") Long userId) {
         long startTime = System.currentTimeMillis();
         UserBean userBean1 = new UserBean();
         Users users = usersService.getUserById(userId);   // Check whether Auth-Token is valid, provided by user
         if (users != null && file != null) {
+        	System.out.println(file.getOriginalFilename()+ "==" + userId);
             userBean1.setProfileImg(usersService.updateUserProfileImage(users, file));
         } else {
             response.setStatus(401);

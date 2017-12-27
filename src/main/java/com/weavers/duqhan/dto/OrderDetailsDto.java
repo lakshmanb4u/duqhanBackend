@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.dto;
 
+import java.util.Date;
 import java.util.HashMap;
 
 /**
@@ -32,7 +33,7 @@ public class OrderDetailsDto {
     private TrackerBean trackerBean;
     private String returnStatus;
     private HashMap<String, String> propertyMap;
-
+    private Date orderDateTime;
     /**
      * @return the userId
      */
@@ -298,5 +299,15 @@ public class OrderDetailsDto {
     public void setPropertyMap(HashMap<String, String> propertyMap) {
         this.propertyMap = propertyMap;
     }
+
+	public Date getOrderDateTime() {
+		return orderDateTime;
+	}
+
+	public void setOrderDateTime(Date orderDateTime) {
+		this.orderDateTime = orderDateTime;
+	}
+    
+    
 
 }
