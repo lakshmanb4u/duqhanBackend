@@ -23,6 +23,8 @@ public interface ProductDao extends BaseDao<Product> {
     List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit);
 
     List<Product> getAllRecentViewProduct(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice);
+    
+    List<Product> getAllRecentViewProductByPrice(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice,Double lp,Double hp);
 
     List<Product> getProductsByCategory(Long categoryId);
 
@@ -35,6 +37,8 @@ public interface ProductDao extends BaseDao<Product> {
     List<Product> loadAllByLimit(int start, int limit);
 
 	List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG, Double PRICE_FILTER,  long startTime);
+	
+	List<Product> getProductsByPrice(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG, Double PRICE_FILTER,  long startTime,Double lp,Double hp);
 
 	List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice);
 }

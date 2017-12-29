@@ -180,14 +180,15 @@ public class ProductServiceImpl implements ProductService {
                 bean.setPrice(price);
                 bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
-                if(product.getThumbImg()!=null || !(product.getThumbImg().equals("-")) || !(product.getThumbImg().equals("failure"))){
-                	bean.setImgurl(product.getThumbImg());
+                if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
+                	if(!(product.getImgurl() ==null || product.getImgurl().equals("-") || product.getImgurl().equals("failure"))) {
+                    bean.setImgurl(product.getImgurl());
                 	beans.add(bean);
-                  }else{
-                	if(!(product.getImgurl().equals("-")) || product.getImgurl() !=null){
-                		bean.setImgurl(product.getImgurl());
-                		beans.add(bean);
                 	}
+                  }else{
+                
+                		bean.setImgurl(product.getThumbImg());
+                		beans.add(bean);
                 }
                 
             }
@@ -598,10 +599,78 @@ public class ProductServiceImpl implements ProductService {
         System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
+    
+    @Override
+    public ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users,String lp,String hp) {
+    	List<Product> products = new ArrayList<Product>();
+    	Double lowPrice = Double.parseDouble(lp);
+    	Double highPrice = Double.parseDouble(hp);
+    	products = productDao.getProductsByPrice(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER,startTime,lowPrice,highPrice);  // Find category wise product 
+    	System.out.println("End Of Query for product==========================="+(startTime-System.currentTimeMillis()));
+    	HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
+        for (Product product : products) {
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                        
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
+            /*Impressions impressions = new Impressions();
+            impressions.setDate(new Date());
+            impressions.setProductId(product.getId());
+            impressions.setUserId(users.getId());
+            impressionsDao.save(impressions);*/
+        }
+        System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
+//        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
+        //ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
+        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users);
+        System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
+        System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
+        return productBeans;
+    }
 
     @Override
     public ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users) {
         List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());    // Find recent view product 
+        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
+        for (Product product : products) {
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+            for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
+                Long productId = productPropertiesMap.getProductId().getId();
+                if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
+                    if (mapProductPropertiesMap.get(productId).getDiscount() > productPropertiesMap.getDiscount()) {
+                        mapProductPropertiesMap.get(productId).setDiscount(productPropertiesMap.getDiscount());
+                        mapProductPropertiesMap.get(productId).setPrice(productPropertiesMap.getPrice());
+                        mapProductPropertiesMap.get(productId).setQuantity(mapProductPropertiesMap.get(productId).getQuantity() + productPropertiesMap.getQuantity());
+                    }
+                } else {    // else add new
+                    mapProductPropertiesMap.put(productId, productPropertiesMap);
+                }
+            }
+            /*Impressions impressions = new Impressions();
+            impressions.setDate(new Date());
+            impressions.setProductId(product.getId());
+            impressions.setUserId(users.getId());
+            impressionsDao.save(impressions);*/
+        }
+        //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
+    }
+    
+    @Override
+    public ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requestBean,Users users,String lp,String hp) {
+        Double lowPrice = Double.parseDouble(lp);
+        Double highPrice = Double.parseDouble(hp);
+    	List<Product> products = productDao.getAllRecentViewProductByPrice(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy(),lowPrice,highPrice);    // Find recent view product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
             List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();

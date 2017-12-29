@@ -26,6 +26,8 @@ public class ProductRequistBean {
     private String priceOrderBy;
     private Integer priceGt;
     private Integer priceLt;
+    private String lowPrice;
+    private String highPrice;
 
     /**
      * @return the productId
@@ -219,6 +221,22 @@ public class ProductRequistBean {
 		this.priceLt = priceLt;
 	}
 
+	public String getLowPrice() {
+		return lowPrice;
+	}
+
+	public void setLowPrice(String lowPrice) {
+		this.lowPrice = lowPrice;
+	}
+
+	public String getHighPrice() {
+		return highPrice;
+	}
+
+	public void setHighPrice(String highPrice) {
+		this.highPrice = highPrice;
+	}
+	
 	
    
 }

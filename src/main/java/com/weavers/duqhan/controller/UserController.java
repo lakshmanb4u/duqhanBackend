@@ -45,11 +45,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.social.linkedin.api.Product;
+//import org.springframework.social.linkedin.api.Product;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -366,20 +368,32 @@ public class UserController {
             if(requistBean.getPriceLt() == null){
             	requistBean.setPriceLt(0);
             }
-
+            
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
                 if (categoryId.equals(1l)) {
                     categoryId = 12l;
                 }
+                if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
+                	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice());	
+                }else {
                 productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users);
+                }
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
+            	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
+                 	productBeans = productService.getProductsByRecentViewPrice(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,requistBean.getLowPrice(),requistBean.getHighPrice());	
+                 }else {
                 productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users);
-            } else if (categoryId == null && !isRecent) {
+                 }
+                 } else if (categoryId == null && !isRecent) {
                 //******************all******************//
                // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
-            	productBeans = this.getProductV1(users,requistBean);
+                	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
+                		 productBeans = this.getProductCacheByPrice(users, requistBean);
+                      }else {
+                        productBeans = this.getProductV1(users,requistBean);
+                      }
             }
         } else {
             response.setStatus(401);
@@ -404,6 +418,32 @@ public class UserController {
         	} 
         	
         	List<ProductNewBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
+        	
+        	/*for (ProductBean productBean : productbeans) {
+        		Impressions impressions = new Impressions();
+                impressions.setDate(new Date());
+                impressions.setProductId(productBean.getProductId());
+                impressions.setUserId(users.getId());
+                impressionsDao.save(impressions);	
+			}
+        	*/
+        	//productBeans.setTotalProducts(300);
+             productBeans.setProducts(productbeans);
+        	} catch (Exception e) {
+        		
+        	}
+        
+        return productBeans;
+    }
+    
+    public ProductNewBeans getProductCacheByPrice(Users users,ProductRequistBean requistBean) {
+        ProductNewBeans productBeans = new ProductNewBeans();
+        	try {	
+        	if(!CacheController.isProductBeanListAvailableForUserPrice(users)) {
+        		CacheController.buildProductBeanListPrice(users,requistBean.getLowPrice(),requistBean.getHighPrice());
+        	} 
+        	
+        	List<ProductNewBean> productbeans = CacheController.getProductBeanListByPrice(users, requistBean.getStart(), requistBean.getLimit());
         	
         	/*for (ProductBean productBean : productbeans) {
         		Impressions impressions = new Impressions();

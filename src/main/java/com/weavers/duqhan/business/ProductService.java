@@ -50,8 +50,12 @@ public interface ProductService {
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
     ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users);
+    
+    ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users,String lp,String hp);
 
     ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users);
+    
+    ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requistBean, Users users,String lp,String hp);
 
    // ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean,Users users );
 
