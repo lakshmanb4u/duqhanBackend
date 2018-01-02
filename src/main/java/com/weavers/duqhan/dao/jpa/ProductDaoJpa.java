@@ -78,7 +78,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     @Override
     public List<Product> getAllRecentViewProductByPrice(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice,Double lp,Double hp) {
         //SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv INNER JOIN p.ProductPropertiesMaps AS map on p=map.productId.id WHERE p.id = rv.productId AND rv.userId=:userId AND map.price >:lowPrice AND map.price <:highPrice ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv INNER JOIN p.ProductPropertiesMaps AS map on p=map.productId.id WHERE p.id = rv.productId AND rv.userId=:userId AND map.discount >:lowPrice AND map.discount <:highPrice ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
         query.setParameter("lowPrice", lp);
         query.setParameter("highPrice", hp);
@@ -165,15 +165,15 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	if(categoryId.equals(25L) || parentPath.contains("25")){
     		System.out.println("Start Of Query for product==========================="+(startTime-System.currentTimeMillis()));
     		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND map.price >:lowPrice AND map.price <:highPrice AND "
+        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
         			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
         			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
         			.setFirstResult(start).setMaxResults(limit);
         	if(categoryId.equals(25L))
         	categoryId=27L;		
             query.setParameter("categoryId", categoryId);
-            query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("discountPrice", PRICE_FILTER_BAG);
+            query.setParameter("parentPath", "%=" + categoryId + "=%");/*
+            query.setParameter("discountPrice", PRICE_FILTER_BAG);*/
             query.setParameter("lowPrice", lowPrice);
             query.setParameter("highPrice", highPrice);
             return query.getResultList();
@@ -181,10 +181,10 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	/*Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);*/
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND map.price >:lowPrice AND map.price <:highPrice AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
-            query.setParameter("discountPrice", PRICE_FILTER);
+            /*query.setParameter("discountPrice", PRICE_FILTER);*/
             query.setParameter("lowPrice", lowPrice);
             query.setParameter("highPrice", highPrice);
             return query.getResultList();

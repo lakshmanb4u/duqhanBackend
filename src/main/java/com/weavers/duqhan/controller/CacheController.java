@@ -93,7 +93,7 @@ public class CacheController {
 		Double lowPrice = Double.parseDouble(lp);
 		Double highPrice = Double.parseDouble(hp);
 		for(ProductNewBean pnb:listOfProduct) {
-			if(pnb.getPrice()<highPrice && pnb.getPrice()>lowPrice)
+			if(pnb.getDiscountedPrice()<highPrice && pnb.getDiscountedPrice()>lowPrice)
 				listOfProduct1.add(pnb);
 		}
 		userProductCacheMap1.put(u.getId(), listOfProduct1);
