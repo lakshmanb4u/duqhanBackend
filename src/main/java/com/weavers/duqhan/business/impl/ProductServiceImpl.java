@@ -299,13 +299,16 @@ public class ProductServiceImpl implements ProductService {
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
-                if(product.getThumbImg()==null){
-                	bean.setImgurl(product.getImgurl());
-                  }else if (product.getThumbImg().equals("-") || product.getThumbImg().equals("failure")) {
-                	  bean.setImgurl(null);
-                  }else{
-                	bean.setImgurl(product.getThumbImg());
-					}
+                if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
+                   	if(!(product.getImgurl() ==null || product.getImgurl().equals("-") || product.getImgurl().equals("failure"))) {
+                       bean.setImgurl(product.getImgurl());
+                   	beans.add(bean);
+                   	}
+                }else{
+                   
+                    bean.setImgurl(product.getThumbImg());
+                   	beans.add(bean);
+                }
                 bean.setPrice(price);
                 bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
