@@ -61,7 +61,7 @@ public interface ProductService {
 
 //    ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
-    ProductBeans searchProducts(ProductRequistBean requistBean, Users users);
+    ProductNewBeans searchProducts(ProductRequistBean requistBean, Users users);
 
     ProductDetailBean getProductDetailsById(Long productId, Long userId);
     

@@ -744,7 +744,7 @@ public class ProductServiceImpl implements ProductService {
 //        return this.setProductBeans(products, mapSizeColorMaps);
 //    }
     @Override
-    public ProductBeans searchProducts(ProductRequistBean requistBean,Users users) {
+    public ProductNewBeans searchProducts(ProductRequistBean requistBean,Users users) {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -763,7 +763,7 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,25L,users);
+        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
         productBeans.setSearchString(requistBean.getName());
         return productBeans;
     }
@@ -849,7 +849,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productDao.loadById(productId);
         if (product != null) {
             List<Long> ids;
-           // Category category = categoryDao.loadById(product.getCategoryId());
+            //Category category = categoryDao.loadById(product.getCategoryId());
             List<ProductImg> imgs = productImgDao.getProductImgsByProductId(productId);
             double orginalPrice = 0.0;
             double salesPrice = 0.0;
@@ -929,8 +929,8 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setProductId(product.getId());
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
-           /* productDetailBean.setCategoryId(category.getId());
-            productDetailBean.setCategoryName(category.getName());*/
+            productDetailBean.setCategoryId(product.getCategoryId());
+           /* productDetailBean.setCategoryName(category.getName());*/
             productDetailBean.setProductImg(product.getImgurl());
             productDetailBean.setVendorId(product.getVendorId());
             productDetailBean.setShippingCost(product.getShippingRate());

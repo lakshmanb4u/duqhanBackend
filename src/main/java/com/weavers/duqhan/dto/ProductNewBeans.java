@@ -10,6 +10,7 @@ public class ProductNewBeans {
 	private List<ProductNewBean> products;
     private String statusCode;
     private String status;
+    private String searchString;
 	public List<ProductNewBean> getProducts() {
 		return products;
 	}
@@ -28,5 +29,12 @@ public class ProductNewBeans {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public String getSearchString() {
+		return searchString;
+	}
+	public void setSearchString(String searchString) {
+		this.searchString = searchString;
+	}
+	
     
 }

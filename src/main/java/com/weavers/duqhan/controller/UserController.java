@@ -463,10 +463,10 @@ public class UserController {
     }
     
     @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
-    public ProductBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    public ProductNewBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        ProductBeans productBeans = new ProductBeans();
+        ProductNewBeans productBeans = new ProductNewBeans();
         if (users != null) {
             requistBean.setUserId(users.getId());
             productBeans = productService.searchProducts(requistBean,users);
