@@ -748,7 +748,8 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
+        	Product productObj = productDao.loadById(product.getId());
+            List<ProductPropertiesMap> productPropertiesMaps = productObj.getProductPropertiesMaps();
             for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
                 Long productId = productPropertiesMap.getProductId().getId();
                 if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
