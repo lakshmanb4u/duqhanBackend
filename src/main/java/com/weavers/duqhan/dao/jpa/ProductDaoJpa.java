@@ -130,7 +130,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ " on p=map.productId.id WHERE "
         			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY map.discount,p.lastUpdate DESC")
+        			+ "GROUP BY p.id ORDER BY p.linkId")
         			.setFirstResult(start).setMaxResults(limit);
         	if(categoryId.equals(25L))
         	categoryId=27L;		
@@ -142,7 +142,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	/*Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);*/
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY map.discount,p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        			+ " on p=map.productId.id WHERE p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
             /*query.setParameter("discountPrice", PRICE_FILTER);*/
@@ -167,7 +167,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
         			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
+        			+ "GROUP BY p.id ORDER BY p.linkId")
         			.setFirstResult(start).setMaxResults(limit);
         	if(categoryId.equals(25L))
         	categoryId=27L;		
@@ -181,7 +181,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	/*Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);*/
         	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
             /*query.setParameter("discountPrice", PRICE_FILTER);*/

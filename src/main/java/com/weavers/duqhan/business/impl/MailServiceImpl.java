@@ -50,7 +50,8 @@ public class MailServiceImpl implements MailService {
     ProductPropertyvaluesDao productPropertyvaluesDao;
     @Autowired
     ProductPropertiesDao productPropertiesDao;
-    private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
+    //private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
+    private static final String ADMIN_MAIL = "abhijit.borkar137@gmail.com";//duqhanapp@gmail.com
     private static final String BCC = "krisanu.nandi@pkweb.in";
 
     @Override
@@ -64,7 +65,7 @@ public class MailServiceImpl implements MailService {
         String body = "";
         ProductPropertiesMap propertyMap = productPropertiesMapDao.loadById(orderDetails.getMapId());
         body = "<table><tr><td>User ID </td><td> : " + orderDetails.getUserId() + "</td></tr><tr><td>User Name</td><td> : " + usersDao.loadById(orderDetails.getUserId()).getName() + "</td></tr><tr><td>Order ID</td><td> : " + orderDetails.getOrderId() + "</td></tr><tr><td>Product</td><td> : " + productDao.loadById(propertyMap.getProductId().getId()).getName() + "</td></tr><tr><td>Product Size Color Map ID</td><td> : " + propertyMap.getId() + "</td></tr><tr><td>Quantity</td><td> : " + orderDetails.getQuentity() + "</td></tr><tr><td>Order Date</td><td> : " + DateFormater.formate(orderDetails.getOrderDate()) + "</td></tr></table>";
-        String status = MailSender.sendEmail(ADMIN_MAIL, "Return Request", body, BCC);// send mail to Admin if user return a order.
+        String status = MailSender.sendEmail(ADMIN_MAIL, "Cancel Order", body, BCC);// send mail to Admin if user return a order.
         return status;
     }
 

@@ -1117,7 +1117,7 @@ public class ProductServiceImpl implements ProductService {
                     productBean.setShippingTime(product.getShippingTime());
                 } else {
                     productBean.setShippingRate(0.0);
-                    productBean.setShippingTime("21");
+                    productBean.setShippingTime("3-4 weeks");
                 }
                 productBean.setVendorId(product.getVendorId());
                 productBean.setProductHeight(product.getProductHeight());
@@ -1526,7 +1526,7 @@ public class ProductServiceImpl implements ProductService {
             //orderDetails.setReturnStatus(StatusConstants.REQUEST_FOR_RETURN);
         	orderDetails.setStatus("order cancel");
             orderDetailsDao.save(orderDetails);
-            //mailService.returnRequestToAdmin(orderDetails);
+            mailService.returnRequestToAdmin(orderDetails);
         }
     }
 

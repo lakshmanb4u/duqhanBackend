@@ -103,6 +103,9 @@ public class Product extends BaseDomain {
     
     @Column(name = "like_unlike_count")
     private long likeUnlikeCount;
+    
+    @Column(name = "link_id")
+    private long linkId;
 
     @Column(name = "thumb_img")
     private String thumbImg;
@@ -265,5 +268,15 @@ public class Product extends BaseDomain {
 	public void setLikeUnlikeCount(long likeUnlikeCount) {
 		this.likeUnlikeCount = likeUnlikeCount;
 	}
+
+	public long getLinkId() {
+		return linkId;
+	}
+
+	public void setLinkId(long linkId) {
+		this.linkId = linkId;
+	}
+	
+	
 
 }
