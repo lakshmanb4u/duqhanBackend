@@ -1532,6 +1532,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void returnOrder(OrderReturnDto orderReturnDto,MultipartFile file) {
+    	OrderDetails orderDetails = orderDetailsDao.getOrderDetailsByUserIdAndOrderId(orderReturnDto.getUserId(), orderReturnDto.getOrderId());
+    	if (orderDetails != null){
     	RequestReturn obj = new RequestReturn();
     	obj.setOrderId(orderReturnDto.getOrderId());
     	obj.setUserId(orderReturnDto.getUserId());
@@ -1541,6 +1543,8 @@ public class ProductServiceImpl implements ProductService {
         //System.out.println("image uploaded.......................................");
     	requestReturnDao.save(obj);
     	//System.out.println(orderReturnDto.getOrderId()+"  "+orderReturnDto.getReturnText());
+    	mailService.returnRequestToAdminDeliver(orderDetails);
+    	}
     }
     /*
     @Override

@@ -31,4 +31,6 @@ public interface MailService {
     String sendPurchaseMailToAdmin(List<OrderDetails> orderDetails);
 
     String sendPurchaseMailToUser(List<OrderDetails> orderDetails);
+
+	String returnRequestToAdminDeliver(OrderDetails orderDetails);
 }
