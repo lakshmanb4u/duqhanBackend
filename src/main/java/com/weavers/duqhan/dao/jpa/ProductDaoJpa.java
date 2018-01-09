@@ -256,7 +256,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
        // Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE MATCH (p.name,p.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
        // query.setParameter("searchName",searchName);
-    	Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.last_update DESC").setFirstResult(start).setMaxResults(limit);
+    	Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.link_id").setFirstResult(start).setMaxResults(limit);
     	query.setParameter("searchName",searchName);
     	
     	List<Product> searchList = new ArrayList<Product>();
@@ -267,6 +267,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	product.setName(obj[1].toString());
         	product.setCategoryId(Long.parseLong(obj[2].toString()));
         	product.setImgurl(obj[4].toString());
+        	product.setThumbImg(obj[5].toString());
         	searchList.add(product);
     	}
         return searchList;
