@@ -50,6 +50,8 @@ public class Category extends BaseDomain {
     @Size(max = 255)
     @Column(name = "menu_icon")
     private String menuIcon;
+    @Column(name = "price_limit")
+    private String priceLimit;
     public String getName() {
         return name;
     }
@@ -112,6 +114,14 @@ public class Category extends BaseDomain {
 
 	public void setMenuIcon(String menuIcon) {
 		this.menuIcon = menuIcon;
+	}
+
+	public String getPriceLimit() {
+		return priceLimit;
+	}
+
+	public void setPriceLimit(String priceLimit) {
+		this.priceLimit = priceLimit;
 	}
     
     

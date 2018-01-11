@@ -17,6 +17,13 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
+/*import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.search.FullTextSession;
+import org.hibernate.search.Search;
+import org.hibernate.search.jpa.FullTextEntityManager;
+import org.hibernate.search.query.dsl.QueryBuilder;
+import org.springframework.beans.factory.annotation.Autowired;*/
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -251,6 +258,26 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	}*/
     	return allTypesList;
     }
+    
+  //private SessionFactory sessionFactory;
+	
+	/*@Autowired
+	private EntityManagerFactory entityManagerFactory;
+	*/
+	/*public void rebuildIndex() throws Exception {
+	      try {
+	    	  
+	    	 sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+	    	 Session session = sessionFactory.getCurrentSession();
+	         FullTextSession fullTextSession = Search.getFullTextSession(session);
+	         fullTextSession.createIndexer().transactionTimeout(120).startAndWait();
+	         
+	      }
+	      catch(Exception e) {
+	    	  e.printStackTrace();
+	         throw e;
+	      }
+	}*/
 
     @Override
     public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
@@ -271,7 +298,50 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	searchList.add(product);
     	}
         return searchList;
-    }
+        
+    /*   entityManagerFactory.unwrap(SessionFactory.class);
+        Session session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+        FullTextSession fullTextSession = Search.getFullTextSession(session);
+        
+        QueryBuilder qb = fullTextSession.getSearchFactory()
+                .buildQueryBuilder().forEntity(Product.class).get();
+       
+        
+        
+           org.apache.lucene.search.Query query =qb.keyword().onFields("name","description").matching(searchName).createQuery();
+            	
+            	
+        
+           org.hibernate.Query hibQuery = 
+                fullTextSession.createFullTextQuery(query, Product.class);
+        	
+           return hibQuery.getResultList();*/
+           
+           
+           /*EntityManager em = getEntityManager();
+
+           FullTextEntityManager fullTextEntityManager = 
+               org.hibernate.search.jpa.Search.getFullTextEntityManager(em);
+
+           final QueryBuilder b = fullTextEntityManager.getSearchFactory()
+               .buildQueryBuilder().forEntity( Product.class ).get();
+
+           org.apache.lucene.search.Query luceneQuery =
+               b.keyword()
+                   .onFields("name","description")
+                   .matching(searchName)
+                   .createQuery();
+           javax.persistence.Query fullTextQuery = 
+               fullTextEntityManager.createFullTextQuery( luceneQuery );
+
+           List<Product> result = fullTextQuery.getResultList(); //return a list of managed objects 
+           
+           
+           
+           return result;*/
+        
+   }
 
     @Override
     public Product getProductByExternelLink(String externalLink) {

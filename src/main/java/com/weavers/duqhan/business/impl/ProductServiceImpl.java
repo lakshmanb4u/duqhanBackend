@@ -1367,6 +1367,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
                 categoryDto.setMenuIcon(category.getMenuIcon());
+                categoryDto.setPriceLimit(category.getPriceLimit());
+                categoryDto.setParentPath(category.getParentPath());
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
@@ -1411,6 +1413,7 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
                 categoryDto.setMenuIcon(category.getMenuIcon());
+                categoryDto.setPriceLimit(category.getPriceLimit());
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);

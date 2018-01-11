@@ -113,6 +113,7 @@ public class UsersServiceImpl implements UsersService {
             user2.setLongitude(loginBean.getLongitude());
             user2.setUserAgent(loginBean.getUserAgent());
             user2.setFreeOfferAccepted(false);
+            user2.setMobile(loginBean.getMobile());
             Users saveUser = usersDao.save(user2);  // new user registration.
             if (saveUser != null) {
                 userBean.setName(user2.getName());

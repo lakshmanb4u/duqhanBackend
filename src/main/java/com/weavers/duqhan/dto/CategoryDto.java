@@ -18,6 +18,8 @@ public class CategoryDto {
     private String imgUrl;
     private String displayText;
     private String menuIcon;
+    private String priceLimit;
+    private String parentPath;
 
     /**
      * @return the categoryId
@@ -109,6 +111,22 @@ public class CategoryDto {
 
 	public void setMenuIcon(String menuIcon) {
 		this.menuIcon = menuIcon;
+	}
+
+	public String getPriceLimit() {
+		return priceLimit;
+	}
+
+	public void setPriceLimit(String priceLimit) {
+		this.priceLimit = priceLimit;
+	}
+
+	public String getParentPath() {
+		return parentPath;
+	}
+
+	public void setParentPath(String parentPath) {
+		this.parentPath = parentPath;
 	}
     
     
