@@ -1335,7 +1335,9 @@ public class ProductServiceImpl implements ProductService {
         CategorysBean categorysBean = new CategorysBean();
         List<CategoryDto> categoryDtos = new ArrayList<>();
         List<Category> categorys = categoryDao.getChildByParentId(parentId);
-        categorysBean.setCategoryName(categoryDao.loadById(parentId).getName());
+        Category categoryObj = categoryDao.loadById(parentId);
+        categorysBean.setCategoryName(categoryObj.getName());
+        categorysBean.setParentPath(categoryObj.getParentPath());
         if (categorys.isEmpty()) {
         	categorysBean.setStatus("No child category found");
             categorysBean.setStatusCode("403");

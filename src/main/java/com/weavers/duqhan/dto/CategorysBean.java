@@ -20,6 +20,7 @@ public class CategorysBean {
     private String status;
     private String categoryName;
     private Object breadcrums;
+    private String parentPath;
 
     /**
      * @return the categoryDtos
@@ -106,6 +107,13 @@ public class CategorysBean {
 	public void setCategoryName(String categoryName) {
 		this.categoryName = categoryName;
 	}
-    
+
+	public String getParentPath() {
+		return parentPath;
+	}
+
+	public void setParentPath(String parentPath) {
+		this.parentPath = parentPath;
+	}
     
 }
