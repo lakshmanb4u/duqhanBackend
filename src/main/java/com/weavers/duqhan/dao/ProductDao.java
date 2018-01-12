@@ -6,6 +6,8 @@
 package com.weavers.duqhan.dao;
 
 import com.weavers.duqhan.domain.Product;
+import com.weavers.duqhan.dto.ProductRequistBean;
+
 import java.util.List;
 
 /**

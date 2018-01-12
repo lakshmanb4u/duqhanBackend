@@ -4,15 +4,17 @@
  * and open the template in the editor.
  */
 package com.weavers.duqhan.dao.jpa;
-
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Product;
-
+import com.weavers.duqhan.dto.ProductRequistBean;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
@@ -25,11 +27,13 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;*/
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  *
  * @author Android-3
  */
+@Transactional
 public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 
     public ProductDaoJpa() {
@@ -118,34 +122,35 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     
     @Override
     public List<Product> getProductsByCategoryIncludeChildDiscount(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER , long startTime) {
-    	/*System.out.println("Start Of Query for category==========================="+(startTime-System.currentTimeMillis()));
+    	System.out.println("Start Of Query for category==========================="+(startTime-System.currentTimeMillis()));
     	Query q = getEntityManager().createQuery("SELECT c FROM Category AS c WHERE c.id=:categoryId");
     	q.setParameter("categoryId", categoryId);
     	List<Category> categoryList=q.getResultList();
-    	String parentPath = "";
-    	for (Category category : categoryList) {
-			parentPath=category.getParentPath(); 
-		} 
-    	System.out.println("End Of Query for Category==========================="+(startTime-System.currentTimeMillis()));*/
-    	if(categoryId.equals(1l)){
-    		System.out.println("Start Of Query for product==========================="+(startTime-System.currentTimeMillis()));
-        	/*Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND "
-        			+ "(p.parentPath like :parentPath OR p.categoryId=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
-        			.setFirstResult(start).setMaxResults(limit);*/
-    		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE "
-        			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY RAND(), p.linkId")
-        			.setFirstResult(start).setMaxResults(limit);		
-            query.setParameter("categoryId", categoryId);
-            query.setParameter("parentPath", "%=" + categoryId + "=%");
-            /*query.setParameter("discountPrice", PRICE_FILTER_BAG);*/
-            return query.getResultList();
-    	}else{		
-        	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE "
+    	Category category=categoryList.get(0);
+    	Long parent=category.getParentId();
+    	
+    	if(parent.equals(0l)) {
+    		Double highPrice = Double.parseDouble(category.getPriceLimit()); 
+    		Double lowPrice = 1d;
+        	String loadCat=category.getLoadCategory();
+        	String[] loadCatArr=loadCat.split(",");
+        	int lt=loadCatArr.length;
+        	List<Product> ProductList = new ArrayList<Product>();
+        	for(String cat:loadCatArr) {
+        		categoryId=new Long(cat);
+        		
+        		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
+            			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
+            			+ "p.categoryId=:categoryId GROUP BY p.id ORDER BY p.linkId").setFirstResult(start/lt).setMaxResults(limit/lt);
+            	query.setParameter("categoryId", categoryId);
+                query.setParameter("lowPrice", lowPrice);
+                query.setParameter("highPrice", highPrice);
+                ProductList.addAll(query.getResultList());
+                
+        	}
+        	return ProductList;
+    	}else {
+    		Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE "
         			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
         			+ "GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("categoryId", categoryId);
@@ -158,40 +163,16 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     
     @Override
     public List<Product> getProductsByPrice(Long categoryId, int start, int limit,Double PRICE_FILTER_BAG,Double PRICE_FILTER , long startTime,Double lowPrice,Double highPrice) {
-    	/*System.out.println("Start Of Query for category==========================="+(startTime-System.currentTimeMillis()));
-    	Query q = getEntityManager().createQuery("SELECT c FROM Category AS c WHERE c.id=:categoryId");
-    	q.setParameter("categoryId", categoryId);
-    	List<Category> categoryList=q.getResultList();
-    	String parentPath = "";
-    	for (Category category : categoryList) {
-			parentPath=category.getParentPath(); 
-		} 
-    	System.out.println("End Of Query for Category==========================="+(startTime-System.currentTimeMillis()));*/
-    	if(categoryId.equals(1l)){
-    		System.out.println("Start Of Query for product==========================="+(startTime-System.currentTimeMillis()));
-    		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
-        			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
-        			+ "GROUP BY p.id ORDER BY RAND(), p.linkId")
-        			.setFirstResult(start).setMaxResults(limit);		
-            query.setParameter("categoryId", categoryId);
-            query.setParameter("parentPath", "%=" + categoryId + "=%");/*
-            query.setParameter("discountPrice", PRICE_FILTER_BAG);*/
-            query.setParameter("lowPrice", lowPrice);
-            query.setParameter("highPrice", highPrice);
-            return query.getResultList();
-    	}else{		
-        	/*Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount <:discountPrice AND (p.parentPath like :parentPath OR p.categoryId=:categoryId) GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);*/
-        	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
-        			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
-        	query.setParameter("categoryId", categoryId);
-            query.setParameter("parentPath", "%=" + categoryId + "=%");
-            /*query.setParameter("discountPrice", PRICE_FILTER);*/
-            query.setParameter("lowPrice", lowPrice);
-            query.setParameter("highPrice", highPrice);
-            return query.getResultList();
-    	}
+    	
+    	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
+    			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice "
+    			+ "AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
+    			+ "GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
+    	query.setParameter("categoryId", categoryId);
+        query.setParameter("parentPath", "%=" + categoryId + "=%");
+        query.setParameter("lowPrice", lowPrice);
+        query.setParameter("highPrice", highPrice);
+        return query.getResultList();
     	
     }
     
@@ -259,48 +240,12 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	return allTypesList;
     }
     
-  //private SessionFactory sessionFactory;
-	
-	/*@Autowired
-	private EntityManagerFactory entityManagerFactory;
-	*/
-	/*public void rebuildIndex() throws Exception {
-	      try {
-	    	  
-	    	 sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-	    	 Session session = sessionFactory.getCurrentSession();
-	         FullTextSession fullTextSession = Search.getFullTextSession(session);
-	         fullTextSession.createIndexer().transactionTimeout(120).startAndWait();
-	         
-	      }
-	      catch(Exception e) {
-	    	  e.printStackTrace();
-	         throw e;
-	      }
-	}*/
 
     @Override
+    @Transactional
     public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
-       // Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE MATCH (p.name,p.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
-       // query.setParameter("searchName",searchName);
-    	Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.link_id").setFirstResult(start).setMaxResults(limit);
-    	query.setParameter("searchName",searchName);
-    	
-    	List<Product> searchList = new ArrayList<Product>();
-    	List<Object[]> objectArray = query.getResultList();
-    	for(Object[] obj: objectArray) {
-    		Product product = new Product();
-        	product.setId(Long.parseLong(obj[0].toString()));
-        	product.setName(obj[1].toString());
-        	product.setCategoryId(Long.parseLong(obj[2].toString()));
-        	product.setImgurl(obj[4].toString());
-        	product.setThumbImg(obj[5].toString());
-        	searchList.add(product);
-    	}
-        return searchList;
-        
-    /*   entityManagerFactory.unwrap(SessionFactory.class);
-        Session session = sessionFactory.getCurrentSession();
+    	/*SessionFactory sessionFactory = getEntityManager().getEntityManagerFactory().unwrap(SessionFactory.class);
+        Session session = sessionFactory.openSession();
         session.beginTransaction();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         
@@ -316,9 +261,9 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
            org.hibernate.Query hibQuery = 
                 fullTextSession.createFullTextQuery(query, Product.class);
         	
-           return hibQuery.getResultList();*/
+           List<Product> result = hibQuery.list();
            
-           
+           return result;*/
            /*EntityManager em = getEntityManager();
 
            FullTextEntityManager fullTextEntityManager = 
@@ -340,6 +285,24 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
            
            
            return result;*/
+           
+        // Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE MATCH (p.name,p.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+           // query.setParameter("searchName",searchName);
+        	Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.link_id").setFirstResult(start).setMaxResults(limit);
+        	query.setParameter("searchName",searchName);
+        	
+        	List<Product> searchList = new ArrayList<Product>();
+        	List<Object[]> objectArray = query.getResultList();
+        	for(Object[] obj: objectArray) {
+        		Product product = new Product();
+            	product.setId(Long.parseLong(obj[0].toString()));
+            	product.setName(obj[1].toString());
+            	product.setCategoryId(Long.parseLong(obj[2].toString()));
+            	product.setImgurl(obj[4].toString());
+            	product.setThumbImg(obj[5].toString());
+            	searchList.add(product);
+        	}
+            return searchList;
         
    }
 

@@ -28,6 +28,7 @@ public class ProductRequistBean {
     private Integer priceLt;
     private String lowPrice;
     private String highPrice;
+    private String loadCategory;
 
     /**
      * @return the productId
@@ -235,6 +236,14 @@ public class ProductRequistBean {
 
 	public void setHighPrice(String highPrice) {
 		this.highPrice = highPrice;
+	}
+
+	public String getLoadCategory() {
+		return loadCategory;
+	}
+
+	public void setLoadCategory(String loadCategory) {
+		this.loadCategory = loadCategory;
 	}
 	
 	

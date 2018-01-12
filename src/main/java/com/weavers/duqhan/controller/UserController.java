@@ -371,10 +371,6 @@ public class UserController {
             
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
-            	if(categoryId.equals(25l))
-                	categoryId=27l;
-            	if(categoryId.equals(42l))
-                	categoryId=43l;
                 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
                 	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice());	
                 }else {

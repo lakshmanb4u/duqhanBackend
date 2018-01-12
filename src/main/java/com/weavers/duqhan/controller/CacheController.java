@@ -26,8 +26,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.domain.Users;
-import com.weavers.duqhan.dto.ProductBean;
-import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductNewBean;
 import com.weavers.duqhan.dto.ProductNewBeans;
 import com.weavers.duqhan.dto.ProductRequistBean;

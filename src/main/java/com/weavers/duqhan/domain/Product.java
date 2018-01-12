@@ -21,6 +21,9 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+
 
 /**
  *
@@ -28,6 +31,7 @@ import javax.validation.constraints.Size;
  */
 @Entity
 @Table(name = "product")
+@Indexed
 public class Product extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
@@ -36,6 +40,7 @@ public class Product extends BaseDomain {
     @Lob
     @Size(min = 1, max = 65535)
     @Column(name = "name")
+    @Field
     private String name;
     @Basic(optional = false)
     @NotNull
@@ -44,6 +49,7 @@ public class Product extends BaseDomain {
     @Lob
     @Size(max = 65535)
     @Column(name = "description")
+    @Field
     private String description;
     @Basic(optional = false)
     @NotNull

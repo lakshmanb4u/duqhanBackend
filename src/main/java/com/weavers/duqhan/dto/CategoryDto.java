@@ -20,6 +20,7 @@ public class CategoryDto {
     private String menuIcon;
     private String priceLimit;
     private String parentPath;
+    private String loadCategory;
 
     /**
      * @return the categoryId
@@ -127,6 +128,14 @@ public class CategoryDto {
 
 	public void setParentPath(String parentPath) {
 		this.parentPath = parentPath;
+	}
+
+	public String getLoadCategory() {
+		return loadCategory;
+	}
+
+	public void setLoadCategory(String loadCategory) {
+		this.loadCategory = loadCategory;
 	}
     
     
