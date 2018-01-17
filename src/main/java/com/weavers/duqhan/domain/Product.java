@@ -35,6 +35,8 @@ import org.hibernate.search.annotations.Indexed;
 public class Product extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
+    
+    
     @Basic(optional = false)
     @NotNull
     @Lob
