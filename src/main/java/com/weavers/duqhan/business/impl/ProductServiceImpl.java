@@ -745,11 +745,10 @@ public class ProductServiceImpl implements ProductService {
 //    }
     @Override
     public ProductNewBeans searchProducts(ProductRequistBean requistBean,Users users) {
-        List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit());   // Search products by name and Description
+        List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit()); 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-        	Product productObj = productDao.loadById(product.getId());
-            List<ProductPropertiesMap> productPropertiesMaps = productObj.getProductPropertiesMaps();
+            List<ProductPropertiesMap> productPropertiesMaps = product.getProductPropertiesMaps();
             for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
                 Long productId = productPropertiesMap.getProductId().getId();
                 if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update
@@ -763,10 +762,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
-//        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
-        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
-        productBeans.setSearchString(requistBean.getName());
-        return productBeans;
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
     }
     
     @Override
