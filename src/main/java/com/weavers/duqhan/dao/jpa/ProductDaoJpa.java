@@ -11,6 +11,8 @@ import com.weavers.duqhan.domain.Product;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
@@ -179,60 +181,36 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     }
     @Override
     public List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderbyPrice) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
-    	List<Product> allTypesList = new ArrayList<>();
-    	List<BigInteger> productIdList = new ArrayList<>();
+    	List<Product> ProductList = new ArrayList<Product>();
+    	String pattern = "14:8,8:3,21:3,1535:2,26:4";
+		String[] list2 = pattern.split(",");
+		Double priceLimit = 1000d;
+		
+    	Query q = getEntityManager().createNativeQuery("select p.latest_category,p.price_limit from product_config p");
+    	List<Object[]> authors = q.getResultList();
     	
-    	Query q = getEntityManager().createNativeQuery("select p.latest_category from product_config p");
-    	List<String> authors = q.getResultList();
-    	String[] list2 = authors.get(0).split(",");
+    	if(Objects.nonNull(authors)&&!authors.isEmpty()&&authors.get(0).length>1) {
+    	pattern  =authors.get(0)[0].toString();
+    	list2 = pattern.split(",");
+    	priceLimit = new Double(new Double(authors.get(0)[1].toString()));
+    	}
     	for (String string : list2) {
 			String[] list3=string.split(":");
 			Long cat = new Long(list3[0]);
 			int catLimit= new Integer(list3[1]);
-			Query query = getEntityManager().createNativeQuery("SELECT distinct(p.id) FROM product p,product_properties_map ppm"
-					+ " WHERE (p.parent_path LIKE :likepath OR p.category_id=:categoryId) AND "
-					+ " ppm.product_id = p.id AND "
-					+ " ppm.discount <:discountPrice ORDER BY p.last_update DESC")
+			
+			Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
+        			+ "on p=map.productId.id WHERE map.discount <:highPrice "
+        			+ "AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
+        			+ "GROUP BY p.id ORDER BY p.linkId")
 					.setFirstResult((start/20)*catLimit)
 					.setMaxResults(catLimit*15);
-			query.setParameter("likepath", "%="+cat+"=%");
-			query.setParameter("categoryId", cat);
-			//query.setParameter("orderByPrice", orderbyPrice);
-			query.setParameter("discountPrice", 300);
-			
-			productIdList.addAll(query.getResultList());
-			/*Query query = getEntityManager()
-					.createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map"
-					+ " on p=map.productId.id WHERE map.discount < 300 AND "
-					+ "(p.parentPath like :key OR p.categoryId=:categoryId) "
-					+ "GROUP BY p.id ORDER BY p.lastUpdate DESC")
-					.setFirstResult((start/20)*catLimit)
-					.setMaxResults(catLimit);
-			query.setParameter("key", "%="+cat+"=%");
-			query.setParameter("categoryId", cat);
-	        allTypesList.addAll(query.getResultList());*/
-	        /*if(productIdList.size() >= 20)    new code for cacheeeeeeee
-	        	break;*/
+        	query.setParameter("categoryId", cat);
+        	query.setParameter("parentPath", "%=" + cat + "=%");
+            query.setParameter("highPrice", priceLimit);
+            ProductList.addAll(query.getResultList());
     	}
-    	List<Long> productIDList = new ArrayList<>();
-    	for(BigInteger p: productIdList){
-    		productIDList.add(Long.valueOf(p.toString()));
-    	}
-    	
-    	System.out.println("product list --"+ productIdList);
-    	if(productIDList.size() == 0){
-    		return allTypesList;
-    	}
-    	
-    	Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE p.id IN (:productIdList)");
-    		query.setParameter("productIdList",productIDList);
-    		allTypesList.addAll(query.getResultList());	
-    	/*if(allTypesList.size() >= 20) {                                new code for cacheee
-    	return (new ArrayList<Product>(allTypesList.subList(0, 19)));
-    	}else {
-    	return allTypesList;
-    	}*/
-    	return allTypesList;
+    	return ProductList;
     }
     
 
