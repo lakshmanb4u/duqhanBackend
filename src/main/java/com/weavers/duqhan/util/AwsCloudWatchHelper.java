@@ -28,8 +28,8 @@ import com.amazonaws.services.cloudwatch.model.StandardUnit;
  */
 public class AwsCloudWatchHelper {
 
-    private static final String awsAccessKey = "awsAccessKey";
-    private static final String awsSecretKey = "awsSecretKey";
+    private static final String awsAccessKey = "AKIAJQSBZKD5ATWEMYZQ";
+    private static final String awsSecretKey = "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";
     private static AWSCredentialsProvider awsCredentialProvider;
     private static final String awsRegion = "us-east-1";
     private static AmazonCloudWatch cw;

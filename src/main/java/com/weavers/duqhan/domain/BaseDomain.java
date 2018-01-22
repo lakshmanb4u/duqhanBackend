@@ -1,9 +1,6 @@
 package com.weavers.duqhan.domain;
 
 import javax.persistence.MappedSuperclass;
-
-import org.hibernate.search.annotations.DocumentId;
-
 import javax.persistence.Id;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,7 +19,6 @@ public class BaseDomain implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "ID", nullable = false)
-    @DocumentId
     private Long id;
 
     public BaseDomain() {

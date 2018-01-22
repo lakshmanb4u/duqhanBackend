@@ -11,7 +11,7 @@ import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
-//import com.weavers.duqhan.util.AwsCloudWatchHelper;
+import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -36,7 +36,7 @@ public class HomeController {
     ProductService productService;
 
     private final Logger logger = Logger.getLogger(HomeController.class);
-    //private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
+    private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String home(HttpServletResponse response) throws IOException {
@@ -51,15 +51,21 @@ public class HomeController {
 
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000.0;
-        //awsCloudWatchHelper.logCount("Signup", "signup count", "signup API hit counter");
-        //awsCloudWatchHelper.logTimeSecounds("Signup", "signup response", "signup API response time", timeTakenToLogin);
+        awsCloudWatchHelper.logCount("Signup", "signup count", "signup API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Signup", "signup response", "signup API response time", timeTakenToLogin);
         return userBean;
     }
 
     @RequestMapping(value = "/fb-login", method = RequestMethod.POST)   // login by FaceBook old user as well as new user. Auth-Token generate.
     public UserBean fbLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        UserBean userBean = usersService.fbUserLogin(loginBean);
+    	long loginStartTime = System.currentTimeMillis();
+    	UserBean userBean = usersService.fbUserLogin(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
+        System.out.println("Time for login api======="+timeTakenToLogin);
+        awsCloudWatchHelper.logCount("Login", "Login count", "fb-login API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "fb-login API response time", timeTakenToLogin);
         return userBean;
     }
 
@@ -73,26 +79,36 @@ public class HomeController {
         userBean = usersService.userLogin(loginBean,loginStartTime);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         long loginEndTime = System.currentTimeMillis();
-        double timeTakenToLogin = (loginEndTime - loginStartTime);
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
         System.out.println("Time for login api======="+timeTakenToLogin);
-        //awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
-        //awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+        awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
 
         return userBean;
     }
 
     @RequestMapping(value = "/request-password-reset", method = RequestMethod.POST) // Password reset request send a 6 digits OPT to user's register email 
     public UserBean passwordResetRequest(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        UserBean userBean = usersService.passwordResetRequest(loginBean.getEmail());
+    	long loginStartTime = System.currentTimeMillis();
+    	UserBean userBean = usersService.passwordResetRequest(loginBean.getEmail());
         System.out.println("loginBean.getEmail() = " + loginBean.getEmail());
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
+        awsCloudWatchHelper.logCount("Password Reset", "Password Reset count", "request-password-reset API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Password Reset", "Password Reset response", "request-password-reset API response time", timeTakenToLogin);
         return userBean;
     }
 
     @RequestMapping(value = "/confirm-password_reset", method = RequestMethod.POST) // Password will change if user provide correct OPT which was send to their mail
     public UserBean passwordReset(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        UserBean userBean = usersService.passwordReset(loginBean);
+    	long loginStartTime = System.currentTimeMillis();
+    	UserBean userBean = usersService.passwordReset(loginBean);
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
+        awsCloudWatchHelper.logCount("Confirm Password Reset", "Confirm Password Reset count", "confirm-password_reset API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Confirm Password Reset", "Confirm Password Reset response", "confirm-password_reset API response time", timeTakenToLogin);
         return userBean;
     }
 
@@ -105,8 +121,13 @@ public class HomeController {
     
     @RequestMapping(value = "/get-child-category-byid", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategoryById(@RequestBody ProductRequistBean requistBean) {
+    	long loginStartTime = System.currentTimeMillis();
         CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
+        awsCloudWatchHelper.logCount("Get Category", "Get Category count", "Get Category API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Get Category", "Get Category response", "Get Category API response time", timeTakenToLogin);
         return categorysBean;
     }
     /*

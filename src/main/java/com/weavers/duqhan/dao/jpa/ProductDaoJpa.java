@@ -4,9 +4,11 @@
  * and open the template in the editor.
  */
 package com.weavers.duqhan.dao.jpa;
+
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Product;
+
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,13 +19,14 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.Query;
 
-import org.hibernate.Session;
+/*import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.query.dsl.QueryBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;*/
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -127,26 +130,22 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	Long parent=category.getParentId();
     	
     	if(parent.equals(0l)) {
+    		List<Long> catList = new ArrayList<Long>();
     		Double highPrice = Double.parseDouble(category.getPriceLimit()); 
     		Double lowPrice = 1d;
         	String loadCat=category.getLoadCategory();
         	String[] loadCatArr=loadCat.split(",");
-        	int lt=loadCatArr.length;
-        	List<Product> ProductList = new ArrayList<Product>();
         	for(String cat:loadCatArr) {
-        		categoryId=new Long(cat);
-        		
+        		catList.add(new Long(cat));
+        	}
         		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
             			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
-            			+ "p.categoryId=:categoryId GROUP BY p.id ORDER BY p.linkId").setFirstResult(start/lt).setMaxResults(limit/lt);
-            	query.setParameter("categoryId", categoryId);
+            			+ "p.categoryId IN:categoryId GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
+            	query.setParameter("categoryId", catList);
                 query.setParameter("lowPrice", lowPrice);
                 query.setParameter("highPrice", highPrice);
-                ProductList.addAll(query.getResultList());
-                
-        	}
-        	return ProductList;
-    	}else {
+                return query.getResultList();
+    		}else {
     		Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE "
         			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
         			+ "GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
@@ -217,7 +216,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     @Override
     @Transactional
     public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
-    	SessionFactory sessionFactory = getEntityManager().getEntityManagerFactory().unwrap(SessionFactory.class);
+    	/*SessionFactory sessionFactory = getEntityManager().getEntityManagerFactory().unwrap(SessionFactory.class);
         Session session = sessionFactory.openSession();
         session.beginTransaction();
         FullTextSession fullTextSession = Search.getFullTextSession(session);
@@ -236,7 +235,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	
            List<Product> result = hibQuery.list();
            
-           return result;
+           return result;*/
            /*EntityManager em = getEntityManager();
 
            FullTextEntityManager fullTextEntityManager = 
@@ -261,7 +260,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
            
         // Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE MATCH (p.name,p.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
            // query.setParameter("searchName",searchName);
-        	/*Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.link_id").setFirstResult(start).setMaxResults(limit);
+        	Query query = getEntityManager().createNativeQuery("SELECT * FROM product WHERE MATCH (product.name,product.description) AGAINST (:searchName IN NATURAL LANGUAGE MODE) ORDER BY product.link_id").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("searchName",searchName);
         	
         	List<Product> searchList = new ArrayList<Product>();
@@ -275,7 +274,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
             	product.setThumbImg(obj[5].toString());
             	searchList.add(product);
         	}
-            return searchList;*/
+            return searchList;
         
    }
 
