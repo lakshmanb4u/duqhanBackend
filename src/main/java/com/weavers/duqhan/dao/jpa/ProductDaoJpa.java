@@ -214,7 +214,6 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     
 
     @Override
-    @Transactional
     public List<Product> SearchProductByNameAndDescription(String searchName, int start, int limit) {
     	/*SessionFactory sessionFactory = getEntityManager().getEntityManagerFactory().unwrap(SessionFactory.class);
         Session session = sessionFactory.openSession();
