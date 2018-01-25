@@ -28,6 +28,7 @@ import com.weavers.duqhan.dao.ReviewDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.dao.VendorDao;
+import com.weavers.duqhan.dao.jpa.ProductDaoJpa;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Impressions;
@@ -748,8 +749,7 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit()); 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
-        	Product newProduct=productDao.loadById(product.getId());
-            List<ProductPropertiesMap> productPropertiesMaps = newProduct.getProductPropertiesMaps();
+            List<ProductPropertiesMap> productPropertiesMaps =  product.getProductPropertiesMaps();
             for (ProductPropertiesMap productPropertiesMap : productPropertiesMaps) {
                 Long productId = productPropertiesMap.getProductId().getId();
                 if (mapProductPropertiesMap.containsKey(productId)) {    // if map contains then update

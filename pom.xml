@@ -226,11 +226,11 @@
             <artifactId>jsoup</artifactId>
             <version>1.10.2</version>
         </dependency>
-     <!-- <dependency>
+      <dependency>
 			  <groupId>org.hibernate</groupId>
 			  <artifactId>hibernate-search-orm</artifactId>
 			  <version>5.6.1.Final</version>
-      </dependency>  -->
+      </dependency> 
       <!-- <dependency>
 			   <groupId>org.hibernate</groupId>
 			   <artifactId>hibernate-search-infinispan</artifactId>
