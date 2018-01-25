@@ -149,13 +149,13 @@
         </dependency>
         
         <!--@paytm-->
-        <dependency>
-     <groupId>paytm</groupId>
-     <artifactId>paytm-checksum</artifactId>
-     <scope>system</scope>
-     <version>1.1</version>
-     <systemPath>/home/ubuntu/duqhan/duqhanBackend/paytm-checksum-1.1.jar</systemPath>
-   </dependency>        
+       <!--@paytm-->
+		<dependency> 
+            <groupId>paytm</groupId>
+            <artifactId>paytm-checksum</artifactId> 
+            <version>1.1</version> 
+            <type>jar</type> 
+		 </dependency>         
         <!--@google storage-->
         <dependency>
             <groupId>com.google.cloud</groupId>
