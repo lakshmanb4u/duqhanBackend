@@ -86,6 +86,21 @@ public class HomeController {
 
         return userBean;
     }
+    
+    @RequestMapping(value = "/guest-login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
+    public UserBean guestLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
+    	long loginStartTime = System.currentTimeMillis();
+        UserBean userBean = null;
+        userBean = usersService.guestUserLogin(loginBean,loginStartTime);
+        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        long loginEndTime = System.currentTimeMillis();
+        double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
+        System.out.println("Time for login api======="+timeTakenToLogin);
+        awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
+        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+
+        return userBean;
+    }
 
     @RequestMapping(value = "/request-password-reset", method = RequestMethod.POST) // Password reset request send a 6 digits OPT to user's register email 
     public UserBean passwordResetRequest(HttpServletResponse response, @RequestBody LoginBean loginBean) {

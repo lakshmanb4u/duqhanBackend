@@ -61,6 +61,9 @@ public class UsersServiceImpl implements UsersService {
     OfferProductsDao offerProductsDao;
 
     private final Logger logger = Logger.getLogger(UsersServiceImpl.class);
+    private final String guestMail = "guest@gmail.com";
+    private final String guestPass = "dukhan123";
+    private final String guestToken = "dukhan123"; 
 
     private UserBean setUserBean(Users users) {
         UserBean userBean = new UserBean();
@@ -250,6 +253,32 @@ public class UsersServiceImpl implements UsersService {
             AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
             System.out.println("after Token authen data base connectivity"+(loginStartTime-System.currentTimeMillis()));
             userBean.setAuthtoken(aouthBean.getAouthToken());
+            userBean.setFreeProductEligibility(false);
+            if (!user.getFreeOfferAccepted()) {
+                List<OfferProducts> offerProducts = offerProductsDao.loadAll();
+                if (!offerProducts.isEmpty()) {
+                    userBean.setFreeProductEligibility(true);
+                }
+            }
+        } else {
+            userBean.setStatusCode("403");
+            userBean.setStatus("Wrong email or password");
+        }
+        System.out.println("After Verfication in coad"+(loginStartTime-System.currentTimeMillis()));
+        return userBean;
+    }
+    
+    @Override
+    public UserBean guestUserLogin(LoginBean loginBean,long loginStartTime) {
+        Users user = usersDao.loadByEmailAndPass(guestMail, guestPass);
+        UserBean userBean = new UserBean();
+        if (user != null) {
+            userBean.setName(user.getName());
+            userBean.setEmail(user.getEmail());
+            userBean.setStatusCode("200");
+            userBean.setStatus("Success");
+            Users user2 = usersDao.save(user);
+            userBean.setAuthtoken(guestToken);
             userBean.setFreeProductEligibility(false);
             if (!user.getFreeOfferAccepted()) {
                 List<OfferProducts> offerProducts = offerProductsDao.loadAll();
