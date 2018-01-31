@@ -162,7 +162,7 @@ public class UsersServiceImpl implements UsersService {
             user.setLongitude(loginBean.getLongitude());
             user.setUserAgent(loginBean.getUserAgent());
             Users user2 = usersDao.save(user);
-            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId());
+            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId(),loginBean.getCountryCode());
             userBean.setAuthtoken(aouthBean.getAouthToken());
             userBean.setFreeProductEligibility(false);
             if (!user.getFreeOfferAccepted()) {
@@ -189,7 +189,7 @@ public class UsersServiceImpl implements UsersService {
             user2.setFreeOfferAccepted(false);
             Users saveUser = usersDao.save(user2);  // new registration
             if (saveUser != null) {
-                AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId());   // generate token
+                AouthBean aouthBean = aouthService.generatAccessToken(saveUser.getEmail(), saveUser.getId(),loginBean.getCountryCode());   // generate token
                 userBean.setAuthtoken(aouthBean.getAouthToken());
                 userBean.setName(user2.getName());
                 userBean.setEmail(user2.getEmail());
@@ -250,7 +250,7 @@ public class UsersServiceImpl implements UsersService {
             user.setUserAgent(loginBean.getUserAgent());
             Users user2 = usersDao.save(user);
             System.out.println("after third data base connectivity"+(loginStartTime-System.currentTimeMillis()));
-            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId()); // generate token
+            AouthBean aouthBean = aouthService.generatAccessToken(user2.getEmail(), user2.getId(), loginBean.getCountryCode()); // generate token
             System.out.println("after Token authen data base connectivity"+(loginStartTime-System.currentTimeMillis()));
             userBean.setAuthtoken(aouthBean.getAouthToken());
             userBean.setFreeProductEligibility(false);

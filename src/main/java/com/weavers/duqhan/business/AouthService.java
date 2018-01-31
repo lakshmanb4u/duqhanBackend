@@ -14,7 +14,7 @@ import com.weavers.duqhan.dto.AouthBean;
  */
 public interface AouthService {
 
-    AouthBean generatAccessToken(String email, Long userId);
+    AouthBean generatAccessToken(String email, Long userId, String codeName);
 
     String invalidatedToken(String email, String token);
 

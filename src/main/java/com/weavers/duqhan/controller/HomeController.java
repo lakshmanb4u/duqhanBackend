@@ -13,6 +13,9 @@ import com.weavers.duqhan.dto.ProductRequistBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import java.io.IOException;
+import java.util.Currency;
+import java.util.Locale;
+
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

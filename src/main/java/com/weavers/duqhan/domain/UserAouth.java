@@ -42,6 +42,8 @@ public class UserAouth extends BaseDomain {
     @Column(name = "valid_till")
     @Temporal(TemporalType.TIMESTAMP)
     private Date validTill;
+    @Column(name = "code_name")
+    private String codeName;
 
     public long getUserId() {
         return userId;
@@ -74,5 +76,13 @@ public class UserAouth extends BaseDomain {
     public void setValidTill(Date validTill) {
         this.validTill = validTill;
     }
+
+	public String getCodeName() {
+		return codeName;
+	}
+
+	public void setCodeName(String codeName) {
+		this.codeName = codeName;
+	}
 
 }

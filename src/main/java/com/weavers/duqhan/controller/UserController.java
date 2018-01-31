@@ -12,11 +12,15 @@ import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.dao.CurrencyCodeDao;
 import com.weavers.duqhan.dao.ImpressionsDao;
 import com.weavers.duqhan.dao.LikeUnlikeProductDao;
 import com.weavers.duqhan.dao.RecordedActionsDao;
+import com.weavers.duqhan.dao.UserAouthDao;
+import com.weavers.duqhan.domain.CurrencyCode;
 import com.weavers.duqhan.domain.Impressions;
 import com.weavers.duqhan.domain.RecordedActions;
+import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
@@ -41,6 +45,8 @@ import com.weavers.duqhan.dto.UserBean;
 //import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -89,6 +95,10 @@ public class UserController {
     LikeUnlikeProductDao likeUnlikeProductDao;
     @Autowired
     ImpressionsDao impressionsDao;
+    @Autowired
+    UserAouthDao userAouthDao;
+    @Autowired
+    CurrencyCodeDao currencyCodeDao;
     
     private final Logger logger = Logger.getLogger(UserController.class);
 //</editor-fold>
@@ -426,13 +436,25 @@ public class UserController {
     //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean) {
         ProductNewBeans productBeans = new ProductNewBeans();
+        DecimalFormat numberFormat = new DecimalFormat("#.00");
         	try {	
         	if(!CacheController.isProductBeanListAvailableForUser(users)) {
         		CacheController.buildProductBeanList(users);
         	} 
-        	
+        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            CurrencyCode currencyCode = new CurrencyCode();
+            if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            } else {
+            	currencyCode.setValue(1d);
+            }
+        	List<ProductNewBean> productbeansl = new ArrayList<>();
         	List<ProductNewBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
-        	
+        	for (ProductNewBean productNewBean : productbeans) {
+				productNewBean.setDiscountedPrice(Double.parseDouble(numberFormat.format(currencyCode.getValue()*productNewBean.getDiscountedPrice())));
+				productNewBean.setPrice(Double.parseDouble(numberFormat.format(productNewBean.getPrice()*currencyCode.getValue())));
+				productbeansl.add(productNewBean);
+			}
         	/*for (ProductBean productBean : productbeans) {
         		Impressions impressions = new Impressions();
                 impressions.setDate(new Date());
@@ -442,7 +464,7 @@ public class UserController {
 			}
         	*/
         	//productBeans.setTotalProducts(300);
-             productBeans.setProducts(productbeans);
+             productBeans.setProducts(productbeansl);
         	} catch (Exception e) {
         		
         	}

@@ -11,6 +11,7 @@ import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
+import com.weavers.duqhan.dao.CurrencyCodeDao;
 import com.weavers.duqhan.dao.ImpressionsDao;
 import com.weavers.duqhan.dao.LikeUnlikeProductDao;
 import com.weavers.duqhan.dao.OfferProductsDao;
@@ -26,11 +27,13 @@ import com.weavers.duqhan.dao.RecordedActionsDao;
 import com.weavers.duqhan.dao.RequestReturnDao;
 import com.weavers.duqhan.dao.ReviewDao;
 import com.weavers.duqhan.dao.UserAddressDao;
+import com.weavers.duqhan.dao.UserAouthDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.dao.jpa.ProductDaoJpa;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
+import com.weavers.duqhan.domain.CurrencyCode;
 import com.weavers.duqhan.domain.Impressions;
 import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.OrderDetails;
@@ -46,6 +49,7 @@ import com.weavers.duqhan.domain.RequestReturn;
 import com.weavers.duqhan.domain.Review;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
+import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
@@ -133,6 +137,10 @@ public class ProductServiceImpl implements ProductService {
     ImpressionsDao impressionsDao;
 	@Autowired
     RecordedActionsDao recordedActionsDao;
+	@Autowired
+	CurrencyCodeDao currencyCodeDao;
+	@Autowired
+    UserAouthDao userAouthDao;
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
@@ -172,14 +180,21 @@ public class ProductServiceImpl implements ProductService {
     private ProductNewBeans setNewProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users) {
         ProductNewBeans productNewBeans = new ProductNewBeans();
         List<ProductNewBean> beans = new ArrayList<>();
+        List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+        CurrencyCode currencyCode = new CurrencyCode();
+        if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+        } else {
+        	currencyCode.setValue(1d);
+        }
         for (Product product : products) {
             if (mapProductPropertiesMaps.containsKey(product.getId())) {
                 ProductNewBean bean = new ProductNewBean();
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
-                bean.setPrice(price);
-                bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setPrice(getTwoDecimalFormat(price*currencyCode.getValue()));
+                bean.setDiscountedPrice((getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()*currencyCode.getValue())));
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
                 	if(!(product.getImgurl() ==null || product.getImgurl().equals("-") || product.getImgurl().equals("failure"))) {

@@ -13,8 +13,11 @@ import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AouthBean;
 import com.weavers.duqhan.util.RandomCodeGenerator;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,7 +50,7 @@ public class AouthServiceImpl implements AouthService {
     }
 
     @Override
-    public AouthBean generatAccessToken(String email, Long userId) {
+    public AouthBean generatAccessToken(String email, Long userId, String countryCode) {
         AouthBean aouthBean = new AouthBean();
 //        UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
         UserAouth userAouth = userAouthDao.getTokenByUserId(userId);
@@ -55,6 +58,11 @@ public class AouthServiceImpl implements AouthService {
         if (userAouth != null) {    // for existing user update token
             userAouth.setAouthToken(token);
             userAouth.setValidTill(nextUpdate());
+            if(countryCode != null) {
+            	userAouth.setCodeName(Currency.getInstance(new Locale("", countryCode)).getCurrencyCode());
+            } else {
+            	userAouth.setCodeName("INR");
+            }
             userAouthDao.save(userAouth);
         } else {                    // for new user create new token
             UserAouth userAouth2 = new UserAouth();
@@ -63,6 +71,11 @@ public class AouthServiceImpl implements AouthService {
             userAouth2.setUserId(userId);
             userAouth2.setAouthToken(token);
             userAouth2.setValidTill(nextUpdate());
+            if(countryCode != null) {
+            	userAouth2.setCodeName(Currency.getInstance(new Locale("", countryCode)).getCurrencyCode());
+            } else {
+            	userAouth2.setCodeName("INR");
+            }
             userAouthDao.save(userAouth2);
         }
         aouthBean.setAouthToken(token);

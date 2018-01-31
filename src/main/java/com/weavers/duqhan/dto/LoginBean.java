@@ -27,6 +27,7 @@ public class LoginBean {
     private String latitude;
     private String longitude;
     private String userAgent;
+    private String countryCode;
 
     /**
      * @return the fbid
@@ -252,4 +253,11 @@ public class LoginBean {
         this.userAgent = userAgent;
     }
 
+	public String getCountryCode() {
+		return countryCode;
+	}
+
+	public void setCountryCode(String countryCode) {
+		this.countryCode = countryCode;
+	}
 }

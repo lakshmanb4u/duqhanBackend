@@ -33,6 +33,7 @@
     <bean id="requestReturnDao" class="com.weavers.duqhan.dao.jpa.RequestReturnDaoJpa" />
     <bean id="recordedActionsDao" class="com.weavers.duqhan.dao.jpa.RecordedActionsDaoJap" />
     <bean id="impressionsDao" class="com.weavers.duqhan.dao.jpa.ImpressionsDaoJpa" />
+    <bean id="currencyCodeDao" class="com.weavers.duqhan.dao.jpa.CurrencyCodeDaoJpa" />
     
     <bean
         id="entityManagerFactory"
