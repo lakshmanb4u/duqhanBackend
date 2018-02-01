@@ -370,6 +370,7 @@ public class UsersServiceImpl implements UsersService {
             user.setGender(userBean1.getGender());
             user.setMobile(userBean1.getMobile());
             user.setName(userBean1.getName());
+            user.setCurrencyCode(userBean1.getCurrencyCode());
             Users users = usersDao.save(user);
             if (users != null) {    // change email in auth table
                 aouthService.updateEmailByUserId(users.getId(), users.getEmail());

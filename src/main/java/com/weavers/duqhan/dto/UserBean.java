@@ -177,6 +177,7 @@ public class UserBean {
     private String statusCode;
     private String status;
     private Long cartCount;
+    private String currencyCode;
     private Long id;
     private boolean isFirstLogin;
     private boolean freeProductEligibility;
@@ -250,5 +251,14 @@ public class UserBean {
     public void setFreeProductEligibility(boolean freeProductEligibility) {
         this.freeProductEligibility = freeProductEligibility;
     }
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+    
 
 }

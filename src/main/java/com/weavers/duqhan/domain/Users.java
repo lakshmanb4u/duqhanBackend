@@ -72,6 +72,9 @@ public class Users extends BaseDomain {
     @NotNull
     @Column(name = "free_offer_accepted")
     private boolean freeOfferAccepted;
+    @Size(max = 255)
+    @Column(name = "currency_code")
+    private String currencyCode;
 
     public String getName() {
         return name;
@@ -192,5 +195,14 @@ public class Users extends BaseDomain {
     public void setFreeOfferAccepted(boolean freeOfferAccepted) {
         this.freeOfferAccepted = freeOfferAccepted;
     }
+
+	public String getCurrencyCode() {
+		return currencyCode;
+	}
+
+	public void setCurrencyCode(String currencyCode) {
+		this.currencyCode = currencyCode;
+	}
+    
 
 }

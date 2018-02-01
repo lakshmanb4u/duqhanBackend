@@ -12,6 +12,7 @@ public class ProductNewBean {
     private Double price;
     private Double discountedPrice;
     private Double discountPCT;
+    private String symbol;
 	public Long getProductId() {
 		return productId;
 	}
@@ -47,6 +48,12 @@ public class ProductNewBean {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getSymbol() {
+		return symbol;
+	}
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
     
     

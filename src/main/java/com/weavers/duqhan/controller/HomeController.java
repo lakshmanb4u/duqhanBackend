@@ -15,6 +15,7 @@ import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import java.io.IOException;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
@@ -54,8 +55,14 @@ public class HomeController {
 
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Signup", "signup count", "signup API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Signup", "signup response", "signup API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Signup", "signup count", "signup API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Signup", "signup response", "signup API response time", timeTakenToLogin);
+            });
+        
+        
         return userBean;
     }
 
@@ -67,8 +74,14 @@ public class HomeController {
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
         System.out.println("Time for login api======="+timeTakenToLogin);
-        awsCloudWatchHelper.logCount("Login", "Login count", "fb-login API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "fb-login API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Login", "Login count", "fb-login API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "fb-login API response time", timeTakenToLogin);
+            });
+        
+        
         return userBean;
     }
 
@@ -84,8 +97,14 @@ public class HomeController {
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
         System.out.println("Time for login api======="+timeTakenToLogin);
-        awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return         awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+            });
+        
+
 
         return userBean;
     }
@@ -99,8 +118,12 @@ public class HomeController {
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
         System.out.println("Time for login api======="+timeTakenToLogin);
-        awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Login", "Login count", "Login API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Login", "Login response", "Login API response time", timeTakenToLogin);
+            });
 
         return userBean;
     }
@@ -113,8 +136,14 @@ public class HomeController {
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
-        awsCloudWatchHelper.logCount("Password Reset", "Password Reset count", "request-password-reset API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Password Reset", "Password Reset response", "request-password-reset API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Password Reset", "Password Reset count", "request-password-reset API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Password Reset", "Password Reset response", "request-password-reset API response time", timeTakenToLogin);
+            });
+        
+        
         return userBean;
     }
 
@@ -125,8 +154,14 @@ public class HomeController {
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
-        awsCloudWatchHelper.logCount("Confirm Password Reset", "Confirm Password Reset count", "confirm-password_reset API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Confirm Password Reset", "Confirm Password Reset response", "confirm-password_reset API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Confirm Password Reset", "Confirm Password Reset count", "confirm-password_reset API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Confirm Password Reset", "Confirm Password Reset response", "confirm-password_reset API response time", timeTakenToLogin);
+            });
+        
+        
         return userBean;
     }
 
@@ -144,8 +179,14 @@ public class HomeController {
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         long loginEndTime = System.currentTimeMillis();
         double timeTakenToLogin = (loginEndTime - loginStartTime) / 1000;
-        awsCloudWatchHelper.logCount("Get Category", "Get Category count", "Get Category API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Get Category", "Get Category response", "Get Category API response time", timeTakenToLogin);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Get Category", "Get Category count", "Get Category API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Get Category", "Get Category response", "Get Category API response time", timeTakenToLogin);
+            });
+        
+        
         return categorysBean;
     }
     /*

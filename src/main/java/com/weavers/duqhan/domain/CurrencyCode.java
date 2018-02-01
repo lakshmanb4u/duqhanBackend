@@ -13,6 +13,8 @@ public class CurrencyCode extends BaseDomain{
     private String code;
 	@Column(name = "code_value")
     private Double value;
+	@Column(name = "symbol")
+    private String symbol;
 	
 	public String getCode() {
 		return code;
@@ -25,6 +27,12 @@ public class CurrencyCode extends BaseDomain{
 	}
 	public void setValue(Double value) {
 		this.value = value;
+	}
+	public String getSymbol() {
+		return symbol;
+	}
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 	
 }

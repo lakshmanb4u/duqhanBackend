@@ -43,6 +43,7 @@ public class ProductDetailBean {
     private LikeUnlikeProduct likeUnlikeDetails;
     private Map<String,BigInteger> ratingCount;
     private long likeUnlikeCount;
+    private String symbol;
 
     /**
      * @return the productId
@@ -354,6 +355,14 @@ public class ProductDetailBean {
 
 	public void setLikeUnlikeCount(long likeUnlikeCount) {
 		this.likeUnlikeCount = likeUnlikeCount;
+	}
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
     
     

@@ -12,6 +12,7 @@ import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
+import com.weavers.duqhan.business.impl.ProductServiceImpl;
 import com.weavers.duqhan.dao.CurrencyCodeDao;
 import com.weavers.duqhan.dao.ImpressionsDao;
 import com.weavers.duqhan.dao.LikeUnlikeProductDao;
@@ -30,6 +31,7 @@ import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
+import com.weavers.duqhan.dto.CurrencyBean;
 import com.weavers.duqhan.dto.LikeDto;
 import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
@@ -68,6 +70,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.weavers.duqhan.util.AwsCloudWatchHelper;
+import java.util.concurrent.CompletableFuture;
 
 /**
  *
@@ -113,8 +116,12 @@ public class UserController {
         statusBean.setStatus(usersService.userLogout(loginBean));
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Logout", "Logout count", "Logout API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Logout", "Logout response", "Logout API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+        	return awsCloudWatchHelper.logCount("Logout", "Logout count", "Logout API hit counter");
+        });
+        CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+        	return awsCloudWatchHelper.logTimeSecounds("Logout", "Logout response", "Logout API response time", timeTaken);
+        });
         return statusBean;
     }
 
@@ -141,9 +148,40 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Profile Details", "profile details count", "get-profile-details API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Profile Details", "profile details response", "get-profile-details API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+        return awsCloudWatchHelper.logCount("Profile Details", "profile details count", "get-profile-details API hit counter");
+        });
+        CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+        return awsCloudWatchHelper.logTimeSecounds("Profile Details", "profile details response", "get-profile-details API response time", timeTaken);
+        });
         return userBean;
+    }
+    
+    @RequestMapping(value = "/get-country-code", method = RequestMethod.POST)    // viewe user's profile.
+    public CurrencyBean getCountryCode(HttpServletResponse response, HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
+        CurrencyBean currencyBean = new CurrencyBean();
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        if (users != null) {
+        	List<CurrencyCode> currencyCodes=currencyCodeDao.loadAll();
+        	currencyBean.setCurrencyCodes(currencyCodes);
+        } else {
+            response.setStatus(401);
+            currencyBean.setStatusCode("401");
+            currencyBean.setStatus("Invalid Token.");
+        }
+
+        long endTime = System.currentTimeMillis();
+        double timeTaken = (endTime - startTime) / 1000.0;
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Profile Details", "profile details count", "get-profile-details API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Profile Details", "profile details response", "get-profile-details API response time", timeTaken);
+            });
+        
+        
+        return currencyBean;
     }
 
     @RequestMapping(value = "/update-profile-details", method = RequestMethod.POST) // Update user profile.
@@ -161,8 +199,15 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Update Profile", "update profile count", "update-profile-details API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Update Profile", "update profile response", "update-profile-details API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Update Profile", "update profile count", "update-profile-details API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Update Profile", "update profile response", "update-profile-details API response time", timeTaken);
+            });
+        
+        
+        
         return userBean1;
     }
 
@@ -195,8 +240,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Update Profile Image", "update profile image count", "update-profile-image API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Update Profile Image", "update profile image response", "update-profile-image API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Update Profile Image", "update profile image count", "update-profile-image API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Update Profile Image", "update profile image response", "update-profile-image API response time", timeTaken);
+            });
+        
+        
         return userBean1;
     }
 
@@ -214,8 +265,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Change Password", "change password count", "change-password API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Change Password", "change password response", "change-password API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Change Password", "change password count", "change-password API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Change Password", "change password response", "change-password API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
 
@@ -236,8 +293,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Get User Email", "Get User Email count", "get-user-email-phone API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Get User Email", "Get User Email response", "get-user-email-phone API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Get User Email", "Get User Email count", "get-user-email-phone API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Get User Email", "Get User Email response", "get-user-email-phone API response time", timeTaken);
+            });
+        
+        
         return userBean;
     }
 
@@ -260,8 +323,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Set User Email", "Set User Email count", "set-user-email-phone API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Set User Email", "Set User Email response", "set-user-email-phone API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Set User Email", "Set User Email count", "set-user-email-phone API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Set User Email", "Set User Email response", "set-user-email-phone API response time", timeTaken);
+            });
+        
+        
         return userBean;
     }
 //</editor-fold>
@@ -281,8 +350,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Addresses", "get addresses count", "get-addresses API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Addresses", "get addresses response", "get-addresses API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Addresses", "get addresses count", "get-addresses API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Addresses", "get addresses response", "get-addresses API response time", timeTaken);
+            });
+        
+        
         return addressBean;
     }
 
@@ -308,8 +383,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Save Address", "save address count", "save-address API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Save Address", "save address response", "save-address API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Save Address", "save address count", "save-address API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Save Address", "save address response", "save-address API response time", timeTaken);
+            });
+        
+        
         return addressBean;
     }
 
@@ -327,8 +408,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Set Default Addresses", "set default addresses count", "set-default-addresses API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Set Default Addresses", "set default addresses response", "set-default-addresses API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Set Default Addresses", "set default addresses count", "set-default-addresses API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Set Default Addresses", "set default addresses response", "set-default-addresses API response time", timeTaken);
+            });
+        
+        
         return addressBean;
     }
 
@@ -346,8 +433,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Default Addresses", "get default addresses count", "get-default-addresses API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Default Addresses", "get default addresses response", "get-default-addresses API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Default Addresses", "get default addresses count", "get-default-addresses API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Default Addresses", "get default addresses response", "get-default-addresses API response time", timeTaken);
+            });
+        
+        
         return addressBean;
     }
 
@@ -365,8 +458,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Deactivate Address", "deactivate address count", "deactivate-address API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Deactivate Address", "deactivate address response", "deactivate-address API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Deactivate Address", "deactivate address count", "deactivate-address API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Deactivate Address", "deactivate address response", "deactivate-address API response time", timeTaken);
+            });
+        
+        
         return addressBean;
     }
 //</editor-fold>
@@ -428,8 +527,12 @@ public class UserController {
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
         System.out.println("Total time taken for api==========================="+timeTaken);
-        awsCloudWatchHelper.logCount("Get Product", "get product count", "get-product API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Get Product", "get product response", "get-product API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Get Product", "get product count", "get-product API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Get Product", "get product response", "get-product API response time", timeTaken);
+            });
         return productBeans;
     }
     
@@ -441,18 +544,27 @@ public class UserController {
         	if(!CacheController.isProductBeanListAvailableForUser(users)) {
         		CacheController.buildProductBeanList(users);
         	} 
-        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
-            CurrencyCode currencyCode = new CurrencyCode();
-            if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
-            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
-            } else {
-            	currencyCode.setValue(1d);
+        	CurrencyCode currencyCode = new CurrencyCode();
+            String symbol = new String();
+            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            	symbol=currencyCode.getSymbol();
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getSymbol();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
             }
         	List<ProductNewBean> productbeansl = new ArrayList<>();
         	List<ProductNewBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
         	for (ProductNewBean productNewBean : productbeans) {
-				productNewBean.setDiscountedPrice(Double.parseDouble(numberFormat.format(currencyCode.getValue()*productNewBean.getDiscountedPrice())));
-				productNewBean.setPrice(Double.parseDouble(numberFormat.format(productNewBean.getPrice()*currencyCode.getValue())));
+				productNewBean.setDiscountedPrice(ProductServiceImpl.getTwoDecimalFormat(currencyCode.getValue()*productNewBean.getDiscountedPrice()));
+				productNewBean.setPrice(ProductServiceImpl.getTwoDecimalFormat(productNewBean.getPrice()*currencyCode.getValue()));
+				productNewBean.setSymbol(symbol);
 				productbeansl.add(productNewBean);
 			}
         	/*for (ProductBean productBean : productbeans) {
@@ -514,8 +626,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Search Product", "search product count", "search-product API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Search Product", "search product response", "search-product API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Search Product", "search product count", "search-product API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Search Product", "search product response", "search-product API response time", timeTaken);
+            });
+        
+        
         return productBeans;
     }
     
@@ -525,7 +643,7 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         ProductDetailBean productDetailBean = new ProductDetailBean();
         if (users != null) {
-            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users.getId());
+            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users);
         } else {
             response.setStatus(401);
             productDetailBean.setStatusCode("401");
@@ -534,8 +652,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Product Detail", "Product Detail count", "get-product-detail API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Product Detail", "Product Detail response", "get-product-detail API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Product Detail", "Product Detail count", "get-product-detail API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Product Detail", "Product Detail response", "get-product-detail API response time", timeTaken);
+            });
+        
+        
         return productDetailBean;
     }
     
@@ -554,8 +678,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Product Reviews", "product Reviews count", "get-product-reviews API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Product Reviews", "product Reviews response", "get-product-reviews API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Product Reviews", "product Reviews count", "get-product-reviews API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Product Reviews", "product Reviews response", "get-product-reviews API response time", timeTaken);
+            });
+        
+        
         return productDetailBean;
     }
     
@@ -574,8 +704,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Save Recent Product", "Save Recent Product count", "save-recent-record API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Save Recent Product", "Save Recent Product response", "save-recent-record API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Save Recent Product", "Save Recent Product count", "save-recent-record API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Save Recent Product", "Save Recent Product response", "save-recent-record API response time", timeTaken);
+            });
+        
+        
         return productDetailBean;
     }
     
@@ -594,8 +730,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Get Like Unlike", "Get Like Unlike count", "get-like-unlike API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Get Like Unlike", "Get Like Unlike response", "get-like-unlike API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Get Like Unlike", "Get Like Unlike count", "get-like-unlike API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Get Like Unlike", "Get Like Unlike response", "get-like-unlike API response time", timeTaken);
+            });
+        
+        
         return likeDto;
     }
     	//</editor-fold>
@@ -618,8 +760,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Add To Cart", "add to cart count", "add-to-cart API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Add To Cart", "add to cart response", "add-to-cart API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Add To Cart", "add to cart count", "add-to-cart API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Add To Cart", "add to cart response", "add-to-cart API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
 
@@ -647,8 +795,14 @@ public class UserController {
 
          long endTime = System.currentTimeMillis();
          double timeTaken = (endTime - startTime) / 1000.0;
-         awsCloudWatchHelper.logCount("Set Property Record", "Set Property Record count", "set-property-record API hit counter");
-         awsCloudWatchHelper.logTimeSecounds("Set Property Record", "Set Property Record response", "set-property-record API response time", timeTaken);
+         CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+             return awsCloudWatchHelper.logCount("Set Property Record", "Set Property Record count", "set-property-record API hit counter");
+             });
+             CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+             return awsCloudWatchHelper.logTimeSecounds("Set Property Record", "Set Property Record response", "set-property-record API response time", timeTaken);
+             });
+         
+         
          return statusBean;
     }
     @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
@@ -657,7 +811,7 @@ public class UserController {
         CartBean cartBean = new CartBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            cartBean = productService.getCartForUser(users.getId());
+            cartBean = productService.getCartForUser(users);
         } else {
             response.setStatus(401);
             cartBean.setStatusCode("401");
@@ -666,8 +820,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Cart", "cart count", "cart API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Cart", "cart response", "cart API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Cart", "cart count", "cart API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Cart", "cart response", "cart API response time", timeTaken);
+            });
+        
+        
         return cartBean;
     }
 
@@ -688,8 +848,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Cart Count", "cart-count count", "get-cart-count API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Cart Count", "cart-count response", "get-cart-count API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Cart Count", "cart-count count", "get-cart-count API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Cart Count", "cart-count response", "get-cart-count API response time", timeTaken);
+            });
+        
+        
         return userBean;
     }
 
@@ -709,8 +875,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Remove From Cart", "remove from cart count", "remove-from-cart API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Remove From Cart", "remove from cart response", "remove-from-cart API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Remove From Cart", "remove from cart count", "remove-from-cart API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Remove From Cart", "remove from cart response", "remove-from-cart API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
 //</editor-fold>
@@ -817,8 +989,14 @@ public class UserController {
         }*/
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Checkout", "checkout count", "checkout API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Checkout", "checkout response", "checkout API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Checkout", "checkout count", "checkout API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Checkout", "checkout response", "checkout API response time", timeTaken);
+            });
+        
+        
         return paymentBean;
     }
 
@@ -842,8 +1020,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Check Payment Status", "check payment status count", "check-payment-status API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Check Payment Status", "check payment status response", "check-payment-status API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Check Payment Status", "check payment status count", "check-payment-status API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Check Payment Status", "check payment status response", "check-payment-status API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
 
@@ -853,7 +1037,7 @@ public class UserController {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
-            orderDetailsBean = productService.getOrderDetails(users.getId(), requistBean.getStart(), requistBean.getLimit());
+            orderDetailsBean = productService.getOrderDetails(users, requistBean.getStart(), requistBean.getLimit());
         } else {
             response.setStatus(401);
             orderDetailsBean.setStatusCode("401");
@@ -862,8 +1046,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Order Details", "order details count", "get-order-details API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Order Details", "order details response", "get-order-details API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Order Details", "order details count", "get-order-details API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Order Details", "order details response", "get-order-details API response time", timeTaken);
+            });
+        
+        
         return orderDetailsBean;
     }
 
@@ -883,8 +1073,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Cancel Order", "cancel order count", "cancel-order API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Cancel Order", "cancel order response", "cancel-order API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Cancel Order", "cancel order count", "cancel-order API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Cancel Order", "cancel order response", "cancel-order API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
     
@@ -911,8 +1107,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Return Order", "cancel order count", "order/request_return API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Return Order", "Return order response", "order/request_return API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Return Order", "cancel order count", "order/request_return API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Return Order", "Return order response", "order/request_return API response time", timeTaken);
+            });
+        
+        
         return statusBean;
     }
 //</editor-fold>
@@ -937,8 +1139,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Contact Us", "contact us count", "contact-us API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Contact Us", "contact us response", "contact-us API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Contact Us", "contact us count", "contact-us API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Contact Us", "contact us response", "contact-us API response time", timeTaken);
+            });
+        
+        
         return status;
     }
 //</editor-fold>
@@ -965,8 +1173,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Free Product", "get free product count", "get-free-product API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Free Product", "get free product response", "get-free-product API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Free Product", "get free product count", "get-free-product API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Free Product", "get free product response", "get-free-product API response time", timeTaken);
+            });
+        
+        
         return productBeans;
     }
 
@@ -984,8 +1198,14 @@ public class UserController {
 
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Accept Free Product", "accept free product offer count", "accept-free-product-offer API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Accept Free Product", "accept free product offer response", "accept-free-product-offer API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Accept Free Product", "accept free product offer count", "accept-free-product-offer API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Accept Free Product", "accept free product offer response", "accept-free-product-offer API response time", timeTaken);
+            });
+
+        
         return cartBean;
     }
 //</editor-fold>
@@ -1013,8 +1233,14 @@ public class UserController {
         }
         long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Save Review", "Save Review count", "save-review API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Save Review", "Save Review response", "save-review API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Save Review", "Save Review count", "save-review API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Save Review", "Save Review response", "save-review API response time", timeTaken);
+            });
+        
+        
         return reviewBean;
     }
     
@@ -1036,8 +1262,14 @@ public class UserController {
         }
     	long endTime = System.currentTimeMillis();
         double timeTaken = (endTime - startTime) / 1000.0;
-        awsCloudWatchHelper.logCount("Like", "Like count", "likeUlike API hit counter");
-        awsCloudWatchHelper.logTimeSecounds("Like", "Like response", "likeUlike API response time", timeTaken);
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logCount("Like", "Like count", "likeUlike API hit counter");
+            });
+            CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+            return awsCloudWatchHelper.logTimeSecounds("Like", "Like response", "likeUlike API response time", timeTaken);
+            });
+        
+        
     	return likeUnlikeProductBean;
     }
 }

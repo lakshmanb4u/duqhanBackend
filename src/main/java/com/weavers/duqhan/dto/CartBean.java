@@ -26,6 +26,7 @@ public class CartBean {
     private AddressDto addressDto;
     private int appType;
     private int paymentGateway;
+    private String symbol;
 
     /**
      * @return the itemTotal
@@ -208,4 +209,13 @@ public class CartBean {
     public void setPaymentGateway(int paymentGateway) {
         this.paymentGateway = paymentGateway;
     }
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
+	}
+    
 }

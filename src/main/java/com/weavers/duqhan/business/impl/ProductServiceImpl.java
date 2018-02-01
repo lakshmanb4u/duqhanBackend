@@ -79,9 +79,11 @@ import com.weavers.duqhan.util.StatusConstants;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -144,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final Logger logger = Logger.getLogger(ProductServiceImpl.class);
 
-    private Double getTwoDecimalFormat(Double unformatedValue) {
+    public static Double getTwoDecimalFormat(Double unformatedValue) {
         Double formatedValue = 0.0;
         if (unformatedValue != null && unformatedValue > 0) {
 //            formatedValue = Math.round(unformatedValue * 100.0) / 100.0;
@@ -180,13 +182,22 @@ public class ProductServiceImpl implements ProductService {
     private ProductNewBeans setNewProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users) {
         ProductNewBeans productNewBeans = new ProductNewBeans();
         List<ProductNewBean> beans = new ArrayList<>();
-        List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
         CurrencyCode currencyCode = new CurrencyCode();
-        if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
-        	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
-        } else {
-        	currencyCode.setValue(1d);
+        String symbol = new String();
+        if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+        	symbol=currencyCode.getCode();
+        }else{
+        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+        	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            	symbol=currencyCode.getCode();
+            } else {
+            	currencyCode.setValue(1d);
+            	symbol="INR";
+            }
         }
+        
         for (Product product : products) {
             if (mapProductPropertiesMaps.containsKey(product.getId())) {
                 ProductNewBean bean = new ProductNewBean();
@@ -194,8 +205,9 @@ public class ProductServiceImpl implements ProductService {
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
                 bean.setPrice(getTwoDecimalFormat(price*currencyCode.getValue()));
-                bean.setDiscountedPrice((getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()*currencyCode.getValue())));
+                bean.setDiscountedPrice((getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()))*currencyCode.getValue());
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
+                bean.setSymbol(symbol);
                 if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
                 	if(!(product.getImgurl() ==null || product.getImgurl().equals("-") || product.getImgurl().equals("failure"))) {
                     bean.setImgurl(product.getImgurl());
@@ -857,10 +869,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailBean getProductDetailsById(Long productId, Long userId) {/*http://duqhan.com/#/store/product/55918/overview*/
+    public ProductDetailBean getProductDetailsById(Long productId, Users users) {/*http://duqhan.com/#/store/product/55918/overview*/
         ProductDetailBean productDetailBean = new ProductDetailBean();
         Product product = productDao.loadById(productId);
         if (product != null) {
+        	CurrencyCode currencyCode = new CurrencyCode();
+            String symbol = new String();
+            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            	symbol=currencyCode.getCode();
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getCode();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
+            }
             List<Long> ids;
             //Category category = categoryDao.loadById(product.getCategoryId());
             List<ProductImg> imgs = productImgDao.getProductImgsByProductId(productId);
@@ -875,9 +902,9 @@ public class ProductServiceImpl implements ProductService {
                 propertiesMapDto.setMapId(productPropertiesMap.getId());
                 propertiesMapDto.setProductId(productPropertiesMap.getProductId().getId());
                 propertiesMapDto.setPropertyvalueComposition(productPropertiesMap.getPropertyvalueComposition());
-                propertiesMapDto.setOrginalPrice(productPropertiesMap.getPrice());
-                propertiesMapDto.setSalesPrice(productPropertiesMap.getDiscount());
-                propertiesMapDto.setDiscount(this.getPercentage(productPropertiesMap.getPrice(), productPropertiesMap.getDiscount()));
+                propertiesMapDto.setOrginalPrice(getTwoDecimalFormat(productPropertiesMap.getPrice()*currencyCode.getValue()));
+                propertiesMapDto.setSalesPrice(getTwoDecimalFormat(productPropertiesMap.getDiscount()*currencyCode.getValue()));
+                propertiesMapDto.setDiscount((this.getPercentage(productPropertiesMap.getPrice(), productPropertiesMap.getDiscount())));
                 propertiesMapDto.setQuantity(productPropertiesMap.getQuantity());
                 productPropertiesMapDtos.add(propertiesMapDto);
                 if (c == 0) {
@@ -978,10 +1005,11 @@ public class ProductServiceImpl implements ProductService {
             }
             //====================load specification end=================//
             orginalPrice += StatusConstants.PRICE_GREASE;
-            productDetailBean.setOrginalPrice(orginalPrice);
-            productDetailBean.setSalesPrice(salesPrice);
+            productDetailBean.setOrginalPrice(getTwoDecimalFormat(orginalPrice*currencyCode.getValue()));
+            productDetailBean.setSalesPrice(getTwoDecimalFormat(salesPrice*currencyCode.getValue()));
             productDetailBean.setDiscount(this.getPercentage(orginalPrice, salesPrice));
             productDetailBean.setLikeUnlikeCount(product.getLikeUnlikeCount());
+            productDetailBean.setSymbol(symbol);
 //            productDetailBean.setArrival("Not set yet..");
 //            productDetailBean.setShippingCost(null);
 //            productDetailBean.setRelatedProducts(new ProductBeans());
@@ -1059,12 +1087,27 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public CartBean getCartForUser(Long userId) {
+    public CartBean getCartForUser(Users users) {
         CartBean cartBean = new CartBean();
         HashMap<Long, Cart> MapCart = new HashMap<>();
-        List<ProductPropertiesMap> propertiesMaps = cartDao.getProductPropertiesMapByUserId(userId);   // Load user cart
+        List<ProductPropertiesMap> propertiesMaps = cartDao.getProductPropertiesMapByUserId(users.getId());   // Load user cart
         if (!propertiesMaps.isEmpty()) {
-            List<Cart> carts = cartDao.getCartByUserId(userId);
+        	CurrencyCode currencyCode = new CurrencyCode();
+            String symbol = new String();
+            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            	symbol=currencyCode.getCode();
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getCode();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
+            }
+            List<Cart> carts = cartDao.getCartByUserId(users.getId());
             List<Long> productIds = new ArrayList<>();
             for (Cart cart : carts) {
                 MapCart.put(cart.getProductPropertyMapId(), cart);
@@ -1109,17 +1152,17 @@ public class ProductServiceImpl implements ProductService {
                 productBean.setPropertyMap(propertyMap);
 //                productBean.setImgurl(MapProductImg.get(propertiesMap.getProductImgId()).getImgUrl());
                 productBean.setImgurl(product.getImgurl());
-                productBean.setPrice(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE);
+                productBean.setPrice(getTwoDecimalFormat((propertiesMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
                 itemTotal = itemTotal + propertiesMap.getPrice() + StatusConstants.PRICE_GREASE;
                 double reDiscountPct = MapCart.get(propertiesMap.getId()).getDiscountOfferPct();
                 if (reDiscountPct > 0) {
                     double reDiscount = propertiesMap.getDiscount();
                     reDiscount = reDiscount - ((reDiscount * reDiscountPct) / 100);
-                    productBean.setDiscountedPrice(reDiscount);
+                    productBean.setDiscountedPrice(getTwoDecimalFormat(reDiscount*currencyCode.getValue()));
                     orderTotal = orderTotal + reDiscount;
                     productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, reDiscount));
                 } else {
-                    productBean.setDiscountedPrice(propertiesMap.getDiscount());
+                    productBean.setDiscountedPrice(getTwoDecimalFormat(propertiesMap.getDiscount()*currencyCode.getValue()));
                     orderTotal = orderTotal + propertiesMap.getDiscount();
                     productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, propertiesMap.getDiscount()));
                 }
@@ -1160,10 +1203,11 @@ public class ProductServiceImpl implements ProductService {
             discountTotal = itemTotal - orderTotal;
             discountPctTotal = this.getPercentage(itemTotal, orderTotal);   // calcute discount percentage.
             cartBean.setProducts(productBeans);
-            cartBean.setItemTotal(itemTotal);
-            cartBean.setOrderTotal(orderTotal);
-            cartBean.setDiscountTotal(discountTotal);
+            cartBean.setItemTotal(getTwoDecimalFormat(itemTotal*currencyCode.getValue()));
+            cartBean.setOrderTotal(getTwoDecimalFormat(orderTotal*currencyCode.getValue()));
+            cartBean.setDiscountTotal(getTwoDecimalFormat(discountTotal*currencyCode.getValue()));
             cartBean.setDiscountPctTotal(discountPctTotal);
+            cartBean.setSymbol(symbol);
         } else {
             cartBean.setStatus("Cart is empty");
         }
@@ -1457,15 +1501,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public OrderDetailsBean getOrderDetails(Long userId, int start, int limit) {
+    public OrderDetailsBean getOrderDetails(Users users, int start, int limit) {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
         List<OrderDetailsDto> orderdetailsDtos = new ArrayList<>();
-        List<Object[]> objects = orderDetailsDao.getDetailByUserId(userId, start, limit);
+        List<Object[]> objects = orderDetailsDao.getDetailByUserId(users.getId(), start, limit);
         if (!objects.isEmpty()) {
+        	CurrencyCode currencyCode = new CurrencyCode();
+            String symbol = new String();
+            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            	symbol=currencyCode.getCode();
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getCode();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
+            }
             Object[] od = objects.get(0);
             OrderDetails details = (OrderDetails) od[0];
             PaymentDetail paymentDetail = paymentDetailDao.getDetailByPayKey(details.getPaymentKey());
-            List<UserAddress> userAddresses = userAddressDao.getAddressByUserId(userId);
+            List<UserAddress> userAddresses = userAddressDao.getAddressByUserId(users.getId());
             HashMap<Long, UserAddress> mapUserAddress = new HashMap<>();
             for (UserAddress userAddress : userAddresses) {
                 mapUserAddress.put(userAddress.getId(), userAddress);
@@ -1505,7 +1564,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setMapId(orderDetailse.getMapId());
                 orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
                 orderDetailsDto.setOrderDateTime(orderDetailse.getOrderDate());
-                orderDetailsDto.setPaymentAmount(orderDetailse.getPaymentAmount());
+                orderDetailsDto.setPaymentAmount(getTwoDecimalFormat((orderDetailse.getPaymentAmount())*currencyCode.getValue()));
                 orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
                 orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
                 orderDetailsDto.setProductName(mapProduct.get(propertyMap.getProductId().getId()).getName());
@@ -1515,7 +1574,7 @@ public class ProductServiceImpl implements ProductService {
                     orderDetailsDto.setStatus(orderDetailse.getStatus());
                 }
                 orderDetailsDto.setProdImg(mapProduct.get(propertyMap.getProductId().getId()).getImgurl());
-                orderDetailsDto.setPrice(propertyMap.getPrice() + StatusConstants.PRICE_GREASE);
+                orderDetailsDto.setPrice(getTwoDecimalFormat((propertyMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
                 orderDetailsDto.setDiscount(this.getPercentage(propertyMap.getPrice() + StatusConstants.PRICE_GREASE, orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
                 orderDetailsDto.setReturnStatus(orderDetailse.getReturnStatus());

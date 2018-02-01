@@ -63,7 +63,7 @@ public interface ProductService {
 
     ProductNewBeans searchProducts(ProductRequistBean requistBean, Users users);
 
-    ProductDetailBean getProductDetailsById(Long productId, Long userId);
+    ProductDetailBean getProductDetailsById(Long productId, Users users);
     
     ProductDetailBean getProductReviewsById(Long productId, Long userId);
     
@@ -77,7 +77,7 @@ public interface ProductService {
 //
     String removeProductFromCart(ProductRequistBean requistBean);
 //
-    CartBean getCartForUser(Long userId);
+    CartBean getCartForUser(Users user);
 //
 //    String saveProduct(ProductBean productBean);
 //
@@ -97,7 +97,7 @@ public interface ProductService {
 //
     CategorysBean getChildById(Long parentId);
 //
-    OrderDetailsBean getOrderDetails(Long userId, int start, int limit);
+    OrderDetailsBean getOrderDetails(Users user, int start, int limit);
 //
     void cancelOrder(String orderId, Long userId);
     
