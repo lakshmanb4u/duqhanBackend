@@ -1578,6 +1578,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setDiscount(this.getPercentage(propertyMap.getPrice() + StatusConstants.PRICE_GREASE, orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
                 orderDetailsDto.setReturnStatus(orderDetailse.getReturnStatus());
+                orderDetailsDto.setSymbol(symbol);
                 ShipmentTable shipmentTable = orderDetailse.getShipmentId() != null ? shippingService.getShipmentTableByShipmentId(orderDetailse.getShipmentId()) : null;
                 orderDetailsDto.setTrackerBean(shippingService.getTrackerByTrackerId(shipmentTable, orderDetailse.getStatus(), paymentDetail));
                 orderdetailsDtos.add(orderDetailsDto);

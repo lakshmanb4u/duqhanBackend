@@ -548,12 +548,12 @@ public class UserController {
             String symbol = new String();
             if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
             	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
-            	symbol=currencyCode.getSymbol();
+            	symbol=currencyCode.getCode();
             }else{
             	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
             	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
                 	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
-                	symbol=currencyCode.getSymbol();
+                	symbol=currencyCode.getCode();
                 } else {
                 	currencyCode.setValue(1d);
                 	symbol="INR";

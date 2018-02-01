@@ -34,6 +34,7 @@ public class OrderDetailsDto {
     private String returnStatus;
     private HashMap<String, String> propertyMap;
     private Date orderDateTime;
+    private String symbol;
     /**
      * @return the userId
      */
@@ -306,6 +307,14 @@ public class OrderDetailsDto {
 
 	public void setOrderDateTime(Date orderDateTime) {
 		this.orderDateTime = orderDateTime;
+	}
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
     
     
