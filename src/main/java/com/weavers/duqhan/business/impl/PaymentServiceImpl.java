@@ -27,21 +27,25 @@ import com.weavers.duqhan.business.ShippingService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
+import com.weavers.duqhan.dao.CurrencyCodeDao;
 import com.weavers.duqhan.dao.OrderDetailsDao;
 import com.weavers.duqhan.dao.PaymentDetailDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductPropertiesMapDao;
 import com.weavers.duqhan.dao.ShipmentTableDao;
 import com.weavers.duqhan.dao.UserAddressDao;
+import com.weavers.duqhan.dao.UserAouthDao;
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.Cart;
 import com.weavers.duqhan.domain.Category;
+import com.weavers.duqhan.domain.CurrencyCode;
 import com.weavers.duqhan.domain.OrderDetails;
 import com.weavers.duqhan.domain.PaymentDetail;
 import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductPropertiesMap;
 import com.weavers.duqhan.domain.ShipmentTable;
 import com.weavers.duqhan.domain.UserAddress;
+import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressDto;
 import com.weavers.duqhan.dto.CartBean;
@@ -70,6 +74,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
@@ -110,6 +115,10 @@ public class PaymentServiceImpl implements PaymentService {
     CategoryDao categoryDao;
     @Autowired
     ProductPropertiesMapDao productPropertiesMapDao;
+    @Autowired
+    CurrencyCodeDao currencyCodeDao;
+    @Autowired
+    UserAouthDao userAouthDao;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     private final Logger logger = Logger.getLogger(PaymentServiceImpl.class);
@@ -132,9 +141,23 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public CheckoutPaymentBean transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {
+    public CheckoutPaymentBean transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments,Users user) {
         CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
-
+        CurrencyCode currencyCode = new CurrencyCode();
+        String symbol = new String();
+        if(Objects.nonNull(user.getCurrencyCode())&&!user.getCurrencyCode().isEmpty()){
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(user.getCurrencyCode());
+        	symbol=currencyCode.getCode();
+        }else{
+        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(user.getId());
+        	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            	symbol=currencyCode.getCode();
+            } else {
+            	currencyCode.setValue(1d);
+            	symbol="INR";
+            }
+        }
         String returnUrl = null;
         String payKey = null;
         InputStream is;
@@ -178,7 +201,7 @@ public class PaymentServiceImpl implements PaymentService {
                 item.setName(itemName);//***********************
                 item.setCurrency(PayPalConstants.CURRENCY);
                 item.setQuantity(productBean.getQty());
-                itemCost = df2.format(inrRate * productBean.getDiscountedPrice());
+                itemCost = df2.format(inrRate * (productBean.getDiscountedPrice()/currencyCode.getValue()));
                 item.setPrice(itemCost);
                 items.add(item);
                 itemCost = df2.format(Double.parseDouble(itemCost) * Double.parseDouble(productBean.getQty()));
@@ -242,7 +265,7 @@ public class PaymentServiceImpl implements PaymentService {
         if (createdPayment != null && createdPayment.getState().equalsIgnoreCase("created")) {
             PaymentDetail paymentDetail = new PaymentDetail();
             paymentDetail.setId(null);
-            paymentDetail.setPayAmount(cartBean.getOrderTotal());
+            paymentDetail.setPayAmount(cartBean.getOrderTotal()*currencyCode.getInrValue());
             paymentDetail.setPaymentType("CREDITED");
             paymentDetail.setUserId(cartBean.getUserId());
             paymentDetail.setPaymentKey(createdPayment.getId());
@@ -322,7 +345,7 @@ public class PaymentServiceImpl implements PaymentService {
                 orderDetails.setOrderId("OD" + Calendar.getInstance().getTimeInMillis());
                 orderDetails.setMapId(productBean.getProductPropertiesMapId());//required
                 orderDetails.setOrderDate(date);
-                orderDetails.setPaymentAmount(productBean.getDiscountedPrice());//required
+                orderDetails.setPaymentAmount(productBean.getDiscountedPrice()/currencyCode.getValue());//required
                 orderDetails.setPaymentKey(createdPayment.getId());
                 orderDetails.setStatus(createdPayment.getState());
                 orderDetails.setUserId(cartBean.getUserId());
@@ -655,9 +678,24 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments, String baseUrl) {// String orderId, String amount, 
-        String payKey = "PAYKEY" + Calendar.getInstance().getTimeInMillis();
+    	CurrencyCode currencyCode = new CurrencyCode();
+        String symbol = new String();
+        if(Objects.nonNull(user.getCurrencyCode())&&!user.getCurrencyCode().isEmpty()){
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(user.getCurrencyCode());
+        	symbol=currencyCode.getCode();
+        }else{
+        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(user.getId());
+        	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            	symbol=currencyCode.getCode();
+            } else {
+            	currencyCode.setValue(1d);
+            	symbol="INR";
+            }
+        }
+    	String payKey = "PAYKEY" + Calendar.getInstance().getTimeInMillis();
         DecimalFormat df2 = new DecimalFormat(".##");
-        String amount = df2.format(cartBean.getOrderTotal());
+        String amount = df2.format(cartBean.getOrderTotal()*currencyCode.getInrValue());
         List<ProductBean> productBeans = cartBean.getProducts();
         CheckoutPaymentBean paymentBean = new CheckoutPaymentBean();
         TreeMap<String, String> parameters = new TreeMap<String, String>();
@@ -764,14 +802,13 @@ public class PaymentServiceImpl implements PaymentService {
                 logger.error("(==E==)EasyPostException :shipment.lowestRate().getRate() = null", ex);
             }
         }
-
         for (ProductBean productBean : productBeans) {
             OrderDetails orderDetails = new OrderDetails();
             orderDetails.setId(null);
             orderDetails.setOrderId("OD" + Calendar.getInstance().getTimeInMillis());
             orderDetails.setMapId(productBean.getProductPropertiesMapId());//required
             orderDetails.setOrderDate(date);
-            orderDetails.setPaymentAmount(productBean.getDiscountedPrice());//required
+            orderDetails.setPaymentAmount(productBean.getDiscountedPrice()/currencyCode.getValue());//required
             orderDetails.setPaymentKey(payKey);
             orderDetails.setStatus(StatusConstants.PPS_CREATED);
             orderDetails.setUserId(cartBean.getUserId());

@@ -922,7 +922,7 @@ public class UserController {
                         shipments = (List<Shipment>) objects[1];
                         if (null != shippingCost && shippingCost > 0.0 && !shipments.isEmpty()) {
                             if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
-                                paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                                paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments,users);
                             } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
                                 String url = request.getRequestURL().toString();
                                 String uri = request.getRequestURI();
@@ -949,7 +949,7 @@ public class UserController {
                     }
                 } else {
                     if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
-                        paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments);
+                        paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments,users);
                     } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
                         String url = request.getRequestURL().toString();
                         String uri = request.getRequestURI();

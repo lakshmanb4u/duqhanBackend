@@ -77,6 +77,7 @@ import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.GoogleBucketFileUploader;
 import com.weavers.duqhan.util.StatusConstants;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Currency;
@@ -158,6 +159,20 @@ public class ProductServiceImpl implements ProductService {
         }
         return formatedValue;
     }
+    
+    public static Double getThreeDecimalFormat(Double unformatedValue) {
+        Double formatedValue = 0.0;
+        if (unformatedValue != null && unformatedValue > 0) {
+//            formatedValue = Math.round(unformatedValue * 100.0) / 100.0;
+            DecimalFormat df = new DecimalFormat("#.###");
+            df.setRoundingMode(RoundingMode.HALF_UP);
+            try {
+                formatedValue = Double.parseDouble(df.format(unformatedValue));
+            } catch (IllegalArgumentException e) {
+            }
+        }
+        return formatedValue;
+    }
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
     private AddressDto setAddressDto(UserAddress userAddress) {
@@ -204,8 +219,8 @@ public class ProductServiceImpl implements ProductService {
                 double price = getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getPrice()) + StatusConstants.PRICE_GREASE;
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
-                bean.setPrice(getTwoDecimalFormat(price*currencyCode.getValue()));
-                bean.setDiscountedPrice((getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()))*currencyCode.getValue());
+                bean.setPrice(getThreeDecimalFormat(price*currencyCode.getValue()));
+                bean.setDiscountedPrice((getThreeDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()))*currencyCode.getValue());
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 bean.setSymbol(symbol);
                 if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
@@ -902,8 +917,8 @@ public class ProductServiceImpl implements ProductService {
                 propertiesMapDto.setMapId(productPropertiesMap.getId());
                 propertiesMapDto.setProductId(productPropertiesMap.getProductId().getId());
                 propertiesMapDto.setPropertyvalueComposition(productPropertiesMap.getPropertyvalueComposition());
-                propertiesMapDto.setOrginalPrice(getTwoDecimalFormat(productPropertiesMap.getPrice()*currencyCode.getValue()));
-                propertiesMapDto.setSalesPrice(getTwoDecimalFormat(productPropertiesMap.getDiscount()*currencyCode.getValue()));
+                propertiesMapDto.setOrginalPrice(getThreeDecimalFormat(productPropertiesMap.getPrice()*currencyCode.getValue()));
+                propertiesMapDto.setSalesPrice(getThreeDecimalFormat(productPropertiesMap.getDiscount()*currencyCode.getValue()));
                 propertiesMapDto.setDiscount((this.getPercentage(productPropertiesMap.getPrice(), productPropertiesMap.getDiscount())));
                 propertiesMapDto.setQuantity(productPropertiesMap.getQuantity());
                 productPropertiesMapDtos.add(propertiesMapDto);
@@ -1005,8 +1020,8 @@ public class ProductServiceImpl implements ProductService {
             }
             //====================load specification end=================//
             orginalPrice += StatusConstants.PRICE_GREASE;
-            productDetailBean.setOrginalPrice(getTwoDecimalFormat(orginalPrice*currencyCode.getValue()));
-            productDetailBean.setSalesPrice(getTwoDecimalFormat(salesPrice*currencyCode.getValue()));
+            productDetailBean.setOrginalPrice(getThreeDecimalFormat(orginalPrice*currencyCode.getValue()));
+            productDetailBean.setSalesPrice(getThreeDecimalFormat(salesPrice*currencyCode.getValue()));
             productDetailBean.setDiscount(this.getPercentage(orginalPrice, salesPrice));
             productDetailBean.setLikeUnlikeCount(product.getLikeUnlikeCount());
             productDetailBean.setSymbol(symbol);
@@ -1152,17 +1167,17 @@ public class ProductServiceImpl implements ProductService {
                 productBean.setPropertyMap(propertyMap);
 //                productBean.setImgurl(MapProductImg.get(propertiesMap.getProductImgId()).getImgUrl());
                 productBean.setImgurl(product.getImgurl());
-                productBean.setPrice(getTwoDecimalFormat((propertiesMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
+                productBean.setPrice(getThreeDecimalFormat((propertiesMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
                 itemTotal = itemTotal + propertiesMap.getPrice() + StatusConstants.PRICE_GREASE;
                 double reDiscountPct = MapCart.get(propertiesMap.getId()).getDiscountOfferPct();
                 if (reDiscountPct > 0) {
                     double reDiscount = propertiesMap.getDiscount();
                     reDiscount = reDiscount - ((reDiscount * reDiscountPct) / 100);
-                    productBean.setDiscountedPrice(getTwoDecimalFormat(reDiscount*currencyCode.getValue()));
+                    productBean.setDiscountedPrice(getThreeDecimalFormat(reDiscount*currencyCode.getValue()));
                     orderTotal = orderTotal + reDiscount;
                     productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, reDiscount));
                 } else {
-                    productBean.setDiscountedPrice(getTwoDecimalFormat(propertiesMap.getDiscount()*currencyCode.getValue()));
+                    productBean.setDiscountedPrice(getThreeDecimalFormat(propertiesMap.getDiscount()*currencyCode.getValue()));
                     orderTotal = orderTotal + propertiesMap.getDiscount();
                     productBean.setDiscountPCT(this.getPercentage(propertiesMap.getPrice() + StatusConstants.PRICE_GREASE, propertiesMap.getDiscount()));
                 }
@@ -1203,9 +1218,9 @@ public class ProductServiceImpl implements ProductService {
             discountTotal = itemTotal - orderTotal;
             discountPctTotal = this.getPercentage(itemTotal, orderTotal);   // calcute discount percentage.
             cartBean.setProducts(productBeans);
-            cartBean.setItemTotal(getTwoDecimalFormat(itemTotal*currencyCode.getValue()));
-            cartBean.setOrderTotal(getTwoDecimalFormat(orderTotal*currencyCode.getValue()));
-            cartBean.setDiscountTotal(getTwoDecimalFormat(discountTotal*currencyCode.getValue()));
+            cartBean.setItemTotal(getThreeDecimalFormat(itemTotal*currencyCode.getValue()));
+            cartBean.setOrderTotal(getThreeDecimalFormat(orderTotal*currencyCode.getValue()));
+            cartBean.setDiscountTotal(getThreeDecimalFormat(discountTotal*currencyCode.getValue()));
             cartBean.setDiscountPctTotal(discountPctTotal);
             cartBean.setSymbol(symbol);
         } else {
@@ -1564,7 +1579,7 @@ public class ProductServiceImpl implements ProductService {
                 orderDetailsDto.setMapId(orderDetailse.getMapId());
                 orderDetailsDto.setOrderDate(DateFormater.formate(orderDetailse.getOrderDate()));
                 orderDetailsDto.setOrderDateTime(orderDetailse.getOrderDate());
-                orderDetailsDto.setPaymentAmount(getTwoDecimalFormat((orderDetailse.getPaymentAmount())*currencyCode.getValue()));
+                orderDetailsDto.setPaymentAmount(getThreeDecimalFormat((orderDetailse.getPaymentAmount())*currencyCode.getValue()));
                 orderDetailsDto.setPaymentKey(orderDetailse.getPaymentKey());
                 orderDetailsDto.setPhone(mapUserAddress.get(orderDetailse.getAddressId()).getPhone());
                 orderDetailsDto.setProductName(mapProduct.get(propertyMap.getProductId().getId()).getName());
@@ -1574,7 +1589,7 @@ public class ProductServiceImpl implements ProductService {
                     orderDetailsDto.setStatus(orderDetailse.getStatus());
                 }
                 orderDetailsDto.setProdImg(mapProduct.get(propertyMap.getProductId().getId()).getImgurl());
-                orderDetailsDto.setPrice(getTwoDecimalFormat((propertyMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
+                orderDetailsDto.setPrice(getThreeDecimalFormat((propertyMap.getPrice() + StatusConstants.PRICE_GREASE)*currencyCode.getValue()));
                 orderDetailsDto.setDiscount(this.getPercentage(propertyMap.getPrice() + StatusConstants.PRICE_GREASE, orderDetailse.getPaymentAmount()));
                 orderDetailsDto.setQuty(orderDetailse.getQuentity());
                 orderDetailsDto.setReturnStatus(orderDetailse.getReturnStatus());

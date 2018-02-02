@@ -15,6 +15,8 @@ public class CurrencyCode extends BaseDomain{
     private Double value;
 	@Column(name = "symbol")
     private String symbol;
+	@Column(name = "inr_value")
+    private Double inrValue;
 	
 	public String getCode() {
 		return code;
@@ -34,5 +36,12 @@ public class CurrencyCode extends BaseDomain{
 	public void setSymbol(String symbol) {
 		this.symbol = symbol;
 	}
+	public Double getInrValue() {
+		return inrValue;
+	}
+	public void setInrValue(Double inrValue) {
+		this.inrValue = inrValue;
+	}
+	
 	
 }
