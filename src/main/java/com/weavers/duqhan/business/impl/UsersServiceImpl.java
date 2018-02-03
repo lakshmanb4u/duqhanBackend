@@ -380,7 +380,7 @@ public class UsersServiceImpl implements UsersService {
                 userBean.setMobile(users.getMobile());
                 userBean.setName(users.getName());
                 userBean.setProfileImg(users.getProfileImg());
-                userBean.getCurrencyCode();
+                userBean.setCurrencyCode(users.getCurrencyCode());
                 userBean.setStatusCode("200");
                 userBean.setStatus("Profile update successfully");
             }
