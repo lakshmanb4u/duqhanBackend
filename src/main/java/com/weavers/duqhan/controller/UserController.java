@@ -563,10 +563,15 @@ public class UserController {
         	List<ProductNewBean> productbeansl = new ArrayList<>();
         	List<ProductNewBean> productbeans = CacheController.getProductBeanList(users, requistBean.getStart(), requistBean.getLimit());
         	for (ProductNewBean productNewBean : productbeans) {
-				productNewBean.setDiscountedPrice(ProductServiceImpl.getTwoDecimalFormat(currencyCode.getValue()*productNewBean.getDiscountedPrice()));
-				productNewBean.setPrice(ProductServiceImpl.getTwoDecimalFormat(productNewBean.getPrice()*currencyCode.getValue()));
-				productNewBean.setSymbol(symbol);
-				productbeansl.add(productNewBean);
+        		ProductNewBean priceBean = new ProductNewBean(); 
+        		priceBean.setDiscountedPrice(ProductServiceImpl.getTwoDecimalFormat(currencyCode.getValue()*productNewBean.getDiscountedPrice()));
+        		priceBean.setPrice(ProductServiceImpl.getTwoDecimalFormat(productNewBean.getPrice()*currencyCode.getValue()));
+        		priceBean.setSymbol(symbol);
+        		priceBean.setDiscountPCT(productNewBean.getDiscountPCT());
+        		priceBean.setImgurl(productNewBean.getImgurl());
+        		priceBean.setName(productNewBean.getName());
+        		priceBean.setProductId(productNewBean.getProductId());
+				productbeansl.add(priceBean);
 			}
         	/*for (ProductBean productBean : productbeans) {
         		Impressions impressions = new Impressions();
