@@ -138,6 +138,7 @@ public class UserController {
             userBean.setMobile(users.getMobile());
             userBean.setName(users.getName());
             userBean.setProfileImg(users.getProfileImg());
+            userBean.setCurrencyCode(users.getCurrencyCode());
             userBean.setStatusCode("200");
             userBean.setStatus("Success..");
         } else {
