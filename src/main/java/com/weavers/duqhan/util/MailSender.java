@@ -47,7 +47,7 @@ public class MailSender {
 
             // Who is this message to (we could do fancier things like make a list or add CC's)
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinationAddress));
-            message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bcc_address));
+            //message.setRecipients(Message.RecipientType.BCC, InternetAddress.parse(bcc_address));
 
             // Subject and body
             message.setSubject(subject);
