@@ -23,7 +23,7 @@ public interface PaymentService {
 //<editor-fold defaultstate="collapsed" desc="Checkout">
     CheckoutPaymentBean transactionRequest(HttpServletRequest request, HttpServletResponse response, CartBean cartBean, Double shippingCost, List<Shipment> shipments,Users user); // Paypal
 
-    CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments, String baseUrl);   // Paytm
+    CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments);   // Paytm
 
     String genrateCheckSum(TreeMap<String, String> parameters);
 //</editor-fold>

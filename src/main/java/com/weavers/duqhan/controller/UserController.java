@@ -930,11 +930,11 @@ public class UserController {
                             if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
                                 paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments,users);
                             } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
-                                String url = request.getRequestURL().toString();
+                               /* String url = request.getRequestURL().toString();
                                 String uri = request.getRequestURI();
                                 String ctx = request.getContextPath();
-                                String base = url.substring(0, url.length() - uri.length()) + ctx;
-                                paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments, base);
+                                String base = url.substring(0, url.length() - uri.length()) + ctx;*/
+                                paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments);
                             }
                             if (paymentBean != null) {
 
@@ -957,11 +957,11 @@ public class UserController {
                     if (cartBean.getPaymentGateway() == StatusConstants.PAYPAL_GATEWAY) {
                         paymentBean = paymentService.transactionRequest(request, response, cartBean, shippingCost, shipments,users);
                     } else if (cartBean.getPaymentGateway() == StatusConstants.PAYTM_GATEWAY) {
-                        String url = request.getRequestURL().toString();
+                        /*String url = request.getRequestURL().toString();
                         String uri = request.getRequestURI();
                         String ctx = request.getContextPath();
-                        String base = url.substring(0, url.length() - uri.length()) + ctx;
-                        paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments, base);
+                        String base = url.substring(0, url.length() - uri.length()) + ctx;*/
+                    	paymentBean = paymentService.transactionRequest(users, cartBean, shippingCost, shipments);
                     }
                     if (paymentBean != null) {
                     } else {

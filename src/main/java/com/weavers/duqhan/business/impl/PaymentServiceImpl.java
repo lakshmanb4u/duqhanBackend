@@ -677,7 +677,8 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments, String baseUrl) {// String orderId, String amount, 
+    public CheckoutPaymentBean transactionRequest(Users user, CartBean cartBean, Double shippingCost, List<Shipment> shipments) {// String orderId, String amount, 
+    	String baseUrl = "https://duqhan.com";
     	CurrencyCode currencyCode = new CurrencyCode();
         String symbol = new String();
         if(Objects.nonNull(user.getCurrencyCode())&&!user.getCurrencyCode().isEmpty()){
