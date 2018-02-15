@@ -413,7 +413,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public void saveUsersEmailAndPhone(Users users, UserBean userBean) {
-        Users exsistUser = usersDao.loadByEmail(userBean.getEmail());
+        Users exsistUser = usersDao.loadById(users.getId());
         if (exsistUser == null || exsistUser.getId().equals(users.getId())) {
             users.setEmail(userBean.getEmail());
             if (userBean.getMobile() != null) {
