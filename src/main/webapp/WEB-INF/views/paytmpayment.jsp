@@ -5,7 +5,7 @@
 --%>
 
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
-<link href="../resources/style/whirl.min.css" rel="stylesheet">
+<link href="../_resources/style/whirl.min.css" rel="stylesheet">
 <style>
     body {margin: 0;}
     p {font-family: 'Roboto', sans-serif; font-size: 20px; margin-top: 10px;}
