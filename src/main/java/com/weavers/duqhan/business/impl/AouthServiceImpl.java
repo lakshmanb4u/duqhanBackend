@@ -17,6 +17,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,22 @@ public class AouthServiceImpl implements AouthService {
 //        UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
         UserAouth userAouth = userAouthDao.getTokenByUserId(userId);
         String token = this.createToken(userId);
+        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
         if (userAouth != null) {    // for existing user update token
             userAouth.setAouthToken(token);
             userAouth.setValidTill(nextUpdate());
+            Boolean flag = true;
             if(countryCode != null) {
-            	userAouth.setCodeName(Currency.getInstance(new Locale("", countryCode)).getCurrencyCode());
-            } else {
+            	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+            	for (String code : countryArray) {
+				 if(cuntCode.equals(code)){
+				  flag=false;
+				  userAouth.setCodeName(cuntCode);
+				  break;
+				  }
+            	}
+            }
+            if(Objects.isNull(countryCode) || flag){
             	userAouth.setCodeName("INR");
             }
             userAouthDao.save(userAouth);
@@ -71,9 +82,18 @@ public class AouthServiceImpl implements AouthService {
             userAouth2.setUserId(userId);
             userAouth2.setAouthToken(token);
             userAouth2.setValidTill(nextUpdate());
+            Boolean flag = true;
             if(countryCode != null) {
-            	userAouth2.setCodeName(Currency.getInstance(new Locale("", countryCode)).getCurrencyCode());
-            } else {
+            	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+            	for (String code : countryArray) {
+				 if(cuntCode.equals(code)){
+				  flag=false;
+				  userAouth2.setCodeName(cuntCode);
+				  break;
+				 }
+            	}
+            }
+            if(Objects.isNull(countryCode) || flag){
             	userAouth2.setCodeName("INR");
             }
             userAouthDao.save(userAouth2);
