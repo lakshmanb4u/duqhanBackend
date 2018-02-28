@@ -218,6 +218,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserBean userLogin(LoginBean loginBean,long loginStartTime) {
+    	if(loginBean.getEmail().equals(guestMail)){
+    		return this.guestUserLogin(loginBean, loginStartTime);
+    	}else {
         String pass = Crypting.encrypt(loginBean.getPassword());
         Users user = usersDao.loadByEmailAndPass(loginBean.getEmail(), pass);
         System.out.println("after first data base connectivity"+(loginStartTime-System.currentTimeMillis()));
@@ -266,6 +269,7 @@ public class UsersServiceImpl implements UsersService {
         }
         System.out.println("After Verfication in coad"+(loginStartTime-System.currentTimeMillis()));
         return userBean;
+    	}
     }
     
     @Override
