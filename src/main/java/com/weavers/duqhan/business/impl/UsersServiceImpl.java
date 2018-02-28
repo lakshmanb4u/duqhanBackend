@@ -136,6 +136,10 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserBean fbUserLogin(LoginBean loginBean) {
+    	if(loginBean.getEmail().equals(guestMail)){
+    		return this.guestUserLogin(loginBean, 24);
+    	
+    	}else {
         Users user = usersDao.loadByEmail(loginBean.getEmail());
         if (null == user) {
             user = usersDao.loadByFbId(loginBean.getFbid());
@@ -214,6 +218,7 @@ public class UsersServiceImpl implements UsersService {
         activity.setUserAgent(loginBean.getUserAgent());
         userActivityDao.save(activity);
         return userBean;
+    	}
     }
 
     @Override
