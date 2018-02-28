@@ -220,6 +220,7 @@ public class UsersServiceImpl implements UsersService {
     public UserBean userLogin(LoginBean loginBean,long loginStartTime) {
     	if(loginBean.getEmail().equals(guestMail)){
     		return this.guestUserLogin(loginBean, loginStartTime);
+    	
     	}else {
         String pass = Crypting.encrypt(loginBean.getPassword());
         Users user = usersDao.loadByEmailAndPass(loginBean.getEmail(), pass);
