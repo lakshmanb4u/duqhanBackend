@@ -33,6 +33,8 @@ import com.weavers.duqhan.util.StatusConstants;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
@@ -136,7 +138,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserBean fbUserLogin(LoginBean loginBean) {
-    	if(loginBean.getEmail().equals(guestMail)){
+    	if(Objects.nonNull( loginBean.getEmail()) &&  loginBean.getEmail().equals(guestMail)){
     		return this.guestUserLogin(loginBean, 24);
     	
     	}else {
