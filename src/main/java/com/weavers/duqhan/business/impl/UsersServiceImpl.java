@@ -138,7 +138,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserBean fbUserLogin(LoginBean loginBean) {
-    	if(Objects.nonNull( loginBean.getEmail()) &&  loginBean.getEmail().equals(guestMail)){
+    	if(!Objects.isNull(loginBean.getEmail()) && loginBean.getEmail().equals(guestMail)){
     		return this.guestUserLogin(loginBean, 24);
     	
     	}else {
@@ -225,7 +225,7 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public UserBean userLogin(LoginBean loginBean,long loginStartTime) {
-    	if(loginBean.getEmail().equals(guestMail)){
+    	if(!Objects.isNull(loginBean.getEmail()) && loginBean.getEmail().equals(guestMail)){
     		return this.guestUserLogin(loginBean, loginStartTime);
     	
     	}else {
