@@ -14,6 +14,6 @@ import com.weavers.duqhan.domain.Impressions;
 public class ImpressionsDaoJpa extends BaseDaoJpa<Impressions> implements ImpressionsDao {
 	
 	public ImpressionsDaoJpa() {
-        super(Impressions.class, "Cart");
+        super(Impressions.class, "Impressions");
     }
 }

@@ -25,6 +25,7 @@ import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.AwsBean;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
@@ -108,6 +109,21 @@ public class UserController {
 
      private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
     //<editor-fold defaultstate="collapsed" desc="User Profile Module">
+     
+     @RequestMapping(value = "/aws-cloud-watch", method = RequestMethod.POST) //logout, destroy auth token.
+     public StatusBean awsCloudWatch(HttpServletRequest request, @RequestBody AwsBean awsBean) {
+    	 double timeTaken = awsBean.getTimeTaken() / 1000.0;
+    	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+         	return awsCloudWatchHelper.logCount(awsBean.getName(), awsBean.getName()+" "+"count", awsBean.getApiName()+" "+"API hit counter");
+         });
+         CompletableFuture<Integer> future1 = CompletableFuture.supplyAsync(() -> {
+         	return awsCloudWatchHelper.logTimeSecounds(awsBean.getName(), awsBean.getName()+" "+ "response", awsBean.getApiName()+" "+"API response time", timeTaken);
+         });
+         StatusBean statusBean = new StatusBean();
+         statusBean.setStatus("success");
+         return statusBean;
+     }
+     
     @RequestMapping(value = "/logout", method = RequestMethod.POST) //logout, destroy auth token.
      public StatusBean logOut(HttpServletRequest request, @RequestBody LoginBean loginBean) {
     	long startTime = System.currentTimeMillis();
