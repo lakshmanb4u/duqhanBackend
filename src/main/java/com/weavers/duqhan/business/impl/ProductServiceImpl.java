@@ -161,9 +161,9 @@ public class ProductServiceImpl implements ProductService {
     }
     
     public static Double getThreeDecimalFormat(Double unformatedValue) {
-        Double formatedValue = 0.0;
+        /*Double formatedValue = 0.0;
         if (unformatedValue != null && unformatedValue > 0) {
-//            formatedValue = Math.round(unformatedValue * 100.0) / 100.0;
+           formatedValue = Math.round(unformatedValue * 100.0) / 100.0;
             DecimalFormat df = new DecimalFormat("#.###");
             df.setRoundingMode(RoundingMode.HALF_UP);
             try {
@@ -171,7 +171,8 @@ public class ProductServiceImpl implements ProductService {
             } catch (IllegalArgumentException e) {
             }
         }
-        return formatedValue;
+        return formatedValue;*/
+    	return (Math.ceil(unformatedValue * 2)) / 2.0;
     }
 
     // <editor-fold defaultstate="collapsed" desc="setAddressDto">
