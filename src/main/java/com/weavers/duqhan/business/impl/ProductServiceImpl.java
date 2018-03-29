@@ -221,7 +221,8 @@ public class ProductServiceImpl implements ProductService {
                 bean.setProductId(product.getId());
                 bean.setName(product.getName());
                 bean.setPrice(getThreeDecimalFormat(price*currencyCode.getValue()));
-                bean.setDiscountedPrice((getThreeDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()))*currencyCode.getValue());
+                Double dis=mapProductPropertiesMaps.get(product.getId()).getDiscount();
+                bean.setDiscountedPrice(getThreeDecimalFormat(dis*currencyCode.getValue()));
                 bean.setDiscountPCT(this.getPercentage(price, mapProductPropertiesMaps.get(product.getId()).getDiscount()));
                 bean.setSymbol(symbol);
                 if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
