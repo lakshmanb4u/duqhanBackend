@@ -7,6 +7,8 @@ package com.weavers.duqhan.dao.jpa;
 
 import com.weavers.duqhan.dao.UsersDao;
 import com.weavers.duqhan.domain.Users;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
@@ -64,6 +66,16 @@ public class UsersDaoJpa extends BaseDaoJpa<Users> implements UsersDao {
             query.setParameter("userId", userId);
             return (String) query.getSingleResult();
         } catch (NoResultException nre) {
+            return null;
+        }
+    }
+    
+    @Override
+    public List<Users> GetAllFcmToken() {
+        try {
+            Query query = getEntityManager().createQuery("SELECT u FROM Users AS u WHERE u.fcmToken IS NOT NULL");
+            return query.getResultList();
+        } catch (Exception e) {
             return null;
         }
     }

@@ -5,6 +5,8 @@
  */
 package com.weavers.duqhan.dao;
 
+import java.util.List;
+
 import com.weavers.duqhan.domain.Users;
 
 /**
@@ -24,4 +26,6 @@ public interface UsersDao extends BaseDao<Users> {
     String GetFcmTokenByuserId(Long userId);
 
     Users getLastLoginOfUser(Long userId);
+
+	List<Users> GetAllFcmToken();
 }
