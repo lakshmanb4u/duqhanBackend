@@ -44,8 +44,8 @@ public class PushNotification {
 	
 	@Scheduled(cron = "0 0 7 * * ?")
 	//@RequestMapping(value = "/send", method = RequestMethod.GET, produces = "application/json")
-	public void send(){
-		//Map<String, Object> result = new HashMap<String, Object>();
+	public Map<String, Object> send(){
+		Map<String, Object> result = new HashMap<String, Object>();
 		List<Users> users = new ArrayList<Users>();
 		users=usersDao.GetAllFcmToken();
 		Map<String,String> offerCodes=returnRandom();
@@ -54,11 +54,12 @@ public class PushNotification {
 				if(!users2.getFcmToken().equals(""))
 					send(users2.getFcmToken(),offerCodes);
 			}
-			//result.put("status", "success");
+			result.put("status", "success");
 		}catch (Exception e) {
-			//result.put("status", "error");
+			result.put("status", "error");
 			e.printStackTrace();
 		}
+		return result;
 	}
 	
 	public Map<String,String> returnRandom() {
