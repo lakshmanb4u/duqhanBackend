@@ -118,6 +118,9 @@ public class Product extends BaseDomain {
 
     @Column(name = "thumb_img")
     private String thumbImg;
+    
+    @Column(name = "deleted")
+    private boolean deleted;
 
 	public String getThumbImg() {
 		 return thumbImg;
@@ -284,6 +287,14 @@ public class Product extends BaseDomain {
 
 	public void setLinkId(long linkId) {
 		this.linkId = linkId;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 	
 	

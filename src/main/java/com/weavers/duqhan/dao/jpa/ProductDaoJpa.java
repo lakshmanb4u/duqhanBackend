@@ -78,33 +78,37 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     @Override
     public List<Product> getAllRecentViewProduct(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice) {
         //SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv WHERE p.id = rv.productId AND rv.userId=:userId ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv WHERE p.deleted=:flag AND p.id = rv.productId AND rv.userId=:userId ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
+        query.setParameter("flag", false);
         return query.getResultList();
     }
     
     @Override
     public List<Product> getAllRecentViewProductByPrice(Long userid, int start, int limit, Integer lowPrice, Integer highPrice, String orderByPrice,Double lp,Double hp) {
         //SELECT p FROM Product AS p WHERE p.id IN (SELECT DISTINCT rv.productId FROM RecentView AS rv WHERE rv.userId=:userId ORDER BY rv.viewDate DESC)
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv INNER JOIN p.ProductPropertiesMaps AS map on p=map.productId.id WHERE p.id = rv.productId AND rv.userId=:userId AND map.discount >:lowPrice AND map.discount <:highPrice ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p, RecentView AS rv INNER JOIN p.ProductPropertiesMaps AS map on p=map.productId.id WHERE p.deleted=:flag AND p.id = rv.productId AND rv.userId=:userId AND map.discount >:lowPrice AND map.discount <:highPrice ORDER BY rv.viewDate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("userId", userid);
         query.setParameter("lowPrice", lp);
         query.setParameter("highPrice", hp);
+        query.setParameter("flag", false);
         return query.getResultList();
     }
 
     @Override
     public List<Product> getProductsByCategory(Long categoryId) {
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId ORDER BY p.lastUpdate DESC");
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.deleted=:flag AND p.categoryId=:categoryId ORDER BY p.lastUpdate DESC");
         query.setParameter("categoryId", categoryId);
+        query.setParameter("flag", false);
         return query.getResultList();
     }
 
     @Override
     public List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit) {/*SELECT p FROM Product p INNER JOIN ProductPropertiesMap map ON p.id = map.productId WHERE map.discount < 300 AND p.categoryId=:categoryId OR p.parentPath LIKE :parentPath GROUP BY p.id ORDER BY p.lastUpdate DESC*/
-        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.deleted=:flag AND p.categoryId=:categoryId OR p.parentPath LIKE :parentPath ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
         query.setParameter("categoryId", categoryId);
         query.setParameter("parentPath", "%=" + categoryId + "=%");
+        query.setParameter("flag", false);
         return query.getResultList();
     }
     
@@ -137,17 +141,19 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
         	}
         		Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
             			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice AND "
-            			+ "p.categoryId IN:categoryId GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
+            			+ "p.deleted=:flag AND p.categoryId IN:categoryId GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
             	query.setParameter("categoryId", catList);
                 query.setParameter("lowPrice", lowPrice);
                 query.setParameter("highPrice", highPrice);
+                query.setParameter("flag", false);
                 return query.getResultList();
     		}else {
     		Query query = getEntityManager().createQuery("SELECT p FROM Product p WHERE "
-        			+ "p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
+        			+ "p.deleted=:flag AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
         			+ "GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
         	query.setParameter("categoryId", categoryId);
             query.setParameter("parentPath", "%=" + categoryId + "=%");
+            query.setParameter("flag", false);
             /*query.setParameter("discountPrice", PRICE_FILTER);*/
             return query.getResultList();
     	}
@@ -159,12 +165,13 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     	
     	Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
     			+ " on p=map.productId.id WHERE map.discount >:lowPrice AND map.discount <:highPrice "
-    			+ "AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
+    			+ "AND p.deleted=:flag AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
     			+ "GROUP BY p.id ORDER BY p.linkId").setFirstResult(start).setMaxResults(limit);
     	query.setParameter("categoryId", categoryId);
         query.setParameter("parentPath", "%=" + categoryId + "=%");
         query.setParameter("lowPrice", lowPrice);
         query.setParameter("highPrice", highPrice);
+        query.setParameter("flag", false);
         return query.getResultList();
     	
     }
@@ -172,7 +179,8 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     @Override
     public List<Product> getAllAvailableProduct(int start, int limit) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
         Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map"
-        		+ " on p=map.productId.id WHERE map.discount < 300 AND p.parentPath NOT LIKE'0=42%' GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        		+ " on p=map.productId.id WHERE map.discount < 300 AND p.deleted=:flag AND p.parentPath NOT LIKE'0=42%' GROUP BY p.id ORDER BY p.lastUpdate DESC").setFirstResult(start).setMaxResults(limit);
+        query.setParameter("flag", false);
         return query.getResultList();
     }
     @Override
@@ -197,13 +205,14 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
 			
 			Query query = getEntityManager().createQuery("SELECT p FROM Product p INNER JOIN p.ProductPropertiesMaps map "
         			+ "on p=map.productId.id WHERE map.discount <:highPrice "
-        			+ "AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
+        			+ "AND p.deleted=:flag AND p.categoryId IN(SELECT c.id FROM Category AS c WHERE c.parentPath like :parentPath OR c.id=:categoryId) "
         			+ "GROUP BY p.id ORDER BY p.linkId")
 					.setFirstResult((start/20)*catLimit)
 					.setMaxResults(catLimit*15);
         	query.setParameter("categoryId", cat);
         	query.setParameter("parentPath", "%=" + cat + "=%");
             query.setParameter("highPrice", priceLimit);
+            query.setParameter("flag", false);
             ProductList.addAll(query.getResultList());
     	}
     	return ProductList;
@@ -223,7 +232,7 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
        
         
         
-           org.apache.lucene.search.Query query =qb.keyword().onFields("name","description").matching(searchName).createQuery();
+           org.apache.lucene.search.Query query =qb.keyword().fuzzy().withPrefixLength(0).onFields("name","description").matching(searchName).createQuery();
             	
             	
         
