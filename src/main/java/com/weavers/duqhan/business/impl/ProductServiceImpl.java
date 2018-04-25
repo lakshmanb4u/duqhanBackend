@@ -1487,9 +1487,9 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setMenuIcon(category.getMenuIcon());
                 categoryDto.setPriceLimit(category.getPriceLimit());
                 categoryDto.setLoadCategory(category.getLoadCategory())*/;
-                /*if (level <=1 ) {
+                if (level <=1 ) {
                 	categoryDto.setSubCategories(this.getSubCategory(category.getId(),++level));	
-                }*/
+                }
                 categoryDtos.add(categoryDto);
             }
         }
