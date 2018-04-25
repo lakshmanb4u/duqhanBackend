@@ -25,4 +25,6 @@ public interface CategoryDao extends BaseDao<Category> {
 	List<Category> getCategoryNameAndIds(List<Long> categoryIds);
 
 	List<Category> getById(Long parentId);
+
+	List<Category> getAllChildCategory(Long parentId);
 }

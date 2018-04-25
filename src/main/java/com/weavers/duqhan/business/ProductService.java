@@ -146,4 +146,6 @@ public interface ProductService {
 	CategorysBean getChildByIdAndActive(Long parentId);
 
 	ProductNewBeans getAllCacheProducts(int i, int j, ProductRequistBean productRequistBean);
+
+	CategorysBean getAllChildCategory(Long parentId);
 }

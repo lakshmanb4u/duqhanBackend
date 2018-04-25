@@ -1436,19 +1436,19 @@ public class ProductServiceImpl implements ProductService {
         	
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
-                categoryDto.setIsLeaf(false);
-                categoryDto.setCategoryId(category.getId());
-                categoryDto.setCategoryName(category.getName());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
+                categoryDto.setCategoryId(category.getId());
+                /*categoryDto.setIsLeaf(false);
+                categoryDto.setCategoryName(category.getName());
                 categoryDto.setMenuIcon(category.getMenuIcon());
                 categoryDto.setPriceLimit(category.getPriceLimit());
                 categoryDto.setLoadCategory(category.getLoadCategory());
-                categoryDto.setParentPath(category.getParentPath());
+                categoryDto.setParentPath(category.getParentPath());*/
                 List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
-                if (categorys2.isEmpty()) {
+                /*if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
-                }
+                }*/
 //                if (productDao.isAnyProductInCategoryId(category.getId())) {
 //                categoryDtos.add(categoryDto);
 //                }
@@ -1472,6 +1472,61 @@ public class ProductServiceImpl implements ProductService {
         return categorysBean;
     }
     
+    public List<CategoryDto> getSubCategory(Long catId, Long level) {
+    	List<Category> categorys =categoryDao.getChildByParentId(catId);
+    	
+    	List<CategoryDto> categoryDtos = new ArrayList<>();
+        if (!categorys.isEmpty()) {
+            for (Category category : categorys) {
+                CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setImgUrl(category.getImgUrl());
+                categoryDto.setDisplayText(category.getDisplayText());
+               /* categoryDto.setIsLeaf(false);
+                categoryDto.setCategoryId(category.getId());
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
+                categoryDto.setPriceLimit(category.getPriceLimit());
+                categoryDto.setLoadCategory(category.getLoadCategory())*/;
+                /*if (level <=1 ) {
+                	categoryDto.setSubCategories(this.getSubCategory(category.getId(),++level));	
+                }*/
+                categoryDtos.add(categoryDto);
+            }
+        }
+         return categoryDtos;   
+    }
+    
+    @Override
+    public CategorysBean getAllChildCategory(Long parentId) {
+        CategorysBean categorysBean = new CategorysBean();
+        List<CategoryDto> categoryDtos = new ArrayList<>();
+        List<Category> categorys = categoryDao.getChildByParentIdAndActive(parentId);
+        if (categorys.isEmpty()) {
+            categorysBean.setStatus("No child category found");
+            categorysBean.setStatusCode("403");
+        } else {
+            for (Category category : categorys) {
+                CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setCategoryId(category.getId());
+                categoryDto.setImgUrl(category.getImgUrl());
+                categoryDto.setDisplayText(category.getDisplayText());
+                /*categoryDto.setIsLeaf(false);
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
+                categoryDto.setPriceLimit(category.getPriceLimit());
+                categoryDto.setLoadCategory(category.getLoadCategory());*/
+                categoryDto.setSubCategories(this.getSubCategory(category.getId(), 1L));
+                categoryDtos.add(categoryDto);
+            }
+
+            categorysBean.setCategoryDtos(categoryDtos);
+            categorysBean.setChildCount(categoryDtos.size());
+            categorysBean.setStatus("success");
+            categorysBean.setStatusCode("200");
+        }
+        return categorysBean;
+    }
+    
     @Override
     public CategorysBean getChildByIdAndActive(Long parentId) {
         CategorysBean categorysBean = new CategorysBean();
@@ -1483,18 +1538,20 @@ public class ProductServiceImpl implements ProductService {
         } else {
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
-                categoryDto.setIsLeaf(false);
-                categoryDto.setCategoryId(category.getId());
-                categoryDto.setCategoryName(category.getName());
-                categoryDto.setImgUrl(category.getImgUrl());
-                categoryDto.setDisplayText(category.getDisplayText());
+                /*categoryDto.setIsLeaf(false);
                 categoryDto.setMenuIcon(category.getMenuIcon());
                 categoryDto.setPriceLimit(category.getPriceLimit());
                 categoryDto.setLoadCategory(category.getLoadCategory());
-                List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
+                categoryDto.setCategoryName(category.getName());*/
+                categoryDto.setCategoryId(category.getId());
+                
+                categoryDto.setImgUrl(category.getImgUrl());
+                categoryDto.setDisplayText(category.getDisplayText());
+                
+               /* List<Category> categorys2 = categoryDao.getChildByParentId(category.getId());
                 if (categorys2.isEmpty()) {
                     categoryDto.setIsLeaf(true);
-                }
+                }*/
 //                if (productDao.isAnyProductInCategoryId(category.getId())) {
 //                categoryDtos.add(categoryDto);
 //                }

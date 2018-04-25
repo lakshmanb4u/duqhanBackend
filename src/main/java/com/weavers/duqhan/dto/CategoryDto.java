@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package com.weavers.duqhan.dto;
-
+import java.util.List;
 /**
  *
  * @author Android-3
@@ -12,15 +12,16 @@ package com.weavers.duqhan.dto;
 public class CategoryDto {
 
     private Long categoryId;
-    private String categoryName;
-    private Long patentId;
-    private boolean isLeaf;
     private String imgUrl;
     private String displayText;
-    private String menuIcon;
+    /*private String menuIcon;
     private String priceLimit;
     private String parentPath;
     private String loadCategory;
+    private Long patentId;
+    private boolean isLeaf;
+    private String categoryName;*/
+    private List<CategoryDto> subCategories;
 
     /**
      * @return the categoryId
@@ -39,44 +40,44 @@ public class CategoryDto {
     /**
      * @return the categoryName
      */
-    public String getCategoryName() {
+    /*public String getCategoryName() {
         return categoryName;
     }
 
-    /**
+    *//**
      * @param categoryName the categoryName to set
-     */
+     *//*
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
 
-    /**
+    *//**
      * @return the patentId
-     */
+     *//*
     public Long getPatentId() {
         return patentId;
     }
 
-    /**
+    *//**
      * @param patentId the patentId to set
-     */
+     *//*
     public void setPatentId(Long patentId) {
         this.patentId = patentId;
     }
 
-    /**
+    *//**
      * @return the isLeaf
-     */
+     *//*
     public boolean isIsLeaf() {
         return isLeaf;
     }
 
-    /**
+    *//**
      * @param isLeaf the isLeaf to set
-     */
+     *//*
     public void setIsLeaf(boolean isLeaf) {
         this.isLeaf = isLeaf;
-    }
+    }*/
 
     /**
      * @return the imgUrl
@@ -106,7 +107,7 @@ public class CategoryDto {
         this.displayText = displayText;
     }
 
-	public String getMenuIcon() {
+/*	public String getMenuIcon() {
 		return menuIcon;
 	}
 
@@ -136,6 +137,22 @@ public class CategoryDto {
 
 	public void setLoadCategory(String loadCategory) {
 		this.loadCategory = loadCategory;
+	}
+
+	public boolean isLeaf() {
+		return isLeaf;
+	}
+
+	public void setLeaf(boolean isLeaf) {
+		this.isLeaf = isLeaf;
+	}*/
+
+	public List<CategoryDto> getSubCategories() {
+		return subCategories;
+	}
+
+	public void setSubCategories(List<CategoryDto> subCategories) {
+		this.subCategories = subCategories;
 	}
     
     

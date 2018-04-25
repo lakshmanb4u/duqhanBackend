@@ -172,6 +172,13 @@ public class HomeController {
         return categorysBean;
     }
     
+    @RequestMapping(value = "/get-all-child-category", method = RequestMethod.POST) // get child category
+    public CategorysBean getAllChildCategory(@RequestBody ProductRequistBean requistBean) {
+        CategorysBean categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
+//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+        return categorysBean;
+    }
+    
     @RequestMapping(value = "/get-child-category-byid", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategoryById(@RequestBody ProductRequistBean requistBean) {
     	long loginStartTime = System.currentTimeMillis();
