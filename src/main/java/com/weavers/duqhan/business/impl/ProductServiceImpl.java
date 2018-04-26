@@ -1479,6 +1479,7 @@ public class ProductServiceImpl implements ProductService {
         if (!categorys.isEmpty()) {
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
+                categoryDto.setCategoryId(category.getId());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
                /* categoryDto.setIsLeaf(false);
