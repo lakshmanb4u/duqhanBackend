@@ -1477,6 +1477,7 @@ public class ProductServiceImpl implements ProductService {
     	
     	List<CategoryDto> categoryDtos = new ArrayList<>();
         if (!categorys.isEmpty()) {
+        	++level;
             for (Category category : categorys) {
                 CategoryDto categoryDto = new CategoryDto();
                 categoryDto.setCategoryId(category.getId());
@@ -1488,8 +1489,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setMenuIcon(category.getMenuIcon());
                 categoryDto.setPriceLimit(category.getPriceLimit());
                 categoryDto.setLoadCategory(category.getLoadCategory())*/;
-                if (level <=1 ) {
-                	categoryDto.setSubCategories(this.getSubCategory(category.getId(),++level));	
+                if (level <=2 ) {
+                	categoryDto.setSubCategories(this.getSubCategory(category.getId(),level));	
                 }
                 categoryDtos.add(categoryDto);
             }
