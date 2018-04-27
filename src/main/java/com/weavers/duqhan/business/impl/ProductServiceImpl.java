@@ -1439,6 +1439,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
                 categoryDto.setCategoryId(category.getId());
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                 /*categoryDto.setIsLeaf(false);
                 categoryDto.setCategoryName(category.getName());
                 categoryDto.setMenuIcon(category.getMenuIcon());
@@ -1483,6 +1485,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setCategoryId(category.getId());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                /* categoryDto.setIsLeaf(false);
                 categoryDto.setCategoryId(category.getId());
                 categoryDto.setCategoryName(category.getName());
@@ -1512,6 +1516,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setCategoryId(category.getId());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                 /*categoryDto.setIsLeaf(false);
                 categoryDto.setCategoryName(category.getName());
                 categoryDto.setMenuIcon(category.getMenuIcon());
@@ -1546,7 +1552,8 @@ public class ProductServiceImpl implements ProductService {
                 categoryDto.setLoadCategory(category.getLoadCategory());
                 categoryDto.setCategoryName(category.getName());*/
                 categoryDto.setCategoryId(category.getId());
-                
+                categoryDto.setCategoryName(category.getName());
+                categoryDto.setMenuIcon(category.getMenuIcon());
                 categoryDto.setImgUrl(category.getImgUrl());
                 categoryDto.setDisplayText(category.getDisplayText());
                 

@@ -14,13 +14,15 @@ public class CategoryDto {
     private Long categoryId;
     private String imgUrl;
     private String displayText;
+    private String categoryName;
+    private String menuIcon;
     /*private String menuIcon;
     private String priceLimit;
     private String parentPath;
     private String loadCategory;
     private Long patentId;
     private boolean isLeaf;
-    private String categoryName;*/
+    */
     private List<CategoryDto> subCategories;
 
     /**
@@ -36,48 +38,6 @@ public class CategoryDto {
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
-
-    /**
-     * @return the categoryName
-     */
-    /*public String getCategoryName() {
-        return categoryName;
-    }
-
-    *//**
-     * @param categoryName the categoryName to set
-     *//*
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    *//**
-     * @return the patentId
-     *//*
-    public Long getPatentId() {
-        return patentId;
-    }
-
-    *//**
-     * @param patentId the patentId to set
-     *//*
-    public void setPatentId(Long patentId) {
-        this.patentId = patentId;
-    }
-
-    *//**
-     * @return the isLeaf
-     *//*
-    public boolean isIsLeaf() {
-        return isLeaf;
-    }
-
-    *//**
-     * @param isLeaf the isLeaf to set
-     *//*
-    public void setIsLeaf(boolean isLeaf) {
-        this.isLeaf = isLeaf;
-    }*/
 
     /**
      * @return the imgUrl
@@ -107,45 +67,13 @@ public class CategoryDto {
         this.displayText = displayText;
     }
 
-/*	public String getMenuIcon() {
+	public String getMenuIcon() {
 		return menuIcon;
 	}
 
 	public void setMenuIcon(String menuIcon) {
 		this.menuIcon = menuIcon;
 	}
-
-	public String getPriceLimit() {
-		return priceLimit;
-	}
-
-	public void setPriceLimit(String priceLimit) {
-		this.priceLimit = priceLimit;
-	}
-
-	public String getParentPath() {
-		return parentPath;
-	}
-
-	public void setParentPath(String parentPath) {
-		this.parentPath = parentPath;
-	}
-
-	public String getLoadCategory() {
-		return loadCategory;
-	}
-
-	public void setLoadCategory(String loadCategory) {
-		this.loadCategory = loadCategory;
-	}
-
-	public boolean isLeaf() {
-		return isLeaf;
-	}
-
-	public void setLeaf(boolean isLeaf) {
-		this.isLeaf = isLeaf;
-	}*/
 
 	public List<CategoryDto> getSubCategories() {
 		return subCategories;
@@ -154,6 +82,15 @@ public class CategoryDto {
 	public void setSubCategories(List<CategoryDto> subCategories) {
 		this.subCategories = subCategories;
 	}
+
+	public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+	
     
     
 }
