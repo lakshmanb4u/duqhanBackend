@@ -7,6 +7,7 @@ package com.weavers.duqhan.business;
 
 import com.weavers.duqhan.domain.LikeUnlikeProduct;
 import com.weavers.duqhan.domain.Users;
+import com.weavers.duqhan.dto.AutoComplete;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
@@ -148,4 +149,6 @@ public interface ProductService {
 	ProductNewBeans getAllCacheProducts(int i, int j, ProductRequistBean productRequistBean);
 
 	CategorysBean getAllChildCategory(Long parentId);
+
+	List<AutoComplete> searchAutocomplete(String name);
 }

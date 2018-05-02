@@ -52,6 +52,7 @@ import com.weavers.duqhan.domain.UserAddress;
 import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.AutoComplete;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.CategoryDto;
 import com.weavers.duqhan.dto.CategorysBean;
@@ -83,6 +84,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -808,6 +810,30 @@ public class ProductServiceImpl implements ProductService {
             }
         }
         return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
+    }
+    
+    @Override
+    public List<AutoComplete> searchAutocomplete(String name){
+    	List<AutoComplete> finalResult = new ArrayList<AutoComplete>();
+    	 List<Product> products=productDao.SearchProductByNameAndDescription(name, 0, 3);
+    	 for(Product product: products){
+    		 AutoComplete result = new AutoComplete();
+    		 result.setName(product.getName());
+    		 result.setId(product.getId());
+    		 result.setCategory(false);
+    		 finalResult.add(result);
+    	 }
+    		 
+    	 List<Category> categories=categoryDao.getCategoryByNameLike(name);
+    	 for(Category category:categories) {
+    		 AutoComplete result = new AutoComplete();
+    		result.setName(category.getName());
+    		result.setId(category.getId());
+    		result.setCategory(true);
+    		finalResult.add(result);
+    	 }
+    	 
+    	return finalResult;
     }
     
     @Override

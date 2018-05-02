@@ -25,6 +25,7 @@ import com.weavers.duqhan.domain.UserAouth;
 import com.weavers.duqhan.domain.Users;
 import com.weavers.duqhan.dto.AddressBean;
 import com.weavers.duqhan.dto.AddressDto;
+import com.weavers.duqhan.dto.AutoComplete;
 import com.weavers.duqhan.dto.AwsBean;
 import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
@@ -657,6 +658,16 @@ public class UserController {
         
         
         return productBeans;
+    }
+    
+    @RequestMapping(value = "/search-autoComplete", method = RequestMethod.POST)
+    public List<AutoComplete> searchAutoComplete(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+        List<AutoComplete> result = new ArrayList<>();
+        if (users != null) {
+             result= productService.searchAutocomplete(requistBean.getName());
+        } 
+        return result;
     }
     
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.

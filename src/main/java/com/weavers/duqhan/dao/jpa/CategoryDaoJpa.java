@@ -81,6 +81,17 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
     }
     
     @Override
+    public List<Category> getCategoryByNameLike(String name) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.name LIKE :name").setMaxResults(6);
+            query.setParameter("name", "%" + name + "%");
+            return query.getResultList();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
+    
+    @Override
     public List<Category> getById(Long parentId) {
         Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.id=:parentId AND c.quantity>:quantity");
 //         Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId");
