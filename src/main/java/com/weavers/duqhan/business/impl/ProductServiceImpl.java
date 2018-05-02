@@ -816,14 +816,6 @@ public class ProductServiceImpl implements ProductService {
     public List<AutoComplete> searchAutocomplete(String name){
     	List<AutoComplete> finalResult = new ArrayList<AutoComplete>();
     	 List<Product> products=productDao.SearchProductByNameAndDescription(name, 0, 3);
-    	 for(Product product: products){
-    		 AutoComplete result = new AutoComplete();
-    		 result.setName(product.getName());
-    		 result.setId(product.getId());
-    		 result.setCategory(false);
-    		 finalResult.add(result);
-    	 }
-    		 
     	 List<Category> categories=categoryDao.getCategoryByNameLike(name);
     	 for(Category category:categories) {
     		 AutoComplete result = new AutoComplete();
@@ -832,7 +824,13 @@ public class ProductServiceImpl implements ProductService {
     		result.setCategory(true);
     		finalResult.add(result);
     	 }
-    	 
+    	 for(Product product: products){
+    		 AutoComplete result = new AutoComplete();
+    		 result.setName(product.getName());
+    		 result.setId(product.getId());
+    		 result.setCategory(false);
+    		 finalResult.add(result);
+    	 }
     	return finalResult;
     }
     
