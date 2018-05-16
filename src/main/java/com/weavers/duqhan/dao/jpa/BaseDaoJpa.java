@@ -14,7 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public class BaseDaoJpa<T extends BaseDomain> implements BaseDao<T> {
 
-    @PersistenceContext
+    
+	@PersistenceContext
     private EntityManager entityManager;
     private final Class<T> prototype;
     private final String entityName;

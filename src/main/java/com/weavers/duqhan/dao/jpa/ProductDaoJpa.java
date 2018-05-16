@@ -186,9 +186,9 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
     @Override
     public List<Product> getAllAvailableProductByCategories(int start, int limit, Integer lowPrice, Integer highPrice, String orderbyPrice) {/*"SELECT p FROM Product AS p ORDER BY p.lastUpdate DESC"*/
     	List<Product> ProductList = new ArrayList<Product>();
-    	String pattern = "14:8,8:3,21:3,1535:2,26:4";
+    	String pattern = "73:3,14:3,8:3,21:3,1535:4,32:4";
 		String[] list2 = pattern.split(",");
-		Double priceLimit = 1000d;
+		Double priceLimit = 400d;
 		
     	Query q = getEntityManager().createNativeQuery("select p.latest_category,p.price_limit from product_config p");
     	List<Object[]> authors = q.getResultList();
