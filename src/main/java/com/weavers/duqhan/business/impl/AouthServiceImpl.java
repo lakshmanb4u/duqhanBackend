@@ -108,7 +108,7 @@ public class AouthServiceImpl implements AouthService {
         String status = "failure";
         UserAouth userAouth = userAouthDao.getTokenByEmailAndToken(email, token);
         if (userAouth != null) {
-            userAouthDao.delete(userAouth); // Token invalidated when user log out
+            //userAouthDao.delete(userAouth); // Token invalidated when user log out
             status = "success";
         }
         return status;
