@@ -72,7 +72,7 @@ public class UserAouthDaoJpa extends BaseDaoJpa<UserAouth> implements UserAouthD
     @Override
     public Long getUserIdByTokenIfValid(String aouthToken) {
         try {
-            Query query = getEntityManager().createQuery("SELECT ut.userId FROM UserAouth ut WHERE ut.aouthToken=:aouthToken AND ut.validTill>:thisTime");
+            Query query = getEntityManager().createQuery("SELECT ut.userId FROM UserAouth ut WHERE ut.aouthToken=:aouthToken");
             query.setParameter("thisTime", new Date());
             query.setParameter("aouthToken", aouthToken);
             return (Long) query.getSingleResult();

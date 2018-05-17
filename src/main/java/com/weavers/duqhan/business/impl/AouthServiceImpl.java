@@ -46,19 +46,20 @@ public class AouthServiceImpl implements AouthService {
 
     private Date nextUpdate() {
         Calendar calendar = Calendar.getInstance(); // set token validity
-        calendar.add(Calendar.DATE, 1);
+        calendar.add(Calendar.YEAR, 1);
         return calendar.getTime();
     }
 
     @Override
     public AouthBean generatAccessToken(String email, Long userId, String countryCode) {
         AouthBean aouthBean = new AouthBean();
+        UserAouth auth =new UserAouth();
 //        UserAouth userAouth = userAouthDao.getTokenByMailAndUserId(email, userId);
         UserAouth userAouth = userAouthDao.getTokenByUserId(userId);
         String token = this.createToken(userId);
         String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
         if (userAouth != null) {    // for existing user update token
-            userAouth.setAouthToken(token);
+           // userAouth.setAouthToken(token);
             userAouth.setValidTill(nextUpdate());
             Boolean flag = true;
             if(countryCode != null) {
@@ -74,7 +75,7 @@ public class AouthServiceImpl implements AouthService {
             if(Objects.isNull(countryCode) || flag){
             	userAouth.setCodeName("INR");
             }
-            userAouthDao.save(userAouth);
+            auth=userAouthDao.save(userAouth);
         } else {                    // for new user create new token
             UserAouth userAouth2 = new UserAouth();
             userAouth2.setId(null);
@@ -96,9 +97,9 @@ public class AouthServiceImpl implements AouthService {
             if(Objects.isNull(countryCode) || flag){
             	userAouth2.setCodeName("INR");
             }
-            userAouthDao.save(userAouth2);
+            auth=userAouthDao.save(userAouth2);
         }
-        aouthBean.setAouthToken(token);
+        aouthBean.setAouthToken(auth.getAouthToken());
         return aouthBean;
     }
 
