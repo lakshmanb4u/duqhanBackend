@@ -53,8 +53,10 @@ import com.weavers.duqhan.util.StatusConstants;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -495,6 +497,23 @@ public class UserController {
         System.out.println("Start Of User auth==========================="+(startTime-System.currentTimeMillis()));
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
+        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+        String countryCode=request.getHeader("X-Country");
+        Boolean flag = true;
+        String currencyCode = "INR";
+        if(countryCode != null) {
+        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+        	for (String code : countryArray) {
+			 if(cuntCode.equals(code)){
+			  flag=false;
+			  currencyCode=code;
+			  break;
+			 }
+        	}
+        }
+        if(Objects.isNull(countryCode) || flag){
+        	currencyCode="INR";
+        }
         ProductNewBeans productBeans = new ProductNewBeans();
         if (users != null) {
             Long categoryId = null;
@@ -516,24 +535,24 @@ public class UserController {
             if (categoryId != null && !isRecent) {
                 //**********by category id***************//
                 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice());	
+                	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
                 }else {
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users);
+                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,currencyCode);
                 }
             } else if (categoryId == null && isRecent) {
                 //**********recent viewed****************//
             	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                 	productBeans = productService.getProductsByRecentViewPrice(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,requistBean.getLowPrice(),requistBean.getHighPrice());	
+                 	productBeans = productService.getProductsByRecentViewPrice(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
                  }else {
-                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users);
+                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,currencyCode);
                  }
                  } else if (categoryId == null && !isRecent) {
                 //******************all******************//
                // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
                 	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                		 productBeans = this.getProductCacheByPrice(users, requistBean);
+                		 productBeans = this.getProductCacheByPrice(users, requistBean,currencyCode);
                       }else {
-                        productBeans = this.getProductV1(users,requistBean);
+                        productBeans = this.getProductV1(users,requistBean,currencyCode);
                       }
             }
         } else {
@@ -555,7 +574,7 @@ public class UserController {
     }
     
     //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean) {
+    public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean,String currencyCo) {
         ProductNewBeans productBeans = new ProductNewBeans();
         DecimalFormat numberFormat = new DecimalFormat("#.00");
         	try {	
@@ -564,17 +583,22 @@ public class UserController {
         	} 
         	CurrencyCode currencyCode = new CurrencyCode();
             String symbol = new String();
-            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
-            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            if(users.getEmail().equals("guest@gmail.com")) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
             	symbol=currencyCode.getCode();
-            }else{
-            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
-            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
-                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            }else {
+            	if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
                 	symbol=currencyCode.getCode();
-                } else {
-                	currencyCode.setValue(1d);
-                	symbol="INR";
+                }else{
+                	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+                	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                    	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                    	symbol=currencyCode.getCode();
+                    } else {
+                    	currencyCode.setValue(1d);
+                    	symbol="INR";
+                    }
                 }
             }
         	List<ProductNewBean> productbeansl = new ArrayList<>();
@@ -607,7 +631,7 @@ public class UserController {
         return productBeans;
     }
     
-    public ProductNewBeans getProductCacheByPrice(Users users,ProductRequistBean requistBean) {
+    public ProductNewBeans getProductCacheByPrice(Users users,ProductRequistBean requistBean,String currencyCode) {
         ProductNewBeans productBeans = new ProductNewBeans();
         	try {	
         	if(!CacheController.isProductBeanListAvailableForUserPrice(users)) {
@@ -637,10 +661,27 @@ public class UserController {
     public ProductNewBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+        String countryCode=request.getHeader("X-Country-Code");
+        Boolean flag = true;
+        String currencyCode = "INR";
+        if(countryCode != null) {
+        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+        	for (String code : countryArray) {
+			 if(cuntCode.equals(code)){
+			  flag=false;
+			  currencyCode=code;
+			  break;
+			 }
+        	}
+        }
+        if(Objects.isNull(countryCode) || flag){
+        	currencyCode="INR";
+        }
         ProductNewBeans productBeans = new ProductNewBeans();
         if (users != null) {
             requistBean.setUserId(users.getId());
-            productBeans = productService.searchProducts(requistBean,users);
+            productBeans = productService.searchProducts(requistBean,users,currencyCode);
         } else {
             response.setStatus(401);
             productBeans.setStatusCode("401");
@@ -674,9 +715,26 @@ public class UserController {
     public ProductDetailBean getProductDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         long startTime = System.currentTimeMillis();
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+        String countryCode=request.getHeader("X-Country-Code");
+        Boolean flag = true;
+        String currencyCode = "INR";
+        if(countryCode != null) {
+        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+        	for (String code : countryArray) {
+			 if(cuntCode.equals(code)){
+			  flag=false;
+			  currencyCode=code;
+			  break;
+			 }
+        	}
+        }
+        if(Objects.isNull(countryCode) || flag){
+        	currencyCode="INR";
+        }
         ProductDetailBean productDetailBean = new ProductDetailBean();
         if (users != null) {
-            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users);
+            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users,currencyCode);
         } else {
             response.setStatus(401);
             productDetailBean.setStatusCode("401");

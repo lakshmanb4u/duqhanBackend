@@ -50,21 +50,21 @@ public interface ProductService {
 //
 //    ColorAndSizeDto getSpecificationsByCategoryId(Long categoryId);
 
-    ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users);
+    ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users,String currencyCode);
     
-    ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users,String lp,String hp);
+    ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requistBean, long startTime, Users users,String lp,String hp,String currencyCode);
 
-    ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users);
+    ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requistBean, Users users,String currencyCode);
     
-    ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requistBean, Users users,String lp,String hp);
+    ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requistBean, Users users,String lp,String hp,String currencyCode);
 
    // ProductBeans getAllProducts(int start, int limit, ProductRequistBean requistBean,Users users );
 
 //    ProductBeans getAllProductsIncloudeZeroAvailable(int start, int limit);
 
-    ProductNewBeans searchProducts(ProductRequistBean requistBean, Users users);
+    ProductNewBeans searchProducts(ProductRequistBean requistBean, Users users,String currencyCode);
 
-    ProductDetailBean getProductDetailsById(Long productId, Users users);
+    ProductDetailBean getProductDetailsById(Long productId, Users users,String currencycode);
     
     ProductDetailBean getProductReviewsById(Long productId, Long userId);
     

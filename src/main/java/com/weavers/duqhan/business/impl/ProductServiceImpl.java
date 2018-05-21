@@ -197,22 +197,27 @@ public class ProductServiceImpl implements ProductService {
         return addressDto;
     }
     
-    private ProductNewBeans setNewProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users) {
+    private ProductNewBeans setNewProductBeans(List<Product> products, HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps, long startTime,Users users,String currencyCo) {
         ProductNewBeans productNewBeans = new ProductNewBeans();
         List<ProductNewBean> beans = new ArrayList<>();
         CurrencyCode currencyCode = new CurrencyCode();
         String symbol = new String();
-        if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
-        	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+        if(users.getEmail().equals("guest@gmail.com")) {
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
         	symbol=currencyCode.getCode();
-        }else{
-        	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
-        	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
-            	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+        }else {
+        	if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
             	symbol=currencyCode.getCode();
-            } else {
-            	currencyCode.setValue(1d);
-            	symbol="INR";
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getCode();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
             }
         }
         
@@ -615,7 +620,7 @@ public class ProductServiceImpl implements ProductService {
         return colorAndSizeDto;
     }*/
     @Override
-    public ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users) {
+    public ProductNewBeans getProductsByCategory(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users,String currencyCode) {
     	List<Product> products = new ArrayList<Product>();
     	products = productDao.getProductsByCategoryIncludeChildDiscount(categoryId, start, limit,StatusConstants.PRICE_FILTER_BAG,StatusConstants.PRICE_FILTER,startTime);  // Find category wise product 
     	System.out.println("End Of Query for product==========================="+(startTime-System.currentTimeMillis()));
@@ -644,14 +649,14 @@ public class ProductServiceImpl implements ProductService {
         System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
         //ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
-        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users);
+        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users,currencyCode);
         System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
     
     @Override
-    public ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users,String lp,String hp) {
+    public ProductNewBeans getProductsByPrice(Long categoryId, int start, int limit, ProductRequistBean requestBean,long startTime,Users users,String lp,String hp,String currencyCode) {
     	List<Product> products = new ArrayList<Product>();
     	Double lowPrice = Double.parseDouble(lp);
     	Double highPrice = Double.parseDouble(hp);
@@ -682,14 +687,14 @@ public class ProductServiceImpl implements ProductService {
         System.out.println("logicccc end==========================="+(startTime-System.currentTimeMillis()));
 //        HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceIfAvailable(productIds);
         //ProductBeans productBeans = this.setProductBeans(products, mapProductPropertiesMap,startTime,users);
-        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users);
+        ProductNewBeans productBeans = this.setNewProductBeans(products, mapProductPropertiesMap,startTime,users,currencyCode);
         System.out.println("Start Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         System.out.println("End Of categoryDao load by id==========================="+(startTime-System.currentTimeMillis()));
         return productBeans;
     }
 
     @Override
-    public ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users) {
+    public ProductNewBeans getProductsByRecentView(Long userId, int start, int limit, ProductRequistBean requestBean,Users users,String currencyCode) {
         List<Product> products = productDao.getAllRecentViewProduct(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy());    // Find recent view product 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -713,11 +718,11 @@ public class ProductServiceImpl implements ProductService {
             impressionsDao.save(impressions);*/
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
-        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users,currencyCode);
     }
     
     @Override
-    public ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requestBean,Users users,String lp,String hp) {
+    public ProductNewBeans getProductsByRecentViewPrice(Long userId, int start, int limit, ProductRequistBean requestBean,Users users,String lp,String hp,String currencyCode) {
         Double lowPrice = Double.parseDouble(lp);
         Double highPrice = Double.parseDouble(hp);
     	List<Product> products = productDao.getAllRecentViewProductByPrice(userId, start, limit, requestBean.getPriceLt(), requestBean.getPriceGt(), requestBean.getPriceOrderBy(),lowPrice,highPrice);    // Find recent view product 
@@ -743,7 +748,7 @@ public class ProductServiceImpl implements ProductService {
             impressionsDao.save(impressions);*/
         }
         //HashMap<Long, ProductPropertiesMap> mapProductPropertiesMaps = productPropertiesMapDao.getProductPropertiesMapByMinPriceRecentView(productIds);
-        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users,currencyCode);
     }
 
     @Override
@@ -791,7 +796,7 @@ public class ProductServiceImpl implements ProductService {
 //        return this.setProductBeans(products, mapSizeColorMaps);
 //    }
     @Override
-    public ProductNewBeans searchProducts(ProductRequistBean requistBean,Users users) {
+    public ProductNewBeans searchProducts(ProductRequistBean requistBean,Users users,String currencyCode) {
         List<Product> products = productDao.SearchProductByNameAndDescription(requistBean.getName(), requistBean.getStart(), requistBean.getLimit()); 
         HashMap<Long, ProductPropertiesMap> mapProductPropertiesMap = new HashMap<>();
         for (Product product : products) {
@@ -809,7 +814,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
-        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users);
+        return this.setNewProductBeans(products, mapProductPropertiesMap,25L,users,currencyCode);
     }
     
     @Override
@@ -910,23 +915,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailBean getProductDetailsById(Long productId, Users users) {/*http://duqhan.com/#/store/product/55918/overview*/
+    public ProductDetailBean getProductDetailsById(Long productId, Users users,String currencyCo) {/*http://duqhan.com/#/store/product/55918/overview*/
         ProductDetailBean productDetailBean = new ProductDetailBean();
         Product product = productDao.loadById(productId);
         if (product != null) {
         	CurrencyCode currencyCode = new CurrencyCode();
             String symbol = new String();
-            if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
-            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            if(users.getEmail().equals("guest@gmail.com")) {
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
             	symbol=currencyCode.getCode();
-            }else{
-            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
-            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
-                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+            }else {
+            	if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
                 	symbol=currencyCode.getCode();
-                } else {
-                	currencyCode.setValue(1d);
-                	symbol="INR";
+                }else{
+                	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+                	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                    	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                    	symbol=currencyCode.getCode();
+                    } else {
+                    	currencyCode.setValue(1d);
+                    	symbol="INR";
+                    }
                 }
             }
             List<Long> ids;
