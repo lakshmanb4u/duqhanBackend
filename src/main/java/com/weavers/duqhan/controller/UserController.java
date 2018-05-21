@@ -498,7 +498,7 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
         String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
-        String countryCode=request.getHeader("X-Country");
+        String countryCode=request.getHeader("X-Country-Code");
         Boolean flag = true;
         String currencyCode = "INR";
         if(countryCode != null) {
