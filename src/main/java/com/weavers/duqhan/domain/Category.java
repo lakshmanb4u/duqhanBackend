@@ -54,6 +54,10 @@ public class Category extends BaseDomain {
     private String priceLimit;
     @Column(name = "load_category_id")
     private String loadCategory;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "prefrence")
+    private int prefrence;
     public String getName() {
         return name;
     }
@@ -132,6 +136,14 @@ public class Category extends BaseDomain {
 
 	public void setLoadCategory(String loadCategory) {
 		this.loadCategory = loadCategory;
+	}
+
+	public int getPrefrence() {
+		return prefrence;
+	}
+
+	public void setPrefrence(int prefrence) {
+		this.prefrence = prefrence;
 	}
     
     
