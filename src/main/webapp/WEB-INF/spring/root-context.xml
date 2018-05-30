@@ -34,6 +34,7 @@
     <bean id="recordedActionsDao" class="com.weavers.duqhan.dao.jpa.RecordedActionsDaoJap" />
     <bean id="impressionsDao" class="com.weavers.duqhan.dao.jpa.ImpressionsDaoJpa" />
     <bean id="currencyCodeDao" class="com.weavers.duqhan.dao.jpa.CurrencyCodeDaoJpa" />
+    <bean id="guestFcmTokenDao" class="com.weavers.duqhan.dao.jpa.GuestFcmTokenJpa" />
     
     <bean
         id="entityManagerFactory"

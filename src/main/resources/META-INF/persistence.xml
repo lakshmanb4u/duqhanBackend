@@ -30,6 +30,7 @@
     <class>com.weavers.duqhan.domain.ProductProperties</class>
     <class>com.weavers.duqhan.domain.Impressions</class>
     <class>com.weavers.duqhan.domain.RecordedActions</class>
+    <class>com.weavers.duqhan.domain.GuestFcmToken</class>
     
     <properties>
       <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>

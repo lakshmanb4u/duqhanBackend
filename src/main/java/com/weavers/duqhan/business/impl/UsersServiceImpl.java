@@ -9,11 +9,13 @@ import com.weavers.duqhan.business.AouthService;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.controller.CacheController;
+import com.weavers.duqhan.dao.GuestFcmTokenDao;
 import com.weavers.duqhan.dao.OfferProductsDao;
 import com.weavers.duqhan.dao.OtpTableDao;
 import com.weavers.duqhan.dao.UserActivityDao;
 import com.weavers.duqhan.dao.UserAddressDao;
 import com.weavers.duqhan.dao.UsersDao;
+import com.weavers.duqhan.domain.GuestFcmToken;
 import com.weavers.duqhan.domain.OfferProducts;
 import com.weavers.duqhan.domain.OtpTable;
 import com.weavers.duqhan.domain.UserActivity;
@@ -43,6 +45,9 @@ public class UsersServiceImpl implements UsersService {
 
     @Autowired
     UsersDao usersDao;
+    
+    @Autowired
+    GuestFcmTokenDao guestFcmTokenDao;
 
     @Autowired
     OtpTableDao otpTableDao;
@@ -279,6 +284,15 @@ public class UsersServiceImpl implements UsersService {
         return userBean;
     	}
     }
+    
+    @Override
+	public void guestUserFcmToken(LoginBean loginBean) {
+    	GuestFcmToken obj = new GuestFcmToken();
+    	obj.setId(null);
+    	obj.setToken(loginBean.getFcmToken());
+    	guestFcmTokenDao.save(obj);
+    }
+   
     
     @Override
     public UserBean guestUserLogin(LoginBean loginBean,long loginStartTime) {

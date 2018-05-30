@@ -56,5 +56,7 @@ public interface UsersService {
     String contactToAdmin(UserBean contactBean, Users users);
 
 	UserBean guestUserLogin(LoginBean loginBean, long loginStartTime);
+	
+	void guestUserFcmToken(LoginBean loginBean);
 
 }

@@ -108,7 +108,12 @@ public class HomeController {
 
         return userBean;
     }
-    
+    @RequestMapping(value = "/guest-fcm-token", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
+    public void guestFcmToken(HttpServletResponse response, @RequestBody LoginBean loginBean) {
+    	
+        usersService.guestUserFcmToken(loginBean);
+        
+    }
     @RequestMapping(value = "/guest-login", method = RequestMethod.POST)  // Log in by email only register user. Auth-Token generate.
     public UserBean guestLogin(HttpServletResponse response, @RequestBody LoginBean loginBean) {
     	long loginStartTime = System.currentTimeMillis();
