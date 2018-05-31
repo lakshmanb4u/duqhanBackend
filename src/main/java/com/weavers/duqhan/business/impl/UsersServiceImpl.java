@@ -287,10 +287,19 @@ public class UsersServiceImpl implements UsersService {
     
     @Override
 	public void guestUserFcmToken(LoginBean loginBean) {
-    	GuestFcmToken obj = new GuestFcmToken();
-    	obj.setId(null);
-    	obj.setToken(loginBean.getFcmToken());
-    	guestFcmTokenDao.save(obj);
+    	GuestFcmToken obj=guestFcmTokenDao.getByUuid(loginBean.getUuid());
+    	System.out.println(loginBean.getUuid());
+    	if(Objects.nonNull(obj)) {
+    		obj.setToken(loginBean.getFcmToken());
+        	obj.setUuid(loginBean.getUuid());
+        	guestFcmTokenDao.save(obj);
+    	}else {
+    		obj = new GuestFcmToken();
+	    	obj.setId(null);
+	    	obj.setToken(loginBean.getFcmToken());
+	    	obj.setUuid(loginBean.getUuid());
+	    	guestFcmTokenDao.save(obj);
+    	}
     }
    
     

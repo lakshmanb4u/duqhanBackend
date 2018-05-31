@@ -14,5 +14,5 @@ import com.weavers.duqhan.domain.GuestFcmToken;
 
 public interface GuestFcmTokenDao extends BaseDao<GuestFcmToken> {
 
-   
+   GuestFcmToken getByUuid(String uuid);
 }

@@ -28,7 +28,7 @@ public class LoginBean {
     private String longitude;
     private String userAgent;
     private String countryCode;
-
+    private String uuid;
     /**
      * @return the fbid
      */
@@ -260,4 +260,13 @@ public class LoginBean {
 	public void setCountryCode(String countryCode) {
 		this.countryCode = countryCode;
 	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+	
 }

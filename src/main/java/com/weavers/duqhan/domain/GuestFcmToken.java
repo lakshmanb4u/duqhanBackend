@@ -25,11 +25,21 @@ public class GuestFcmToken extends BaseDomain {
     @Size(min = 1, max = 500)
     @Column(name = "token")
     private String token;
+    @Basic(optional = false)
+    @Size(min = 1, max = 200)
+    @Column(name = "uuid")
+    private String uuid;
 	public String getToken() {
 		return token;
 	}
 	public void setToken(String token) {
 		this.token = token;
+	}
+	public String getUuid() {
+		return uuid;
+	}
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
     
     
