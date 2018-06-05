@@ -5,10 +5,14 @@
  */
 package com.weavers.duqhan.domain;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -29,6 +33,11 @@ public class GuestFcmToken extends BaseDomain {
     @Size(min = 1, max = 200)
     @Column(name = "uuid")
     private String uuid;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_login")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastLogin;
 	public String getToken() {
 		return token;
 	}
@@ -40,6 +49,12 @@ public class GuestFcmToken extends BaseDomain {
 	}
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+	}
+	public Date getLastLogin() {
+		return lastLogin;
+	}
+	public void setLastLogin(Date lastLogin) {
+		this.lastLogin = lastLogin;
 	}
     
     

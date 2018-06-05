@@ -21,7 +21,7 @@ public class GuestFcmTokenJpa extends BaseDaoJpa<GuestFcmToken> implements Guest
 		 try {
 	            Query query = getEntityManager().createQuery("SELECT c FROM GuestFcmToken As c WHERE c.uuid = :uuid");
 	            query.setParameter("uuid", uuid);
-	            return (GuestFcmToken) query.getSingleResult();
+	            return (GuestFcmToken) query.getResultList().get(0);
 	        } catch (Exception e) {
 	            return null;
 	        }
