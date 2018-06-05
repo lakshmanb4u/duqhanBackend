@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import com.weavers.duqhan.business.impl.AndroidPushNotificationsService;
+import com.weavers.duqhan.dao.GuestFcmTokenDao;
 import com.weavers.duqhan.dao.UsersDao;
+import com.weavers.duqhan.domain.GuestFcmToken;
 import com.weavers.duqhan.domain.Users;
 import java.util.Objects;
 import java.util.Random;
@@ -42,17 +44,20 @@ public class PushNotification {
 	@Autowired
 	UsersDao usersDao;
 	
+	@Autowired
+	GuestFcmTokenDao guestFcmTokenDao;
+	
 	@Scheduled(cron = "0 0 7 * * ?")
 	//@RequestMapping(value = "/send", method = RequestMethod.GET, produces = "application/json")
 	public Map<String, Object> send(){
 		Map<String, Object> result = new HashMap<String, Object>();
-		List<Users> users = new ArrayList<Users>();
-		users=usersDao.GetAllFcmToken();
+		List<GuestFcmToken> users = new ArrayList<GuestFcmToken>();
+		users=guestFcmTokenDao.loadAll();
 		Map<String,String> offerCodes=returnRandom();
 		try{
-			for (Users users2 : users) {
-				if(!users2.getFcmToken().equals(""))
-					send(users2.getFcmToken(),offerCodes);
+			for (GuestFcmToken users2 : users) {
+				if(!users2.getToken().equals(""))
+					send(users2.getToken(),offerCodes);
 			}
 			result.put("status", "success");
 		}catch (Exception e) {
