@@ -940,7 +940,7 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
             List<Long> ids;
-            //Category category = categoryDao.loadById(product.getCategoryId());
+            Category category = categoryDao.loadById(product.getCategoryId());
             List<ProductImg> imgs = productImgDao.getProductImgsByProductId(productId);
             double orginalPrice = 0.0;
             double salesPrice = 0.0;
@@ -1021,7 +1021,7 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
             productDetailBean.setCategoryId(product.getCategoryId());
-           /* productDetailBean.setCategoryName(category.getName());*/
+           productDetailBean.setCategoryName(category.getName());
             productDetailBean.setProductImg(product.getImgurl());
             productDetailBean.setVendorId(product.getVendorId());
             productDetailBean.setShippingCost(product.getShippingRate());
