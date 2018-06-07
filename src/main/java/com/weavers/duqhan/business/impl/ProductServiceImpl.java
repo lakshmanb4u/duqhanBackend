@@ -1017,7 +1017,8 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
             //==================Load Propertieses end====================//
-            productDetailBean.setProductId(product.getId());
+          
+		    productDetailBean.setProductId(product.getId());
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
             productDetailBean.setCategoryId(product.getCategoryId());
