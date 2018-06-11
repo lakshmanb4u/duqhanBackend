@@ -56,7 +56,7 @@ public class PushNotification {
 		Map<String,String> offerCodes=returnRandom();
 		try{
 			for (GuestFcmToken users2 : users) {
-				if(!users2.getToken().equals(""))
+				if(Objects.nonNull(users2.getToken()) &&!users2.getToken().equals("") && !users2.getToken().equals("BLACKLISTED"))
 					send(users2.getToken(),offerCodes);
 			}
 			result.put("status", "success");
