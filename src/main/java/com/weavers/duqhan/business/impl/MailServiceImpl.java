@@ -51,7 +51,7 @@ public class MailServiceImpl implements MailService {
     @Autowired
     ProductPropertiesDao productPropertiesDao;
     private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
-    //private static final String ADMIN_MAIL = "abhijit.borkar137@gmail.com";//duqhanapp@gmail.com
+   // private static final String ADMIN_MAIL = "abhijit.borkar137@gmail.com";//duqhanapp@gmail.com
     private static final String BCC = "krisanu.nandi@pkweb.in";
 
     @Override
