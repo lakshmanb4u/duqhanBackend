@@ -31,6 +31,7 @@ import com.weavers.duqhan.dto.CartBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
+import com.weavers.duqhan.dto.PriceFilterBean;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.CheckoutPaymentBean;
 import com.weavers.duqhan.dto.CurrencyBean;
@@ -488,8 +489,20 @@ public class UserController {
         
         return addressBean;
     }
-//</editor-fold>
-
+    @RequestMapping(value = "/get-price-filter", method = RequestMethod.POST) 
+    public PriceFilterBean getPriceFilter(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
+    	String countryCode=request.getHeader("X-Country-Code");
+    	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));
+    	PriceFilterBean priceFilterBean = new PriceFilterBean(); 
+    	if (users != null) {
+    		priceFilterBean=productService.getPriceFilter(users, countryCode);
+    	 }else {
+    		 response.setStatus(401);
+    		 priceFilterBean.setStatusCode("401");
+    		 priceFilterBean.setStatus("Invalid Token."); 
+    	 }
+    	return priceFilterBean;
+    }
     //<editor-fold defaultstate="collapsed" desc="Find Product">
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductNewBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {

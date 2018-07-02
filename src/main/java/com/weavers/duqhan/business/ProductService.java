@@ -16,6 +16,7 @@ import com.weavers.duqhan.dto.LikeUnlikeProductBean;
 import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderReturnDto;
+import com.weavers.duqhan.dto.PriceFilterBean;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
@@ -151,4 +152,5 @@ public interface ProductService {
 	CategorysBean getAllChildCategory(Long parentId);
 
 	List<AutoComplete> searchAutocomplete(String name);
+	PriceFilterBean getPriceFilter(Users users,String countryCode);
 }

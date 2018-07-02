@@ -9,6 +9,7 @@ import com.easypost.model.User;
 import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
+import com.weavers.duqhan.controller.CacheController;
 import com.weavers.duqhan.dao.CartDao;
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.CurrencyCodeDao;
@@ -63,6 +64,7 @@ import com.weavers.duqhan.dto.LikeUnlikeProductDto;
 import com.weavers.duqhan.dto.OrderDetailsBean;
 import com.weavers.duqhan.dto.OrderDetailsDto;
 import com.weavers.duqhan.dto.OrderReturnDto;
+import com.weavers.duqhan.dto.PriceFilterBean;
 import com.weavers.duqhan.dto.ProductBean;
 import com.weavers.duqhan.dto.ProductBeans;
 import com.weavers.duqhan.dto.ProductDetailBean;
@@ -2126,5 +2128,67 @@ public class ProductServiceImpl implements ProductService {
 			product.setLikeUnlikeCount(count);
 			productDao.save(product);
 		}
+	}
+	
+	 public Double getValueWithoutDecimal(Double unformatedValue) {
+	        Double formatedValue = 0.0;
+	        if (unformatedValue != null && unformatedValue > 0) {
+	           formatedValue = Math.round(unformatedValue * 100.0) / 100.0;
+	            DecimalFormat df = new DecimalFormat("#");
+	            df.setRoundingMode(RoundingMode.HALF_UP);
+	            try {
+	                formatedValue = Double.parseDouble(df.format(unformatedValue));
+	            } catch (IllegalArgumentException e) {
+	            }
+	        }
+	        return formatedValue;
+	    }
+
+	@Override
+	public PriceFilterBean getPriceFilter(Users users,String countryCode) {
+		String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+        Boolean flag = true;
+        String currencyCo = "INR";
+        if(countryCode != null) {
+        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+        	for (String code : countryArray) {
+			 if(cuntCode.equals(code)){
+			  flag=false;
+			  currencyCo=code;
+			  break;
+			 }
+        	}
+        }
+        if(Objects.isNull(countryCode) || flag){
+        	currencyCo="INR";
+        }
+    	CurrencyCode currencyCode = new CurrencyCode();
+        String symbol = new String();
+        if(users.getEmail().equals("guest@gmail.com")) {
+        	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
+        	symbol=currencyCode.getCode();
+        }else {
+        	if(Objects.nonNull(users.getCurrencyCode())&&!users.getCurrencyCode().isEmpty()){
+            	currencyCode = currencyCodeDao.getCurrencyConversionCode(users.getCurrencyCode());
+            	symbol=currencyCode.getCode();
+            }else{
+            	List<UserAouth> aouthUserL = userAouthDao.loadByUserId(users.getId());
+            	if(Objects.nonNull(aouthUserL)&&!aouthUserL.isEmpty()) {
+                	currencyCode = currencyCodeDao.getCurrencyConversionCode(aouthUserL.get(0).getCodeName());
+                	symbol=currencyCode.getCode();
+                } else {
+                	currencyCode.setValue(1d);
+                	symbol="INR";
+                }
+            }
+        }
+
+        PriceFilterBean priceFilterBean = new PriceFilterBean();
+        Double fiveHundred =this.getValueWithoutDecimal(currencyCode.getValue()*500);
+        Double thousand=this.getValueWithoutDecimal(currencyCode.getValue()*1000);
+        priceFilterBean.setFiveHundred(fiveHundred);
+        priceFilterBean.setThousand(thousand);
+        priceFilterBean.setSymbol(symbol);
+		return priceFilterBean;
 	}
 }
