@@ -480,6 +480,7 @@ public class UsersServiceImpl implements UsersService {
             addressDto.setStreetTwo(userAddress.getStreetTwo());
             addressDto.setUserId(userAddress.getUserId());
             addressDto.setZipCode(userAddress.getZipCode());
+            addressDto.setHouseNo(userAddress.getHouseNo());
         }
         return addressDto;
     }
@@ -507,6 +508,7 @@ public class UsersServiceImpl implements UsersService {
                 userAddress.setStreetTwo(address.getStreetTwo());
                 userAddress.setUserId(address.getUserId());
                 userAddress.setZipCode(address.getZipCode());
+                userAddress.setHouseNo(address.getHouseNo());
                 try {
                     userAddress2 = userAddressDao.save(userAddress);
                     addressDtos.add(this.setAddressDto(userAddress2));
@@ -546,6 +548,7 @@ public class UsersServiceImpl implements UsersService {
             userAddress.setStreetTwo(address.getStreetTwo());
             userAddress.setUserId(address.getUserId());
             userAddress.setZipCode(address.getZipCode());
+            userAddress.setHouseNo(address.getHouseNo());
             try {
                 userAddress2 = userAddressDao.save(userAddress);
                 if (address.getStatus() != null && address.getStatus().equals(1L)) {

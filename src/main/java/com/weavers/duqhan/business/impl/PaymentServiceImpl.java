@@ -307,6 +307,7 @@ public class PaymentServiceImpl implements PaymentService {
                 newAddress.setStreetTwo(address.getStreetTwo());
                 newAddress.setUserId(address.getUserId());
                 newAddress.setZipCode(address.getZipCode());
+                newAddress.setHouseNo(address.getHouseNo());
                 UserAddress newAddress1 = userAddressDao.save(newAddress);
                 addressId = newAddress1.getId();
             }
@@ -772,6 +773,7 @@ public class PaymentServiceImpl implements PaymentService {
             newAddress.setStreetTwo(address.getStreetTwo());
             newAddress.setUserId(address.getUserId());
             newAddress.setZipCode(address.getZipCode());
+            newAddress.setHouseNo(address.getHouseNo());
             UserAddress newAddress1 = userAddressDao.save(newAddress);
             addressId = newAddress1.getId();
         }
