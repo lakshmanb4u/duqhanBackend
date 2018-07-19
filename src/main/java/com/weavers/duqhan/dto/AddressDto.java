@@ -25,7 +25,7 @@ public class AddressDto {
     private String companyName;
     private String phone;
     private String email;
-    private String houseNo;
+    private long houseNo;
 
     /**
      * @return the addressId
@@ -223,11 +223,11 @@ public class AddressDto {
         this.email = email;
     }
 
-	public String getHouseNo() {
+	public long getHouseNo() {
 		return houseNo;
 	}
 
-	public void setHouseNo(String houseNo) {
+	public void setHouseNo(long houseNo) {
 		this.houseNo = houseNo;
 	}
     
