@@ -65,7 +65,6 @@ public class UserAddress extends BaseDomain {
     @Size(max = 255)
     @Column(name = "email")
     private String email;
-    @Size(max = 255)
     @Column(name = "house_no")
     private long houseNo;
 
@@ -76,6 +75,7 @@ public class UserAddress extends BaseDomain {
     public void setUserId(long userId) {
         this.userId = userId;
     }
+    
 
     public long getStatus() {
         return status;
