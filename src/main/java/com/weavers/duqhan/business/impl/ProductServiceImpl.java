@@ -356,12 +356,10 @@ public class ProductServiceImpl implements ProductService {
                 if(product.getThumbImg()==null || (product.getThumbImg().equals("-")) || (product.getThumbImg().equals("failure"))){
                    	if(!(product.getImgurl() ==null || product.getImgurl().equals("-") || product.getImgurl().equals("failure"))) {
                        bean.setImgurl(product.getImgurl());
-                   	beans.add(bean);
                    	}
                 }else{
                    
                     bean.setImgurl(product.getThumbImg());
-                   	beans.add(bean);
                 }
                 bean.setPrice(price);
                 bean.setDiscountedPrice(getTwoDecimalFormat(mapProductPropertiesMaps.get(product.getId()).getDiscount()));
