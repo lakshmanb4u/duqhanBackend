@@ -7,7 +7,10 @@ package com.weavers.duqhan.controller;
 
 import com.easypost.model.Shipment;
 import com.easypost.model.User;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.weavers.duqhan.business.AouthService;
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.PaymentService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.ShippingService;
@@ -51,13 +54,16 @@ import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.DateFormater;
 import com.weavers.duqhan.util.StatusConstants;
 
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.servlet.http.HttpServletRequest;
@@ -108,6 +114,9 @@ public class UserController {
     @Autowired
     CurrencyCodeDao currencyCodeDao;
     
+    @Autowired
+    MailService mailService;
+    
     private final Logger logger = Logger.getLogger(UserController.class);
 //</editor-fold>
 
@@ -135,7 +144,17 @@ public class UserController {
         statusBean.setStatus(usersService.userLogout(loginBean));
        return statusBean;
     }
-
+    
+    public StatusBean logErrorOnAws(String name) {
+   	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+        	return awsCloudWatchHelper.logCount("Error"+name, "Error "+name+" count", name+" "+"API hit counter");
+        });
+        StatusBean statusBean = new StatusBean();
+        statusBean.setStatus("success");
+        mailService.errorLogToAdmin(name);
+        return statusBean;
+    }
+    
     @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getProfileDetails(HttpServletResponse response, HttpServletRequest request) {
         UserBean userBean = new UserBean();
@@ -152,6 +171,7 @@ public class UserController {
             userBean.setStatusCode("200");
             userBean.setStatus("Success..");
         } else {
+        	this.logErrorOnAws("profile detail");
             response.setStatus(401);
             userBean.setStatusCode("401");
             userBean.setStatus("Invalid Token.");
@@ -180,10 +200,13 @@ public class UserController {
         Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
         if (users != null) {
             userBean1 = usersService.updateUserProfile(users, userBean);
+            if(userBean1.getStatusCode().equals("403"))
+            	this.logErrorOnAws("update profile");
         } else {
             response.setStatus(401);
             userBean1.setStatusCode("401");
             userBean1.setStatus("Invalid Token.");
+            this.logErrorOnAws("update profile");
         }
         return userBean1;
     }
@@ -362,82 +385,87 @@ public class UserController {
     //<editor-fold defaultstate="collapsed" desc="Find Product">
     @RequestMapping(value = "/get-product", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
     public ProductNewBeans getProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-    	long startTime = System.currentTimeMillis();
-    	System.out.println("Start Of User auth==========================="+(startTime-System.currentTimeMillis()));
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
-        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
-        String countryCode=request.getHeader("X-Country-Code");
-        Boolean flag = true;
-        String currencyCode = "INR";
-        if(countryCode != null) {
-        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
-        	for (String code : countryArray) {
-			 if(cuntCode.equals(code)){
-			  flag=false;
-			  currencyCode=code;
-			  break;
-			 }
-        	}
-        }
-        if(Objects.isNull(countryCode) || flag){
-        	currencyCode="INR";
-        }
-        ProductNewBeans productBeans = new ProductNewBeans();
-        if (users != null) {
-            Long categoryId = null;
-            Boolean isRecent = null;
-            categoryId = requistBean.getCategoryId();
-            isRecent = requistBean.getIsRecent();
-            if (isRecent == null) {
-                isRecent = Boolean.FALSE;
+    	 ProductNewBeans productBeans = new ProductNewBeans();
+    	try {
+    		long startTime = System.currentTimeMillis();
+        	System.out.println("Start Of User auth==========================="+(startTime-System.currentTimeMillis()));
+            Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            System.out.println("End Of User auth==========================="+(startTime-System.currentTimeMillis()));
+            String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+            String countryCode=request.getHeader("X-Country-Code");
+            Boolean flag = true;
+            String currencyCode = "INR";
+            if(countryCode != null) {
+            	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+            	for (String code : countryArray) {
+    			 if(cuntCode.equals(code)){
+    			  flag=false;
+    			  currencyCode=code;
+    			  break;
+    			 }
+            	}
             }
-            
-            if(requistBean.getPriceOrderBy() == null){
-            	requistBean.setPriceOrderBy("ASC");
+            if(Objects.isNull(countryCode) || flag){
+            	currencyCode="INR";
             }
-            
-            if(requistBean.getPriceLt() == null){
-            	requistBean.setPriceLt(0);
-            }
-            
-            if (categoryId != null && !isRecent) {
-                //**********by category id***************//
-                if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
-                }else {
-                productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,currencyCode);
+            if (users != null) {
+                Long categoryId = null;
+                Boolean isRecent = null;
+                categoryId = requistBean.getCategoryId();
+                isRecent = requistBean.getIsRecent();
+                if (isRecent == null) {
+                    isRecent = Boolean.FALSE;
                 }
-            } else if (categoryId == null && isRecent) {
-                //**********recent viewed****************//
-            	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                 	productBeans = productService.getProductsByRecentViewPrice(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
-                 }else {
-                productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,currencyCode);
-                 }
-                 } else if (categoryId == null && !isRecent) {
-                //******************all******************//
-               // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
+                
+                if(requistBean.getPriceOrderBy() == null){
+                	requistBean.setPriceOrderBy("ASC");
+                }
+                
+                if(requistBean.getPriceLt() == null){
+                	requistBean.setPriceLt(0);
+                }
+                
+                if (categoryId != null && !isRecent) {
+                    //**********by category id***************//
+                    if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
+                    	productBeans = productService.getProductsByPrice(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
+                    }else {
+                    productBeans = productService.getProductsByCategory(categoryId, requistBean.getStart(), requistBean.getLimit(), requistBean,startTime,users,currencyCode);
+                    }
+                } else if (categoryId == null && isRecent) {
+                    //**********recent viewed****************//
                 	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
-                		 productBeans = this.getProductCacheByPrice(users, requistBean,currencyCode);
-                      }else {
-                        productBeans = this.getProductV1(users,requistBean,currencyCode);
-                      }
+                     	productBeans = productService.getProductsByRecentViewPrice(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,requistBean.getLowPrice(),requistBean.getHighPrice(),currencyCode);	
+                     }else {
+                    productBeans = productService.getProductsByRecentView(users.getId(), requistBean.getStart(), requistBean.getLimit(), requistBean,users,currencyCode);
+                     }
+                     } else if (categoryId == null && !isRecent) {
+                    //******************all******************//
+                   // productBeans = productService.getAllProducts(requistBean.getStart(), requistBean.getStart(), requistBean);
+                    	 if(Objects.nonNull(requistBean.getLowPrice()) && Objects.nonNull(requistBean.getHighPrice())) {
+                    		 productBeans = this.getProductCacheByPrice(users, requistBean,currencyCode);
+                          }else {
+                            productBeans = this.getProductV1(users,requistBean,currencyCode);
+                          }
+                }
+            } else {
+            	this.logErrorOnAws("get product");
+                response.setStatus(401);
+                productBeans.setStatusCode("401");
+                productBeans.setStatus("Invalid Token.");
             }
-        } else {
-            response.setStatus(401);
-            productBeans.setStatusCode("401");
-            productBeans.setStatus("Invalid Token.");
-        }
+		} catch (Exception e) {
+			this.logErrorOnAws("get product exception");
+		}
 
         return productBeans;
     }
     
     //@RequestMapping(value = "/get-product-new", method = RequestMethod.POST)    // get latest product, get recent view product by user, get product by category id
-    public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean,String currencyCo) {
+    public ProductNewBeans getProductV1(Users users,ProductRequistBean requistBean,String currencyCo) throws JsonParseException, JsonMappingException, IOException {
         ProductNewBeans productBeans = new ProductNewBeans();
         DecimalFormat numberFormat = new DecimalFormat("#.00");
-        	try {	
+        		
         	if(!CacheController.isProductBeanListAvailableForUser(users)) {
         		CacheController.buildProductBeanList(users);
         	} 
@@ -484,9 +512,6 @@ public class UserController {
         	*/
         	//productBeans.setTotalProducts(300);
              productBeans.setProducts(productbeansl);
-        	} catch (Exception e) {
-        		
-        	}
         
         return productBeans;
     }
@@ -519,33 +544,38 @@ public class UserController {
     
     @RequestMapping(value = "/search-product", method = RequestMethod.POST)    // search product by product name
     public ProductNewBeans searchProduct(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-       Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
-        String countryCode=request.getHeader("X-Country-Code");
-        Boolean flag = true;
-        String currencyCode = "INR";
-        if(countryCode != null) {
-        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
-        	for (String code : countryArray) {
-			 if(cuntCode.equals(code)){
-			  flag=false;
-			  currencyCode=code;
-			  break;
-			 }
-        	}
-        }
-        if(Objects.isNull(countryCode) || flag){
-        	currencyCode="INR";
-        }
-        ProductNewBeans productBeans = new ProductNewBeans();
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            productBeans = productService.searchProducts(requistBean,users,currencyCode);
-        } else {
-            response.setStatus(401);
-            productBeans.setStatusCode("401");
-            productBeans.setStatus("Invalid Token.");
-        }
+    	 ProductNewBeans productBeans = new ProductNewBeans();
+    	try {
+    	   Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+           String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+           String countryCode=request.getHeader("X-Country-Code");
+           Boolean flag = true;
+           String currencyCode = "INR";
+           if(countryCode != null) {
+           	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+           	for (String code : countryArray) {
+   			 if(cuntCode.equals(code)){
+   			  flag=false;
+   			  currencyCode=code;
+   			  break;
+   			 }
+           	}
+           }
+           if(Objects.isNull(countryCode) || flag){
+           	currencyCode="INR";
+           }
+           if (users != null) {
+               requistBean.setUserId(users.getId());
+               productBeans = productService.searchProducts(requistBean,users,currencyCode);
+           } else {
+               response.setStatus(401);
+               productBeans.setStatusCode("401");
+               productBeans.setStatus("Invalid Token.");
+               this.logErrorOnAws("search product");
+           }
+		} catch (Exception e) {
+			this.logErrorOnAws("search product exception");
+		}
 
         return productBeans;
     }
@@ -562,32 +592,38 @@ public class UserController {
     
     @RequestMapping(value = "/get-product-detail", method = RequestMethod.POST) // product details by product id.
     public ProductDetailBean getProductDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
-        String countryCode=request.getHeader("X-Country-Code");
-        Boolean flag = true;
-        String currencyCode = "INR";
-        if(countryCode != null) {
-        	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
-        	for (String code : countryArray) {
-			 if(cuntCode.equals(code)){
-			  flag=false;
-			  currencyCode=code;
-			  break;
-			 }
-        	}
-        }
-        if(Objects.isNull(countryCode) || flag){
-        	currencyCode="INR";
-        }
-        ProductDetailBean productDetailBean = new ProductDetailBean();
-        if (users != null) {
-            productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users,currencyCode);
-        } else {
-            response.setStatus(401);
-            productDetailBean.setStatusCode("401");
-            productDetailBean.setStatus("Invalid Token.");
-        }
+    	ProductDetailBean productDetailBean = new ProductDetailBean();
+    	try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            String[] countryArray = {"USD","EUR","GBP","ILS","INR","JPY","KRW","NGN","PHP","PLN","PYG","THB","UAH","VND","KWD"};
+            String countryCode=request.getHeader("X-Country-Code");
+            Boolean flag = true;
+            String currencyCode = "INR";
+            if(countryCode != null) {
+            	String cuntCode=Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+            	for (String code : countryArray) {
+    			 if(cuntCode.equals(code)){
+    			  flag=false;
+    			  currencyCode=code;
+    			  break;
+    			 }
+            	}
+            }
+            if(Objects.isNull(countryCode) || flag){
+            	currencyCode="INR";
+            }
+            
+            if (users != null) {
+                productDetailBean = productService.getProductDetailsById(requistBean.getProductId(), users,currencyCode);
+            } else {
+                response.setStatus(401);
+                productDetailBean.setStatusCode("401");
+                productDetailBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("product detail");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("product detail exception");
+		}
 
         return productDetailBean;
     }
@@ -644,15 +680,24 @@ public class UserController {
     @RequestMapping(value = "/add-to-cart", method = RequestMethod.POST)    // add product to cart by user.
     public StatusBean addProductToCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            statusBean.setStatus(productService.addProductToCart(requistBean));
-        } else {
-            response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                requistBean.setUserId(users.getId());
+                statusBean.setStatus(productService.addProductToCart(requistBean));
+                if(statusBean.getStatus().equals("failure"))
+                	this.logErrorOnAws("add to cart fail");
+            } else {
+                response.setStatus(401);
+                statusBean.setStatusCode("401");
+                statusBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("add to cart");
+            }
+			
+		} catch (Exception e) {
+			this.logErrorOnAws("add to cart exception");
+		}
+        
 
         return statusBean;
     }
@@ -683,14 +728,19 @@ public class UserController {
     @RequestMapping(value = "/cart", method = RequestMethod.POST)   // view all product of a user's cart.
     public CartBean getCart(HttpServletResponse response, HttpServletRequest request) {
         CartBean cartBean = new CartBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            cartBean = productService.getCartForUser(users);
-        } else {
-            response.setStatus(401);
-            cartBean.setStatusCode("401");
-            cartBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                cartBean = productService.getCartForUser(users);
+            } else {
+                response.setStatus(401);
+                cartBean.setStatusCode("401");
+                cartBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("get cart");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("get cart exception");
+		}
 
         return cartBean;
     }
@@ -715,15 +765,22 @@ public class UserController {
     @RequestMapping(value = "/remove-from-cart", method = RequestMethod.POST)   // product remove from cart.
     public StatusBean removeProductFromCart(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            requistBean.setUserId(users.getId());
-            statusBean.setStatus(productService.removeProductFromCart(requistBean));
-        } else {
-            response.setStatus(401);
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                requistBean.setUserId(users.getId());
+                statusBean.setStatus(productService.removeProductFromCart(requistBean));
+                if(statusBean.getStatus().equals("failure"))
+                this.logErrorOnAws("remove from cart fail");
+            } else {
+                response.setStatus(401);
+                statusBean.setStatusCode("401");
+                statusBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("remove from cart");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("remove from cart exception");
+		}
 
         return statusBean;
     }
@@ -854,14 +911,19 @@ public class UserController {
     @RequestMapping(value = "/get-order-details", method = RequestMethod.POST)   // List of order
     public OrderDetailsBean getOrderDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         OrderDetailsBean orderDetailsBean = new OrderDetailsBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            orderDetailsBean = productService.getOrderDetails(users, requistBean.getStart(), requistBean.getLimit());
-        } else {
-            response.setStatus(401);
-            orderDetailsBean.setStatusCode("401");
-            orderDetailsBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                orderDetailsBean = productService.getOrderDetails(users, requistBean.getStart(), requistBean.getLimit());
+            } else {
+                response.setStatus(401);
+                orderDetailsBean.setStatusCode("401");
+                orderDetailsBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("get order detail");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("get order detail exception");
+		}
 
         return orderDetailsBean;
     }
@@ -869,15 +931,20 @@ public class UserController {
     @RequestMapping(value = "/cancel-order", method = RequestMethod.POST)   //cancel order
     public StatusBean cancelOrder(HttpServletResponse response, HttpServletRequest request, @RequestBody ProductRequistBean requistBean) {
         StatusBean statusBean = new StatusBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            productService.cancelOrder(requistBean.getOrderId(), users.getId());
-            statusBean.setStatusCode("200");
-            statusBean.setStatus("Success");
-        } else {
-            statusBean.setStatusCode("401");
-            statusBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                productService.cancelOrder(requistBean.getOrderId(), users.getId());
+                statusBean.setStatusCode("200");
+                statusBean.setStatus("Success");
+            } else {
+                statusBean.setStatusCode("401");
+                statusBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("cancel order");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("cancel order exception");
+		}
 
          return statusBean;
     }

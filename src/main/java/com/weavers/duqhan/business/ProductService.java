@@ -79,7 +79,7 @@ public interface ProductService {
 //
     String removeProductFromCart(ProductRequistBean requistBean);
 //
-    CartBean getCartForUser(Users user);
+    CartBean getCartForUser(Users user) throws Exception;
 //
 //    String saveProduct(ProductBean productBean);
 //

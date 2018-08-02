@@ -33,4 +33,6 @@ public interface MailService {
     String sendPurchaseMailToUser(List<OrderDetails> orderDetails);
 
 	String returnRequestToAdminDeliver(OrderDetails orderDetails);
+
+	String errorLogToAdmin(String error);
 }

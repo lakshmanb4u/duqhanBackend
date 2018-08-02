@@ -5,11 +5,13 @@
  */
 package com.weavers.duqhan.controller;
 
+import com.weavers.duqhan.business.MailService;
 import com.weavers.duqhan.business.ProductService;
 import com.weavers.duqhan.business.UsersService;
 import com.weavers.duqhan.dto.CategorysBean;
 import com.weavers.duqhan.dto.LoginBean;
 import com.weavers.duqhan.dto.ProductRequistBean;
+import com.weavers.duqhan.dto.StatusBean;
 import com.weavers.duqhan.dto.UserBean;
 import com.weavers.duqhan.util.AwsCloudWatchHelper;
 import java.io.IOException;
@@ -38,7 +40,10 @@ public class HomeController {
     UsersService usersService;
     @Autowired
     ProductService productService;
-
+    @Autowired
+    MailService mailService;
+   
+    private AwsCloudWatchHelper awsCloudWatchHelper = new AwsCloudWatchHelper();
     private final Logger logger = Logger.getLogger(HomeController.class);
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
@@ -100,18 +105,36 @@ public class HomeController {
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
-
+    public StatusBean logErrorOnAws(String name) {
+      	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+           	return awsCloudWatchHelper.logCount("Error"+name, "Error "+name+" count", name+" "+"API hit counter");
+           });
+           StatusBean statusBean = new StatusBean();
+           statusBean.setStatus("success");
+           mailService.errorLogToAdmin(name);
+           return statusBean;
+       }
     @RequestMapping(value = "/get-child-category", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategory(@RequestBody ProductRequistBean requistBean) {
-        CategorysBean categorysBean = productService.getChildByIdAndActive(requistBean.getCategoryId());
+    	CategorysBean categorysBean = new CategorysBean();
+    	try {
+    	    categorysBean = productService.getChildByIdAndActive(requistBean.getCategoryId());	
+		} catch (Exception e) {
+			this.logErrorOnAws("get child category exception");
+		}
+        
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return categorysBean;
     }
     
     @RequestMapping(value = "/get-all-child-category", method = RequestMethod.POST) // get child category
     public CategorysBean getAllChildCategory(@RequestBody ProductRequistBean requistBean) {
-        CategorysBean categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
-//        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+    	CategorysBean categorysBean = new CategorysBean();
+    	try {
+    	 categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
+    	} catch (Exception e) {
+			this.logErrorOnAws("get all category exception");
+		}
         return categorysBean;
     }
     

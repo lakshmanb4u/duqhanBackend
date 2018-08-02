@@ -1139,7 +1139,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public CartBean getCartForUser(Users users) {
+    public CartBean getCartForUser(Users users) throws Exception {
         CartBean cartBean = new CartBean();
         HashMap<Long, Cart> MapCart = new HashMap<>();
         List<ProductPropertiesMap> propertiesMaps = cartDao.getProductPropertiesMapByUserId(users.getId());   // Load user cart
@@ -1198,6 +1198,7 @@ public class ProductServiceImpl implements ProductService {
                             ProductProperties properties = productPropertiesDao.loadById(productPropertyvalues.getPropertyId());
                             propertyMap.put(properties.getPropertyName(), productPropertyvalues.getValueName());
                         } catch (Exception nfe) {
+                        	throw nfe;
                         }
                     }
                 }
