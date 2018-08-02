@@ -443,7 +443,7 @@ public class UserController {
         	} 
         	CurrencyCode currencyCode = new CurrencyCode();
             String symbol = new String();
-            if(users.getEmail().equals("guest@gmail.com")) {
+            if(!Objects.isNull(users.getEmail()) && users.getEmail().equals("guest@gmail.com")) {
             	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
             	symbol=currencyCode.getCode();
             }else {

@@ -204,7 +204,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductNewBean> beans = new ArrayList<>();
         CurrencyCode currencyCode = new CurrencyCode();
         String symbol = new String();
-        if(users.getEmail().equals("guest@gmail.com")) {
+        if(!Objects.isNull(users.getEmail()) &&users.getEmail().equals("guest@gmail.com")) {
         	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
         	symbol=currencyCode.getCode();
         }else {
@@ -921,7 +921,7 @@ public class ProductServiceImpl implements ProductService {
         if (product != null) {
         	CurrencyCode currencyCode = new CurrencyCode();
             String symbol = new String();
-            if(users.getEmail().equals("guest@gmail.com")) {
+            if(!Objects.isNull(users.getEmail()) &&users.getEmail().equals("guest@gmail.com")) {
             	currencyCode = currencyCodeDao.getCurrencyConversionCode(currencyCo);
             	symbol=currencyCode.getCode();
             }else {
@@ -1022,7 +1022,7 @@ public class ProductServiceImpl implements ProductService {
             productDetailBean.setName(product.getName());
             productDetailBean.setDescription(product.getDescription());
             productDetailBean.setCategoryId(product.getCategoryId());
-           productDetailBean.setCategoryName(category.getName());
+            productDetailBean.setCategoryName(category.getName());
             productDetailBean.setProductImg(product.getImgurl());
             productDetailBean.setVendorId(product.getVendorId());
             productDetailBean.setShippingCost(product.getShippingRate());
