@@ -158,24 +158,28 @@ public class UserController {
     @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getProfileDetails(HttpServletResponse response, HttpServletRequest request) {
         UserBean userBean = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            userBean.setId(users.getId());
-            userBean.setDob(DateFormater.formate(users.getDob(), "dd-MMM-yyyy"));
-            userBean.setEmail(users.getEmail());
-            userBean.setGender(users.getGender());
-            userBean.setMobile(users.getMobile());
-            userBean.setName(users.getName());
-            userBean.setProfileImg(users.getProfileImg());
-            userBean.setCurrencyCode(users.getCurrencyCode());
-            userBean.setStatusCode("200");
-            userBean.setStatus("Success..");
-        } else {
-        	this.logErrorOnAws("profile detail");
-            response.setStatus(401);
-            userBean.setStatusCode("401");
-            userBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                userBean.setId(users.getId());
+                userBean.setDob(DateFormater.formate(users.getDob(), "dd-MMM-yyyy"));
+                userBean.setEmail(users.getEmail());
+                userBean.setGender(users.getGender());
+                userBean.setMobile(users.getMobile());
+                userBean.setName(users.getName());
+                userBean.setProfileImg(users.getProfileImg());
+                userBean.setCurrencyCode(users.getCurrencyCode());
+                userBean.setStatusCode("200");
+                userBean.setStatus("Success..");
+            } else {
+            	this.logErrorOnAws("profile detail");
+                response.setStatus(401);
+                userBean.setStatusCode("401");
+                userBean.setStatus("Invalid Token.");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("get profile detail exception");
+		}
         return userBean;
     }
     
@@ -197,17 +201,21 @@ public class UserController {
     @RequestMapping(value = "/update-profile-details", method = RequestMethod.POST) // Update user profile.
     public UserBean updateProfileDetails(HttpServletResponse response, HttpServletRequest request, @RequestBody UserBean userBean) {
         UserBean userBean1 = new UserBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            userBean1 = usersService.updateUserProfile(users, userBean);
-            if(userBean1.getStatusCode().equals("403"))
-            	this.logErrorOnAws("update profile");
-        } else {
-            response.setStatus(401);
-            userBean1.setStatusCode("401");
-            userBean1.setStatus("Invalid Token.");
-            this.logErrorOnAws("update profile");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                userBean1 = usersService.updateUserProfile(users, userBean);
+                if(userBean1.getStatusCode().equals("403"))
+                	this.logErrorOnAws("update profile");
+            } else {
+                response.setStatus(401);
+                userBean1.setStatusCode("401");
+                userBean1.setStatus("Invalid Token.");
+                this.logErrorOnAws("update profile");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("update profile exception");
+		}
         return userBean1;
     }
 
@@ -227,15 +235,19 @@ public class UserController {
     @RequestMapping(value = "/update-profile-image/{userId}", method = RequestMethod.POST)   // Update profile image.
     public UserBean updateProfileImage(HttpServletResponse response, @RequestParam MultipartFile file, @PathVariable("userId") Long userId) {
         UserBean userBean1 = new UserBean();
-        Users users = usersService.getUserById(userId);   // Check whether Auth-Token is valid, provided by user
-        if (users != null && file != null) {
-        	System.out.println(file.getOriginalFilename()+ "==" + userId);
-            userBean1.setProfileImg(usersService.updateUserProfileImage(users, file));
-        } else {
-            response.setStatus(401);
-            userBean1.setStatusCode("401");
-            userBean1.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = usersService.getUserById(userId);   // Check whether Auth-Token is valid, provided by user
+            if (users != null && file != null) {
+            	System.out.println(file.getOriginalFilename()+ "==" + userId);
+                userBean1.setProfileImg(usersService.updateUserProfileImage(users, file));
+            } else {
+                response.setStatus(401);
+                userBean1.setStatusCode("401");
+                userBean1.setStatus("Invalid Token.");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("update profile image exception");
+		}
         return userBean1;
     }
 
@@ -294,36 +306,45 @@ public class UserController {
     @RequestMapping(value = "/get-addresses", method = RequestMethod.POST)   // get Addresses.
     public AddressBean getUserAddresses(HttpServletResponse response, HttpServletRequest request) {
         AddressBean addressBean = new AddressBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            addressBean = usersService.getUserActiveAddresses(users.getId());
-        } else {
-            response.setStatus(401);
-            addressBean.setStatusCode("401");
-            addressBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                addressBean = usersService.getUserActiveAddresses(users.getId());
+            } else {
+                response.setStatus(401);
+                addressBean.setStatusCode("401");
+                addressBean.setStatus("Invalid Token.");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("get address exception");
+		}
         return addressBean;
     }
 
     @RequestMapping(value = "/save-address", method = RequestMethod.POST)   // saveUserAddress
     public AddressBean saveOrUpdateUserAddress(HttpServletResponse response, HttpServletRequest request, @RequestBody AddressDto address) {
         AddressBean addressBean = new AddressBean();
-        Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
-        if (users != null) {
-            address.setUserId(users.getId());
-//            StatusBean statusBean = shippingService.verifyAddress(address);
-//            if (statusBean.getStatusCode().equals("200")) {
-            addressBean = usersService.saveUserAddress(address);
-//            } else {
-//                response.setStatus(402);
-//                addressBean.setStatusCode(statusBean.getStatusCode());
-//                addressBean.setStatus(statusBean.getStatus());
-//            }
-        } else {
-            response.setStatus(401);
-            addressBean.setStatusCode("401");
-            addressBean.setStatus("Invalid Token.");
-        }
+        try {
+        	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
+            if (users != null) {
+                address.setUserId(users.getId());
+//                StatusBean statusBean = shippingService.verifyAddress(address);
+//                if (statusBean.getStatusCode().equals("200")) {
+                addressBean = usersService.saveUserAddress(address);
+//                } else {
+//                    response.setStatus(402);
+//                    addressBean.setStatusCode(statusBean.getStatusCode());
+//                    addressBean.setStatus(statusBean.getStatus());
+//                }
+            } else {
+                response.setStatus(401);
+                addressBean.setStatusCode("401");
+                addressBean.setStatus("Invalid Token.");
+                this.logErrorOnAws("save address");
+            }
+		} catch (Exception e) {
+			this.logErrorOnAws("save adress exception");
+		}
         return addressBean;
     }
 
@@ -449,10 +470,10 @@ public class UserController {
                           }
                 }
             } else {
-            	this.logErrorOnAws("get product");
                 response.setStatus(401);
                 productBeans.setStatusCode("401");
                 productBeans.setStatus("Invalid Token.");
+                this.logErrorOnAws("get product");
             }
 		} catch (Exception e) {
 			this.logErrorOnAws("get product exception");

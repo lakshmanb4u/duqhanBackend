@@ -53,8 +53,13 @@ public class HomeController {
 
     @RequestMapping(value = "/signup", method = RequestMethod.POST) // User registration by email id.
     public UserBean signup(HttpServletResponse response, @RequestBody LoginBean loginBean) {
-        UserBean userBean = usersService.userRegistration(loginBean);
-        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
+    	UserBean  userBean = new UserBean();
+    	try {
+        	userBean = usersService.userRegistration(loginBean);
+            response.setStatus(Integer.valueOf(userBean.getStatusCode()));	
+		} catch (Exception e) {
+			this.logErrorOnAws("signup exception");
+		}
 
        return userBean;
     }
@@ -140,7 +145,13 @@ public class HomeController {
     
     @RequestMapping(value = "/get-child-category-byid", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategoryById(@RequestBody ProductRequistBean requistBean) {
-    	CategorysBean categorysBean = productService.getChildById(requistBean.getCategoryId());
+    	CategorysBean categorysBean = new CategorysBean();
+    	try {
+    	 categorysBean = productService.getChildById(requistBean.getCategoryId());
+    	 categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
+    	} catch (Exception e) {
+			this.logErrorOnAws("get child category byid exception");
+		}	
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
        return categorysBean;
     }
