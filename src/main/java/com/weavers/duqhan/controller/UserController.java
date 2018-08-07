@@ -476,7 +476,7 @@ public class UserController {
                 this.logErrorOnAws("get product");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("get product exception");
+			this.logErrorOnAws(e.toString());
 		}
 
         return productBeans;
