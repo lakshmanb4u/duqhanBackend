@@ -485,7 +485,7 @@ public class UserController {
                 this.logErrorOnAws("get product");
             }
 		} catch (Exception e) {
-			this.logErrorOnAwst("get product exception",e.getStackTrace().toString());
+			//this.logErrorOnAwst("get product exception",e.getStackTrace().toString());
 		}
 
         return productBeans;
@@ -604,7 +604,7 @@ public class UserController {
                this.logErrorOnAws("search product");
            }
 		} catch (Exception e) {
-			this.logErrorOnAwst("search product exception",e.getStackTrace().toString());
+			//this.logErrorOnAwst("search product exception",e.getStackTrace().toString());
 		}
 
         return productBeans;
