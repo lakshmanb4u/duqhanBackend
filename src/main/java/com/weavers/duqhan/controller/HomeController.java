@@ -148,7 +148,6 @@ public class HomeController {
     	CategorysBean categorysBean = new CategorysBean();
     	try {
     	 categorysBean = productService.getChildById(requistBean.getCategoryId());
-    	 categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
     	} catch (Exception e) {
 			this.logErrorOnAws("get child category byid exception");
 		}	
