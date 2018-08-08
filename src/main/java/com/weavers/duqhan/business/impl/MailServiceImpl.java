@@ -70,7 +70,15 @@ public class MailServiceImpl implements MailService {
     }
     
     @Override
-    public String errorLogToAdmin(String error) {
+    public String errorLogToAdmin(String error,String exception) {
+        String body = "";
+        body = "<table><tr><td>Api Failed </td><td> : " + error + "</td></tr><tr><td>Api Failed </td><td> : " + exception + "</td></tr></table>";
+        String status = MailSender.sendEmail(ADMIN_MAIL, "Error Log", body, BCC);// send mail to Admin if user return a order.
+        return status;
+    }
+    
+    @Override
+    public String errorLogToAdmint(String error) {
         String body = "";
         body = "<table><tr><td>Api Failed </td><td> : " + error + "</td></tr></table>";
         String status = MailSender.sendEmail(ADMIN_MAIL, "Error Log", body, BCC);// send mail to Admin if user return a order.

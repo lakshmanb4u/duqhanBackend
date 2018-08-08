@@ -151,9 +151,18 @@ public class UserController {
         });
         StatusBean statusBean = new StatusBean();
         statusBean.setStatus("success");
-        mailService.errorLogToAdmin(name);
+        mailService.errorLogToAdmint(name);
         return statusBean;
     }
+    public StatusBean logErrorOnAwst(String name,String exception) {
+    	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+         	return awsCloudWatchHelper.logCount("Error"+name, "Error "+name+" count", name+" "+"API hit counter");
+         });
+         StatusBean statusBean = new StatusBean();
+         statusBean.setStatus("success");
+         mailService.errorLogToAdmin(name,exception);
+         return statusBean;
+     }
     
     @RequestMapping(value = "/get-profile-details", method = RequestMethod.POST)    // viewe user's profile.
     public UserBean getProfileDetails(HttpServletResponse response, HttpServletRequest request) {
@@ -476,7 +485,7 @@ public class UserController {
                 this.logErrorOnAws("get product");
             }
 		} catch (Exception e) {
-			//this.logErrorOnAws("get product exception");
+			this.logErrorOnAwst("get product exception",e.getStackTrace().toString());
 		}
 
         return productBeans;
@@ -595,7 +604,7 @@ public class UserController {
                this.logErrorOnAws("search product");
            }
 		} catch (Exception e) {
-			this.logErrorOnAws("search product exception");
+			this.logErrorOnAwst("search product exception",e.getStackTrace().toString());
 		}
 
         return productBeans;

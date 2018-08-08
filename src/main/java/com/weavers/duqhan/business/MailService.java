@@ -34,5 +34,6 @@ public interface MailService {
 
 	String returnRequestToAdminDeliver(OrderDetails orderDetails);
 
-	String errorLogToAdmin(String error);
+	String errorLogToAdmin(String error,String exception);
+	String errorLogToAdmint(String error);
 }

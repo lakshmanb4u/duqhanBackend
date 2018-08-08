@@ -89,10 +89,15 @@ public class CacheController {
         }
     }
 
-    public static void buildProductBeanList(Users u)
-        throws JsonParseException, JsonMappingException, IOException {
-        ProductNewBeans productBeans = new ObjectMapper().readValue(cacheProductList,
-                ProductNewBeans.class);
+    public static void buildProductBeanList(Users u){
+        ProductNewBeans productBeans = new ProductNewBeans();
+		try {
+			productBeans = new ObjectMapper().readValue(cacheProductList,
+			        ProductNewBeans.class);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         List<ProductNewBean> listOfProduct = productBeans.getProducts();
         Collections.shuffle(listOfProduct);
         userProductCacheMap.put(u.getId(), listOfProduct);
@@ -120,7 +125,7 @@ public class CacheController {
     }
 
     public static List<ProductNewBean> getProductBeanList(Users u, int start,
-        int limit) throws JsonParseException, JsonMappingException, IOException {
+        int limit){
         List<ProductNewBean> listOfProduct = new ArrayList<ProductNewBean>();
         listOfProduct = userProductCacheMap.get(u.getId());
 

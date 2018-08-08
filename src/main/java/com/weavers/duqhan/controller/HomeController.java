@@ -116,9 +116,10 @@ public class HomeController {
            });
            StatusBean statusBean = new StatusBean();
            statusBean.setStatus("success");
-           mailService.errorLogToAdmin(name);
+           mailService.errorLogToAdmint(name);
            return statusBean;
        }
+   
     @RequestMapping(value = "/get-child-category", method = RequestMethod.POST) // get child category
     public CategorysBean getChildCategory(@RequestBody ProductRequistBean requistBean) {
     	CategorysBean categorysBean = new CategorysBean();
