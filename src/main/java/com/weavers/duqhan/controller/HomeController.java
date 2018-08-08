@@ -58,7 +58,7 @@ public class HomeController {
         	userBean = usersService.userRegistration(loginBean);
             response.setStatus(Integer.valueOf(userBean.getStatusCode()));	
 		} catch (Exception e) {
-			this.logErrorOnAws("signup exception");
+			this.logErrorOnAws("signup exception",e.toString());
 		}
 
        return userBean;
@@ -110,13 +110,13 @@ public class HomeController {
         response.setStatus(Integer.valueOf(userBean.getStatusCode()));
         return userBean;
     }
-    public StatusBean logErrorOnAws(String name) {
+    public StatusBean logErrorOnAws(String name,String exception) {
       	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
            	return awsCloudWatchHelper.logCount("Error"+name, "Error "+name+" count", name+" "+"API hit counter");
            });
            StatusBean statusBean = new StatusBean();
            statusBean.setStatus("success");
-           mailService.errorLogToAdmint(name);
+           mailService.errorLogToAdmin(name,exception);
            return statusBean;
        }
    
@@ -126,7 +126,7 @@ public class HomeController {
     	try {
     	    categorysBean = productService.getChildByIdAndActive(requistBean.getCategoryId());	
 		} catch (Exception e) {
-			this.logErrorOnAws("get child category exception");
+			this.logErrorOnAws("get child category exception",e.toString());
 		}
         
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
@@ -139,7 +139,7 @@ public class HomeController {
     	try {
     	 categorysBean = productService.getAllChildCategory(requistBean.getCategoryId());
     	} catch (Exception e) {
-			this.logErrorOnAws("get all category exception");
+			this.logErrorOnAws("get all category exception",e.toString());
 		}
         return categorysBean;
     }
@@ -150,7 +150,7 @@ public class HomeController {
     	try {
     	 categorysBean = productService.getChildById(requistBean.getCategoryId());
     	} catch (Exception e) {
-			this.logErrorOnAws("get child category byid exception");
+			this.logErrorOnAws("get child category byid exception",e.toString());
 		}	
 //        response.setStatus(Integer.valueOf(userBean.getStatusCode()));
        return categorysBean;

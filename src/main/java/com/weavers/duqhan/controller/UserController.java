@@ -145,13 +145,13 @@ public class UserController {
        return statusBean;
     }
     
-    public StatusBean logErrorOnAws(String name) {
+    public StatusBean logErrorOnAws(String name,String exception) {
    	 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
         	return awsCloudWatchHelper.logCount("Error"+name, "Error "+name+" count", name+" "+"API hit counter");
         });
         StatusBean statusBean = new StatusBean();
         statusBean.setStatus("success");
-        mailService.errorLogToAdmint(name);
+        mailService.errorLogToAdmin(name,exception);
         return statusBean;
     }
     public StatusBean logErrorOnAwst(String name,String exception) {
@@ -181,13 +181,13 @@ public class UserController {
                 userBean.setStatusCode("200");
                 userBean.setStatus("Success..");
             } else {
-            	this.logErrorOnAws("profile detail");
+            	this.logErrorOnAws("profile detail","user null");
                 response.setStatus(401);
                 userBean.setStatusCode("401");
                 userBean.setStatus("Invalid Token.");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("get profile detail exception");
+			this.logErrorOnAws("get profile detail exception",e.toString());
 		}
         return userBean;
     }
@@ -214,16 +214,14 @@ public class UserController {
         	Users users = aouthService.getUserByToken(request.getHeader("X-Auth-Token"));   // Check whether Auth-Token is valid, provided by user
             if (users != null) {
                 userBean1 = usersService.updateUserProfile(users, userBean);
-                if(userBean1.getStatusCode().equals("403"))
-                	this.logErrorOnAws("update profile");
             } else {
                 response.setStatus(401);
                 userBean1.setStatusCode("401");
                 userBean1.setStatus("Invalid Token.");
-                this.logErrorOnAws("update profile");
+                this.logErrorOnAws("update profile","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("update profile exception");
+			this.logErrorOnAws("update profile exception",e.toString());
 		}
         return userBean1;
     }
@@ -255,7 +253,7 @@ public class UserController {
                 userBean1.setStatus("Invalid Token.");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("update profile image exception");
+			this.logErrorOnAws("update profile image exception",e.toString());
 		}
         return userBean1;
     }
@@ -325,7 +323,7 @@ public class UserController {
                 addressBean.setStatus("Invalid Token.");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("get address exception");
+			this.logErrorOnAws("get address exception",e.toString());
 		}
         return addressBean;
     }
@@ -349,10 +347,10 @@ public class UserController {
                 response.setStatus(401);
                 addressBean.setStatusCode("401");
                 addressBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("save address");
+                this.logErrorOnAws("save address","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("save adress exception");
+			this.logErrorOnAws("save adress exception",e.toString());
 		}
         return addressBean;
     }
@@ -482,10 +480,10 @@ public class UserController {
                 response.setStatus(401);
                 productBeans.setStatusCode("401");
                 productBeans.setStatus("Invalid Token.");
-                this.logErrorOnAws("get product");
+                this.logErrorOnAws("get product","user null");
             }
 		} catch (Exception e) {
-			//this.logErrorOnAwst("get product exception",e.getStackTrace().toString());
+			e.printStackTrace();
 		}
 
         return productBeans;
@@ -601,10 +599,10 @@ public class UserController {
                response.setStatus(401);
                productBeans.setStatusCode("401");
                productBeans.setStatus("Invalid Token.");
-               this.logErrorOnAws("search product");
+               this.logErrorOnAws("search product","user null");
            }
 		} catch (Exception e) {
-			//this.logErrorOnAwst("search product exception",e.getStackTrace().toString());
+			e.printStackTrace();
 		}
 
         return productBeans;
@@ -649,10 +647,10 @@ public class UserController {
                 response.setStatus(401);
                 productDetailBean.setStatusCode("401");
                 productDetailBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("product detail");
+                this.logErrorOnAws("product detail","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("product detail exception");
+			this.logErrorOnAws("product detail exception",e.toString());
 		}
 
         return productDetailBean;
@@ -716,16 +714,16 @@ public class UserController {
                 requistBean.setUserId(users.getId());
                 statusBean.setStatus(productService.addProductToCart(requistBean));
                 if(statusBean.getStatus().equals("failure"))
-                	this.logErrorOnAws("add to cart fail");
+                	this.logErrorOnAws("add to cart fail","failure");
             } else {
                 response.setStatus(401);
                 statusBean.setStatusCode("401");
                 statusBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("add to cart");
+                this.logErrorOnAws("add to cart","user null");
             }
 			
 		} catch (Exception e) {
-			this.logErrorOnAws("add to cart exception");
+			this.logErrorOnAws("add to cart exception",e.toString());
 		}
         
 
@@ -766,10 +764,10 @@ public class UserController {
                 response.setStatus(401);
                 cartBean.setStatusCode("401");
                 cartBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("get cart");
+                this.logErrorOnAws("get cart","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("get cart exception");
+			this.logErrorOnAws("get cart exception",e.toString());
 		}
 
         return cartBean;
@@ -801,15 +799,15 @@ public class UserController {
                 requistBean.setUserId(users.getId());
                 statusBean.setStatus(productService.removeProductFromCart(requistBean));
                 if(statusBean.getStatus().equals("failure"))
-                this.logErrorOnAws("remove from cart fail");
+                this.logErrorOnAws("remove from cart fail","failure");
             } else {
                 response.setStatus(401);
                 statusBean.setStatusCode("401");
                 statusBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("remove from cart");
+                this.logErrorOnAws("remove from cart","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("remove from cart exception");
+			this.logErrorOnAws("remove from cart exception",e.toString());
 		}
 
         return statusBean;
@@ -949,10 +947,10 @@ public class UserController {
                 response.setStatus(401);
                 orderDetailsBean.setStatusCode("401");
                 orderDetailsBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("get order detail");
+                this.logErrorOnAws("get order detail","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("get order detail exception");
+			this.logErrorOnAws("get order detail exception",e.toString());
 		}
 
         return orderDetailsBean;
@@ -970,10 +968,10 @@ public class UserController {
             } else {
                 statusBean.setStatusCode("401");
                 statusBean.setStatus("Invalid Token.");
-                this.logErrorOnAws("cancel order");
+                this.logErrorOnAws("cancel order","user null");
             }
 		} catch (Exception e) {
-			this.logErrorOnAws("cancel order exception");
+			this.logErrorOnAws("cancel order exception",e.toString());
 		}
 
          return statusBean;

@@ -50,8 +50,8 @@ public class MailServiceImpl implements MailService {
     ProductPropertyvaluesDao productPropertyvaluesDao;
     @Autowired
     ProductPropertiesDao productPropertiesDao;
-    //private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
-    private static final String ADMIN_MAIL = "abhijit.borkar137@gmail.com";//duqhanapp@gmail.com
+    private static final String ADMIN_MAIL = "mamidi.laxman.lnu@gmail.com";//duqhanapp@gmail.com
+    //private static final String ADMIN_MAIL = "abhijit.borkar137@gmail.com";//duqhanapp@gmail.com
     private static final String BCC = "krisanu.nandi@pkweb.in";
 
     @Override
@@ -72,7 +72,7 @@ public class MailServiceImpl implements MailService {
     @Override
     public String errorLogToAdmin(String error,String exception) {
         String body = "";
-        body = "<table><tr><td>Api Failed </td><td> : " + error + "</td></tr><tr><td>Api Failed </td><td> : " + exception + "</td></tr></table>";
+        body = "<table><tr><td>Api Failed </td><td> : " + error + "</td></tr><tr><td>Exception </td><td> : " + exception + "</td></tr></table>";
         String status = MailSender.sendEmail(ADMIN_MAIL, "Error Log", body, BCC);// send mail to Admin if user return a order.
         return status;
     }
